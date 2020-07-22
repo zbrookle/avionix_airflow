@@ -1,2 +1,0 @@
-from avionix_airflow.kubernetes.airflow_namespace import AirflowNamespace
-from avionix_airflow.kubernetes.master_pod_deployment import AirflowDeployment
