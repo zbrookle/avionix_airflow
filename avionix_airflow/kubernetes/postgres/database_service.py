@@ -16,7 +16,7 @@ class DatabaseService(Service):
                     )
                 ],
                 selector=label.database_labels,
-                external_name=label.database_service_name,
-                external_ips=[sql_options.POSTGRES_HOST]
+                external_name=sql_options.POSTGRES_HOST,
+                type="ExternalName"
             ),
         )

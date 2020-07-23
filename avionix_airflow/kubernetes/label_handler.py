@@ -10,3 +10,7 @@ class LabelHandler:
     @property
     def database_service_name(self):
         return "airflow-db"
+
+    @property
+    def webserver_host(self):
+        return "airflow.webserver.com"

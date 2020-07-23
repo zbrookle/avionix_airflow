@@ -6,9 +6,9 @@ class SqlOptions:
         self,
         user: str = "airflow",
         password: str = "airflow",
-        host: str = "10.0.0.12",
+        host: str = "airflow.database.com",
         port: int = 5432,
-        db: str = "airflow_db",
+        db: str = "airflow",
         extras="",
     ):
         self.POSTGRES_USER = user

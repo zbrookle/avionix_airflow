@@ -1,9 +1,9 @@
 from avionix.kubernetes_objects.pod import (
-    Container,
     PodSpec,
     PodTemplateSpec,
     LabelSelector,
 )
+from avionix.kubernetes_objects.container import Container,ContainerPort
 from avionix.kubernetes_objects.deployment import Deployment, DeploymentSpec
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
@@ -22,6 +22,7 @@ class PostgresPodTemplate(PodTemplateSpec):
                         name="postgres-database",
                         image="postgres",
                         env=sql_options.get_postgres_envioronment(),
+                        ports=[ContainerPort(5432, None)]
                     )
                 ]
             ),
