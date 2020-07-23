@@ -12,11 +12,12 @@ class DatabaseService(Service):
             ServiceSpec(
                 [
                     ServicePort(
-                        sql_options.POSTGRES_PORT, target_port=sql_options.POSTGRES_PORT
+                        sql_options.POSTGRES_PORT,
+                        target_port=sql_options.POSTGRES_PORT,
+                        node_port=30001
                     )
                 ],
                 selector=label.database_labels,
-                external_name=sql_options.POSTGRES_HOST,
-                type="ExternalName"
+                type="NodePort"
             ),
         )

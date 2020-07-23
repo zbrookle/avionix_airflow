@@ -25,5 +25,5 @@ class WebserverService(AirflowService):
     def __init__(self):
         label = LabelHandler()
         super().__init__(
-            "webserver-connection", 8080, 80, label.webserver_host, 30000
+            "webserver-connection", 8080, 8080, label.webserver_host, 30000
         )

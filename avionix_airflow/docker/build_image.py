@@ -26,4 +26,4 @@ def build_docker_image(
 
 
 def build_airflow_image():
-    build_docker_image("airflow", docker_path / "airflow")
+    build_docker_image("airflow-image", docker_path / "airflow")

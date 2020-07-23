@@ -22,7 +22,7 @@ class PostgresPodTemplate(PodTemplateSpec):
                         name="postgres-database",
                         image="postgres",
                         env=sql_options.get_postgres_envioronment(),
-                        ports=[ContainerPort(5432, None)],
+                        ports=[ContainerPort(5432, None, name="postgres")],
                         image_pull_policy="IfNotPresent"
                     )
                 ]

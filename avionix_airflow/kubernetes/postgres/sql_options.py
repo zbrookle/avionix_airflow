@@ -6,7 +6,7 @@ class SqlOptions:
         self,
         user: str = "airflow",
         password: str = "airflow",
-        host: str = "airflow.database.com",
+        host: str = "airflow-database-connection",
         port: int = 5432,
         db: str = "airflow",
         extras="",
