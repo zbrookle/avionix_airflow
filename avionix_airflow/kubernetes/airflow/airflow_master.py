@@ -4,23 +4,28 @@ from avionix.kubernetes_objects.pod import (
     PodSpec,
     LabelSelector,
 )
-from avionix import ObjectMeta
-from kubernetes.airflow.airflow_containers import WebserverUI, Scheduler
-
-master_labels = {"cluster-type": "master-node"}
+from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
+from avionix_airflow.kubernetes.airflow.airflow_containers import WebserverUI, Scheduler
+from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
 
 class AirflowPodTemplate(PodTemplateSpec):
-    def __init__(self):
+    def __init__(self, sql_options: SqlOptions):
         super().__init__(
-            ObjectMeta(name="airflow-master-pod", labels=master_labels),
-            spec=PodSpec([WebserverUI(), Scheduler()]),
+            AirflowMeta(
+                name="airflow-master-pod", labels=LabelHandler().master_node_labels
+            ),
+            spec=PodSpec([WebserverUI(sql_options), Scheduler(sql_options)]),
         )
 
 
 class AirflowDeployment(Deployment):
-    def __init__(self):
+    def __init__(self, sql_options: SqlOptions):
         super().__init__(
-            ObjectMeta(name="airflow-master-deployment", namespace="airflow"),
-            DeploymentSpec(AirflowPodTemplate(), LabelSelector(master_labels)),
+            AirflowMeta(name="airflow-master-deployment"),
+            DeploymentSpec(
+                AirflowPodTemplate(sql_options),
+                LabelSelector(LabelHandler().master_node_labels),
+            ),
         )

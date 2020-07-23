@@ -45,17 +45,6 @@ wait_for_port() {
 # Other executors than SequentialExecutor drive the need for an SQL database, here PostgreSQL is used
 if [ "$AIRFLOW__CORE__EXECUTOR" != "SequentialExecutor" ]; then
   # Check if the user has provided explicit Airflow configuration concerning the database
-  if [ -z "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" ]; then
-    # Default values corresponding to the default compose files
-    : "${POSTGRES_HOST:="postgres"}"
-    : "${POSTGRES_PORT:="5432"}"
-    : "${POSTGRES_USER:="airflow"}"
-    : "${POSTGRES_PASSWORD:="airflow"}"
-    : "${POSTGRES_DB:="airflow"}"
-    : "${POSTGRES_EXTRAS:-""}"
-
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN="postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}${POSTGRES_EXTRAS}"
-    export AIRFLOW__CORE__SQL_ALCHEMY_CONN
 
     # Check if the user has provided explicit Airflow configuration for the broker's connection to the database
     if [ "$AIRFLOW__CORE__EXECUTOR" = "CeleryExecutor" ]; then
