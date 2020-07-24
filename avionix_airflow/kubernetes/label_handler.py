@@ -8,6 +8,10 @@ class LabelHandler:
         return {"cluster-type": "airflow-database"}
 
     @property
+    def redis_labels(self):
+        return {"cluster-type": "airflow-redis"}
+
+    @property
     def database_service_name(self):
         return "airflow-db"
 
