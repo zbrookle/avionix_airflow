@@ -12,8 +12,7 @@ class RedisPodTemplate(PodTemplateSpec):
         super().__init__(
             AirflowMeta("redis-pod", labels=labels.redis_labels),
             PodSpec(
-                [Container("redis", image="redis",
-                           image_pull_policy="IfNotPresent")],
+                [Container("redis", image="redis", image_pull_policy="IfNotPresent")],
             ),
         )
 

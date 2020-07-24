@@ -18,3 +18,7 @@ class LabelHandler:
     @property
     def webserver_host(self):
         return "airflow.webserver.com"
+
+    @property
+    def redis_default_service_name(self):
+        return "redis-connection"
