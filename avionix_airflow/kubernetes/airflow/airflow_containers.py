@@ -45,7 +45,7 @@ class AirflowContainer(Container):
                     ),
                     EnvVar(
                         "AIRFLOW__CELERY__RESULT_BACKEND",
-                        self._redis_options.get_redis_connection_string(),
+                        self._sql_options.get_postgres_connection_string(),
                     ),
                 ]
             )
