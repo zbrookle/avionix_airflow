@@ -3,7 +3,7 @@ from avionix.kubernetes_objects.pod import (
     PodTemplateSpec,
     LabelSelector,
 )
-from avionix.kubernetes_objects.container import Container,ContainerPort
+from avionix.kubernetes_objects.container import Container, ContainerPort
 from avionix.kubernetes_objects.deployment import Deployment, DeploymentSpec
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
@@ -23,7 +23,7 @@ class PostgresPodTemplate(PodTemplateSpec):
                         image="postgres",
                         env=sql_options.get_postgres_envioronment(),
                         ports=[ContainerPort(5432, None, name="postgres")],
-                        image_pull_policy="IfNotPresent"
+                        image_pull_policy="IfNotPresent",
                     )
                 ]
             ),

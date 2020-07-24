@@ -2,17 +2,21 @@ from avionix import ChartBuilder, ChartInfo
 from docker.build_image import build_airflow_image
 from avionix_airflow.kubernetes.airflow import AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
+from avionix_airflow.kubernetes.redis import RedisOrchestrator, RedisOptions
 from avionix.errors import ChartAlreadyInstalledError
 
 
 def get_chart_builder():
     sql_options = SqlOptions()
+    redis_options = RedisOptions()
     builder = ChartBuilder(
         ChartInfo(
             api_version="3.2.4", name="airflow", version="0.1.0", app_version="v1"
         ),
         (
-            PostgresOrchestrator(sql_options) + AirflowOrchestrator(sql_options)
+            PostgresOrchestrator(sql_options)
+            + AirflowOrchestrator(sql_options)
+            + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
     )
     return builder

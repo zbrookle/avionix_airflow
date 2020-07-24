@@ -14,10 +14,10 @@ class DatabaseService(Service):
                     ServicePort(
                         sql_options.POSTGRES_PORT,
                         target_port=sql_options.POSTGRES_PORT,
-                        node_port=30001
+                        node_port=30001,
                     )
                 ],
                 selector=label.database_labels,
-                type="NodePort"
+                type="NodePort",
             ),
         )

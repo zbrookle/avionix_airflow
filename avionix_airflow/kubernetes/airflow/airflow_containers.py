@@ -24,14 +24,18 @@ class AirflowContainer(Container):
                     sql_options.get_postgres_connection_string(),
                 )
             ],
-            ports=ports
+            ports=ports,
         )
 
 
 class WebserverUI(AirflowContainer):
     def __init__(self, sql_options: SqlOptions):
-        super().__init__("webserver", ["webserver"], sql_options, ports=[
-            ContainerPort(8080, None, host_port=8080)])
+        super().__init__(
+            "webserver",
+            ["webserver"],
+            sql_options,
+            ports=[ContainerPort(8080, None, host_port=8080)],
+        )
 
 
 class Scheduler(AirflowContainer):
