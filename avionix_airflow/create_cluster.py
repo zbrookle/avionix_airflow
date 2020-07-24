@@ -15,7 +15,7 @@ def get_chart_builder():
         ),
         (
             PostgresOrchestrator(sql_options)
-            + AirflowOrchestrator(sql_options)
+            + AirflowOrchestrator(sql_options, redis_options)
             + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
     )

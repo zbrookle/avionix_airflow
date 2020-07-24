@@ -3,7 +3,19 @@ from avionix_airflow.kubernetes.label_handler import LabelHandler
 
 class RedisOptions:
     def __init__(
-        self, port: int = 6379, host: str = LabelHandler().redis_default_service_name
+        self,
+        port: int = 6379,
+        host: str = LabelHandler().redis_default_service_name,
+        proto: str = "redis://",
+        password: str = "",
+        db_num: int = 1,
     ):
         self.port = port
         self.host = host
+        self.proto = proto
+        self.password = password
+        self.db_num = db_num
+
+    def get_redis_connection_string(self):
+        prefix = f":{self.password}" if self.password else ""
+        return f"{self.proto}{prefix}{self.host}:{self.port}/{self.db_num}"
