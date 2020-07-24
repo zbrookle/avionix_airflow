@@ -37,11 +37,17 @@ class AirflowContainer(Container):
             )
         )
         if core_executor == "CeleryExecutor":
-            env.append(
-                EnvVar(
-                    "AIRFLOW__CELERY__BROKER_URL",
-                    self._redis_options.get_redis_connection_string(),
-                )
+            env.extend(
+                [
+                    EnvVar(
+                        "AIRFLOW__CELERY__BROKER_URL",
+                        self._redis_options.get_redis_connection_string(),
+                    ),
+                    EnvVar(
+                        "AIRFLOW__CELERY__RESULT_BACKEND",
+                        self._redis_options.get_redis_connection_string(),
+                    ),
+                ]
             )
         return env
 

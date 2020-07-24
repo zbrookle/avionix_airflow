@@ -6,4 +6,4 @@ from avionix_airflow.kubernetes.redis.redis_service import RedisService
 
 class RedisOrchestrator(Orchestrator):
     def __init__(self, redis_options: RedisOptions):
-        super().__init__([RedisDeployment(), RedisService(redis_options)])
+        super().__init__([RedisDeployment(redis_options), RedisService(redis_options)])
