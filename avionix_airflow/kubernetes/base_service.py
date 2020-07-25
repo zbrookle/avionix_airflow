@@ -1,6 +1,8 @@
-from avionix.kubernetes_objects.service import Service, ServiceSpec, ServicePort
-from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from typing import Optional
+
+from avionix.kubernetes_objects.core import Service, ServicePort, ServiceSpec
+
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
 
 class AirflowService(Service):

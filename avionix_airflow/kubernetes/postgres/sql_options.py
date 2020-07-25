@@ -1,4 +1,4 @@
-from avionix.kubernetes_objects.env import EnvVar
+from avionix.kubernetes_objects.core import EnvVar
 
 
 class SqlOptions:

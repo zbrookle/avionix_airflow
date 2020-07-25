@@ -1,8 +1,8 @@
-from subprocess import check_call, check_output
 from logging import info
+import os
 from pathlib import Path
 import re
-import os
+from subprocess import check_call, check_output
 
 docker_path = Path(__file__).parent
 

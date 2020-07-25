@@ -1,13 +1,15 @@
-from avionix.kubernetes_objects.pod import (
+from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
+from avionix.kubernetes_objects.core import (
+    Container,
+    ContainerPort,
     PodSpec,
     PodTemplateSpec,
-    LabelSelector,
 )
-from avionix.kubernetes_objects.container import Container, ContainerPort
-from avionix.kubernetes_objects.deployment import Deployment, DeploymentSpec
-from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
-from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
+from avionix.kubernetes_objects.meta import LabelSelector
+
 from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
+from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
 
 class PostgresPodTemplate(PodTemplateSpec):

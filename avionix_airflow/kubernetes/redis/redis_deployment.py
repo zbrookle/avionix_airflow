@@ -1,9 +1,10 @@
-from avionix.kubernetes_objects.deployment import Deployment, DeploymentSpec
-from avionix.kubernetes_objects.pod import PodTemplateSpec, PodSpec
-from avionix.kubernetes_objects.selector import LabelSelector
-from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
-from avionix.kubernetes_objects.container import Container, ContainerPort
+from avionix.kubernetes_objects.core import Container, ContainerPort
+from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
+from avionix.kubernetes_objects.core import PodSpec, PodTemplateSpec
+from avionix.kubernetes_objects.meta import LabelSelector
+
 from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 
 

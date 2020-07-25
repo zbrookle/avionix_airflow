@@ -1,5 +1,5 @@
-from avionix.kubernetes_objects.namespace import Namespace, NamespaceSpec
 from avionix import ObjectMeta
+from avionix.kubernetes_objects.core import Namespace, NamespaceSpec
 
 
 class AirflowNamespace(Namespace):

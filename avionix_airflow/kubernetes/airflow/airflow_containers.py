@@ -1,8 +1,10 @@
-from avionix.kubernetes_objects.container import Container, ContainerPort
+from typing import List, Optional
+
+from avionix.kubernetes_objects.core import Container, ContainerPort
+from avionix.kubernetes_objects.core import EnvVar
+
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
-from avionix.kubernetes_objects.env import EnvVar
-from typing import List, Optional
 
 
 class AirflowContainer(Container):

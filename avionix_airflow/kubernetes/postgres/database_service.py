@@ -1,6 +1,6 @@
 from avionix_airflow.kubernetes.base_service import AirflowService
-from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
 
 class DatabaseService(AirflowService):
