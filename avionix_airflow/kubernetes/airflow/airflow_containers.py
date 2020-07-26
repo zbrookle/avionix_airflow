@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from avionix.kubernetes_objects.core import Container, ContainerPort
-from avionix.kubernetes_objects.core import EnvVar
+from avionix.kubernetes_objects.core import Container, ContainerPort, EnvVar
 
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions

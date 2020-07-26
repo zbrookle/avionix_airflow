@@ -3,9 +3,9 @@ from avionix.errors import ChartAlreadyInstalledError
 from docker.build_image import build_airflow_image
 
 from avionix_airflow.kubernetes.airflow import AirflowOrchestrator
+from avionix_airflow.kubernetes.label_handler import LabelHandler
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
-from avionix_airflow.kubernetes.label_handler import LabelHandler
 
 
 def get_chart_builder():
