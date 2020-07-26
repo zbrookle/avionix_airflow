@@ -1,5 +1,4 @@
-from avionix_airflow import get_chart_builder
-from avionix.testing import ChartInstallationContext, kubectl_get
+from avionix.testing import kubectl_get
 
 
 def kubectl_get_airflow(resource: str):
@@ -19,7 +18,6 @@ def kubectl_name_dict(resource: str):
 
 
 def test_resources_present(label):
-    with ChartInstallationContext(get_chart_builder()):
         # Check services
         service_info = kubectl_name_dict("service")
         for service in service_info:
