@@ -1,24 +1,7 @@
-from avionix.testing import kubectl_get
+from avionix_airflow.tests.utils import kubectl_name_dict
 
 
-def kubectl_get_airflow(resource: str):
-    return kubectl_get(resource, "airflow")
-
-
-def kubectl_name_dict(resource: str):
-    info = kubectl_get_airflow(resource)
-    info_dict = {}
-    for name in info["NAME"]:
-        filtered = info[info["NAME"] == name].reset_index()
-        columns = [
-            column for column in filtered.columns if column not in {"NAME", "index"}
-        ]
-        info_dict[name] = {column: filtered[column][0] for column in columns}
-    return info_dict
-
-
-def test_resources_present(label):
-    # Check services
+def test_services_present(label):
     service_info = kubectl_name_dict("service")
     for service in service_info:
         assert service_info[service]["TYPE"] == "NodePort"
@@ -31,7 +14,8 @@ def test_resources_present(label):
     assert get_port(label.redis_service_name) == "6379"
     assert get_port(label.webserver_service_name) == "8080"
 
-    # Check deployments
+
+def test_deployments_present(label):
     deployment_info = kubectl_name_dict("deployment")
     for deployment in [
         label.master_deployment_name,
@@ -39,3 +23,12 @@ def test_resources_present(label):
         label.database_deployment_name,
     ]:
         assert deployment in deployment_info
+
+
+def test_volumes_present(label):
+    volume_info = kubectl_name_dict("persistentvolume")
+    for volume in volume_info:
+        volume_specific_info = volume_info[volume]
+        print(volume_specific_info)
+        assert volume_specific_info["CAPACITY"] == "50Mi"
+        assert volume_specific_info["ACCESS MODES"] == "RWX"

@@ -1,23 +1,35 @@
 from avionix import ChartBuilder, ChartInfo
 from avionix.errors import ChartAlreadyInstalledError
 from docker.build_image import build_airflow_image
+from typing import Optional
 
 from avionix_airflow.kubernetes.airflow import AirflowOrchestrator
 from avionix_airflow.kubernetes.label_handler import LabelHandler
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
+from avionix_airflow.kubernetes.airflow import AirflowOptions
 
 
-def get_chart_builder():
-    sql_options = SqlOptions()
-    redis_options = RedisOptions()
+def get_chart_builder(
+    sql_options: SqlOptions = SqlOptions(),
+    redis_options: RedisOptions = RedisOptions(),
+    airflow_options: AirflowOptions = AirflowOptions(),
+):
+    """
+    :param sql_options:
+    :param redis_options:
+    :param airflow_options:
+    :return: Avionix ChartBuilder object that can be used to install airflow
+    """
     builder = ChartBuilder(
         ChartInfo(
             api_version="3.2.4", name="airflow", version="0.1.0", app_version="v1"
         ),
         (
             PostgresOrchestrator(sql_options)
-            + AirflowOrchestrator(sql_options, redis_options, LabelHandler())
+            + AirflowOrchestrator(
+                sql_options, redis_options, LabelHandler(), airflow_options
+            )
             + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
     )

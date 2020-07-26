@@ -8,11 +8,20 @@ from avionix_airflow.kubernetes.label_handler import LabelHandler
 from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+from avionix_airflow.kubernetes.airflow.airflow_storage import (
+    AirflowDagVolume,
+    AirflowLogVolume,
+)
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 
 
 class AirflowOrchestrator(Orchestrator):
     def __init__(
-        self, sql_options: SqlOptions, redis_options: RedisOptions, label: LabelHandler
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        label: LabelHandler,
+        airflow_options: AirflowOptions,
     ):
         super().__init__(
             [
@@ -20,5 +29,7 @@ class AirflowOrchestrator(Orchestrator):
                 AirflowDeployment(sql_options, redis_options),
                 WebserverService(label),
                 FlowerService(label),
+                AirflowDagVolume(airflow_options),
+                AirflowLogVolume(airflow_options),
             ]
         )
