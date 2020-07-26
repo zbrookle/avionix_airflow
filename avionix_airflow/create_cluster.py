@@ -5,6 +5,7 @@ from docker.build_image import build_airflow_image
 from avionix_airflow.kubernetes.airflow import AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
+from avionix_airflow.kubernetes.label_handler import LabelHandler
 
 
 def get_chart_builder():
@@ -16,7 +17,7 @@ def get_chart_builder():
         ),
         (
             PostgresOrchestrator(sql_options)
-            + AirflowOrchestrator(sql_options, redis_options)
+            + AirflowOrchestrator(sql_options, redis_options, LabelHandler())
             + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
     )

@@ -5,7 +5,7 @@ class RedisOptions:
     def __init__(
         self,
         port: int = 6379,
-        host: str = LabelHandler().redis_default_service_name,
+        host: str = LabelHandler().redis_service_name,
         proto: str = "redis://",
         password: str = "",
         db_num: int = 1,

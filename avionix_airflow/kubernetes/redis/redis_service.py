@@ -7,7 +7,7 @@ class RedisService(AirflowService):
     def __init__(self, redis_options: RedisOptions):
         labels = LabelHandler()
         super().__init__(
-            labels.redis_default_service_name,
+            labels.redis_service_name,
             redis_options.port,
             redis_options.port,
             30002,

@@ -7,7 +7,7 @@ class DatabaseService(AirflowService):
     def __init__(self, sql_options: SqlOptions):
         label = LabelHandler()
         super().__init__(
-            "airflow-database-connection",
+            label.database_service_name,
             sql_options.POSTGRES_PORT,
             target_port=sql_options.POSTGRES_PORT,
             node_port=30001,
