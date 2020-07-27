@@ -35,18 +35,13 @@ def get_chart_builder(
     return builder
 
 
+from avionix_airflow.tests.utils import parse_shell_script, dag_copy_loc
+
+
 def main():
     airflow_options = AirflowOptions(
-        dag_sync_image="busybox",
-        dag_sync_command=[
-            "git",
-            "clone",
-            "https://github.com/zbrookle/avionix_airflow_test_dags",
-            "/tmp/dags;",
-            "cp",
-            "/tmp/dags/*",
-            "/home/airflow/dags",
-        ],
+        dag_sync_image="alpine/git",
+        dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc),],
         dag_sync_schedule="* * * * *",
     )
     get_chart_builder(airflow_options).install_chart()
