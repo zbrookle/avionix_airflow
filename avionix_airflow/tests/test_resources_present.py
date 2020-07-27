@@ -1,3 +1,5 @@
+import time
+
 from avionix_airflow.tests.utils import kubectl_name_dict
 
 
@@ -17,18 +19,20 @@ def test_services_present(label):
 
 def test_deployments_present(label):
     deployment_info = kubectl_name_dict("deployment")
+    time.sleep(5)
+    print(deployment_info)
     for deployment in [
         label.master_deployment_name,
         label.redis_deployment_name,
         label.database_deployment_name,
     ]:
         assert deployment in deployment_info
+        assert deployment_info[deployment]["READY"] == "1/1"
 
 
 def test_volumes_present(label):
     volume_info = kubectl_name_dict("persistentvolume")
     for volume in volume_info:
         volume_specific_info = volume_info[volume]
-        print(volume_specific_info)
         assert volume_specific_info["CAPACITY"] == "50Mi"
         assert volume_specific_info["ACCESS MODES"] == "RWX"

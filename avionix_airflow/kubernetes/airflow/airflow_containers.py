@@ -1,7 +1,17 @@
 from typing import List, Optional
 
-from avionix.kubernetes_objects.core import Container, ContainerPort, EnvVar
+from avionix.kubernetes_objects.core import (
+    Container,
+    ContainerPort,
+    EnvVar,
+    SecurityContext,
+)
 
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.airflow.airflow_storage import (
+    AirflowDagVolumeGroup,
+    AirflowLogVolumeGroup,
+)
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 
@@ -13,6 +23,7 @@ class AirflowContainer(Container):
         args,
         sql_options: SqlOptions,
         redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
         core_executor: str = "CeleryExecutor",
         ports: Optional[List[ContainerPort]] = None,
     ):
@@ -25,6 +36,10 @@ class AirflowContainer(Container):
             image_pull_policy="Never",
             env=self._get_environment(core_executor),
             ports=ports,
+            volume_mounts=[
+                AirflowLogVolumeGroup(airflow_options).volume_mount,
+                AirflowDagVolumeGroup(airflow_options).volume_mount,
+            ],
         )
 
     def _get_environment(self, core_executor: str):
@@ -54,21 +69,41 @@ class AirflowContainer(Container):
 
 
 class WebserverUI(AirflowContainer):
-    def __init__(self, sql_options: SqlOptions, redis_options: RedisOptions):
+    def __init__(
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+    ):
         super().__init__(
             "webserver",
             ["webserver"],
             sql_options,
             redis_options,
+            airflow_options,
             ports=[ContainerPort(8080, host_port=8080)],
         )
 
 
 class Scheduler(AirflowContainer):
-    def __init__(self, sql_options: SqlOptions, redis_options: RedisOptions):
-        super().__init__("scheduler", ["scheduler"], sql_options, redis_options)
+    def __init__(
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+    ):
+        super().__init__(
+            "scheduler", ["scheduler"], sql_options, redis_options, airflow_options
+        )
 
 
 class FlowerUI(AirflowContainer):
-    def __init__(self, sql_options: SqlOptions, redis_options: RedisOptions):
-        super().__init__("flower", ["flower"], sql_options, redis_options)
+    def __init__(
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+    ):
+        super().__init__(
+            "flower", ["flower"], sql_options, redis_options, airflow_options
+        )

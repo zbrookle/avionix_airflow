@@ -1,11 +1,12 @@
+import os
+import time
+
+from avionix.errors import NamespaceBeingTerminatedError
 from avionix.testing import ChartInstallationContext
 import pytest
 
 from avionix_airflow import get_chart_builder
 from avionix_airflow.kubernetes.label_handler import LabelHandler
-import time
-from avionix.errors import NamespaceBeingTerminatedError
-import os
 
 
 @pytest.fixture
