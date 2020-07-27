@@ -13,6 +13,7 @@ from avionix_airflow.kubernetes.label_handler import LabelHandler
 from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
 
 
 class AirflowOrchestrator(Orchestrator):
@@ -35,5 +36,6 @@ class AirflowOrchestrator(Orchestrator):
                 log_group.persistent_volume,
                 dag_group.persistent_volume_claim,
                 log_group.persistent_volume_claim,
+                DagRetrievalJob(airflow_options),
             ]
         )

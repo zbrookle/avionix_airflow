@@ -9,9 +9,9 @@ from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 
 
 def get_chart_builder(
+    airflow_options: AirflowOptions,
     sql_options: SqlOptions = SqlOptions(),
     redis_options: RedisOptions = RedisOptions(),
-    airflow_options: AirflowOptions = AirflowOptions(),
 ):
     """
     :param sql_options:
@@ -35,25 +35,21 @@ def get_chart_builder(
     return builder
 
 
-def install_chart():
-    build_airflow_image()
-    get_chart_builder().install_chart()
-
-
-def uninstall_chart():
-    get_chart_builder().uninstall_chart()
-
-
-def create_airflow_cluster():
-    install_chart()
-
-
 def main():
-    try:
-        create_airflow_cluster()
-    except ChartAlreadyInstalledError:
-        uninstall_chart()
-        create_airflow_cluster()
+    airflow_options = AirflowOptions(
+        dag_sync_image="busybox",
+        dag_sync_command=[
+            "git",
+            "clone",
+            "https://github.com/zbrookle/avionix_airflow_test_dags",
+            "/tmp/dags;",
+            "cp",
+            "/tmp/dags/*",
+            "/home/airflow/dags",
+        ],
+        dag_sync_schedule="* * * * *",
+    )
+    get_chart_builder(airflow_options).install_chart()
 
 
 if __name__ == "__main__":

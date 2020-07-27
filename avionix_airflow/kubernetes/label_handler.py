@@ -1,15 +1,19 @@
 class LabelHandler:
     @property
     def master_node_labels(self):
-        return {"cluster-type": "master-node"}
+        return {"pod-job": "master-node"}
 
     @property
     def database_labels(self):
-        return {"cluster-type": "airflow-database"}
+        return {"pod-job": "database"}
 
     @property
     def redis_labels(self):
-        return {"cluster-type": "airflow-redis"}
+        return {"pod-job": "redis"}
+
+    @property
+    def dag_sync_cron_labels(self):
+        return {"pod-job": "dag-sync"}
 
     @property
     def database_service_name(self):

@@ -37,11 +37,7 @@ class AirflowPodTemplate(PodTemplateSpec):
                     Scheduler(sql_options, redis_options, airflow_options),
                     FlowerUI(sql_options, redis_options, airflow_options),
                 ],
-                # init_containers=[
-                #     log_volume_group.permission_container,
-                #     dag_volume_group.permission_container,
-                # ],
-                volumes=[log_volume_group.volume, dag_volume_group.volume,],
+                volumes=[log_volume_group.volume, dag_volume_group.volume],
             ),
         )
 
