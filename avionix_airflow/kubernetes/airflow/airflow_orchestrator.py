@@ -29,7 +29,7 @@ class AirflowOrchestrator(Orchestrator):
         log_group = AirflowLogVolumeGroup(airflow_options)
         super().__init__(
             [
-                AirflowNamespace(),
+                AirflowNamespace(airflow_options),
                 AirflowDeployment(sql_options, redis_options, airflow_options),
                 WebserverService(label),
                 FlowerService(label),

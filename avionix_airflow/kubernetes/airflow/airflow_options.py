@@ -17,6 +17,9 @@ class AirflowOptions:
         default_executor_cpu: int = 5,
         default_executor_memory: int = 2,
         access_modes: Optional[List[str]] = None,
+        default_timezone: str = "utc",
+        core_executor: str = "CeleryExecutor",
+        namespace: str = "airflow",
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -27,6 +30,9 @@ class AirflowOptions:
         self.dag_sync_command = dag_sync_command
         self.dag_sync_schedule = dag_sync_schedule
         self.domain_name = domain_name
+        self.default_time_zone = default_timezone
+        self.core_executor = core_executor
+        self.namespace = namespace
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

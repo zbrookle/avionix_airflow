@@ -1,5 +1,4 @@
 from avionix import ChartBuilder, ChartInfo
-from avionix.errors import ChartAlreadyInstalledError
 from avionix_airflow.docker._build_image import build_airflow_image
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
@@ -44,6 +43,7 @@ def main():
         dag_sync_image="alpine/git",
         dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc),],
         dag_sync_schedule="* * * * *",
+        default_timezone="est",
     )
     get_chart_builder(airflow_options).install_chart()
 
