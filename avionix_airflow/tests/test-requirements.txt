@@ -1,4 +1,0 @@
-telnetlib
-requests
-pytest
-pytest-rerunfailures
