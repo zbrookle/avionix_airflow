@@ -16,9 +16,7 @@ class AirflowIngress(Ingress):
         super().__init__(
             AirflowMeta(
                 "airflow-ingress",
-                annotations={
-                    "nginx.ingress.kubernetes.io/ssl-redirect": "false",
-                },
+                annotations={"nginx.ingress.kubernetes.io/ssl-redirect": "false",},
             ),
             IngressSpec(
                 backend=IngressBackend("default-http-backend", 80),

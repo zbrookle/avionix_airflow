@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
+from avionix.kubernetes_objects.core import EnvVar
 
 
 class AirflowOptions:
@@ -20,6 +21,7 @@ class AirflowOptions:
         default_timezone: str = "utc",
         core_executor: str = "CeleryExecutor",
         namespace: str = "airflow",
+        additional_vars: Dict[str, str] = None,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -33,9 +35,14 @@ class AirflowOptions:
         self.default_time_zone = default_timezone
         self.core_executor = core_executor
         self.namespace = namespace
+        self.__additional_vars = additional_vars if additional_vars is not None else {}
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
         if access_modes is None:
             return ["ReadWriteMany"]
         return access_modes
+
+    @property
+    def extra_env_vars(self):
+        return [EnvVar(name, value) for name, value in self.__additional_vars.items()]
