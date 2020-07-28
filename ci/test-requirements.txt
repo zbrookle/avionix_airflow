@@ -1,3 +1,9 @@
+black
+flake8
+mypy
+isort
+pytest
+pandas
 telnetlib
 requests
 pytest
