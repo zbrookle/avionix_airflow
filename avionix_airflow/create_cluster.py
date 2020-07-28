@@ -29,23 +29,16 @@ def get_chart_builder(
             )
             + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
-        keep_chart=True,
     )
     return builder
 
 
-from avionix_airflow.tests.utils import dag_copy_loc, parse_shell_script
+from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS
 
 
 def main():
     build_airflow_image()
-    airflow_options = AirflowOptions(
-        dag_sync_image="alpine/git",
-        dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc),],
-        dag_sync_schedule="* * * * *",
-        default_timezone="est",
-    )
-    get_chart_builder(airflow_options).install_chart()
+    get_chart_builder(TEST_AIRFLOW_OPTIONS).install_chart()
 
 
 if __name__ == "__main__":

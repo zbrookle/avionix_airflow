@@ -20,7 +20,6 @@ def test_services_present(label):
 def test_deployments_present(label):
     deployment_info = kubectl_name_dict("deployment")
     time.sleep(5)
-    print(deployment_info)
     for deployment in [
         label.master_deployment_name,
         label.redis_deployment_name,
