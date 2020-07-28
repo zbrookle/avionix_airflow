@@ -38,4 +38,5 @@ class FlowerService(MasterNodeService):
             self.__flower_port,
             values.flower_node_port,
             values,
+            values.flower_port_name
         )

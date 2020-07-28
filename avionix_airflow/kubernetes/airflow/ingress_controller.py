@@ -18,8 +18,8 @@ class AirflowIngress(Ingress):
             AirflowMeta(
                 "airflow-ingress",
                 annotations={
-                    "nginx.ingress.kubernetes.io/rewrite-target": "/",
-                    "nginx.ingress.kubernetes.io/ssl-redirect": "false",
+                    "nginx.ingress.kubernetes.io/rewrite-target": "$1",
+                    # "nginx.ingress.kubernetes.io/ssl-redirect": "false",
                 },
             ),
             IngressSpec(
@@ -42,6 +42,13 @@ class AirflowIngress(Ingress):
                                     ),
                                     path="/admin",
                                 ),
+                                HTTPIngressPath(
+                                    IngressBackend(
+                                        values.flower_service_name,
+                                        values.flower_port_name
+                                    ),
+                                    path="/flower"
+                                )
                             ]
                         ),
                         # airflow_options.domain_name,

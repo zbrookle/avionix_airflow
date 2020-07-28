@@ -48,8 +48,12 @@ class ValueOrchestrator:
         return "webserver-port"
 
     @property
+    def flower_port_name(self):
+        return "flower-port"
+
+    @property
     def webserver_node_port(self):
-        return 8080
+        return 30000
 
     @property
     def flower_node_port(self):
