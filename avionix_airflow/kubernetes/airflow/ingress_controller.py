@@ -7,12 +7,13 @@ from avionix.kubernetes_objects.extensions import (
     IngressSpec,
 )
 
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowIngress(Ingress):
-    def __init__(self):
+    def __init__(self, airflow_options: AirflowOptions):
         values = ValueOrchestrator()
         super().__init__(
             AirflowMeta(
@@ -41,6 +42,7 @@ class AirflowIngress(Ingress):
                                 ),
                             ]
                         ),
+                        host=airflow_options.domain_name,
                     )
                 ],
             ),

@@ -13,7 +13,7 @@ class AirflowOptions:
         dag_sync_image: str,
         dag_sync_command: List[str],
         dag_sync_schedule: str,
-        domain_name: str = "avionix-airflow.com",
+        domain_name: str = "www.avionix-airflow.com",
         dag_storage: str = "50Mi",
         logs_storage: str = "50Mi",
         default_executor_cpu: int = 5,
@@ -22,7 +22,7 @@ class AirflowOptions:
         default_timezone: str = "utc",
         core_executor: str = "CeleryExecutor",
         namespace: str = "airflow",
-        additional_vars: Dict[str, str] = None,
+        additional_vars: Optional[Dict[str, str]] = None,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage

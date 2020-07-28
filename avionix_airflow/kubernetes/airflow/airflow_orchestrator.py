@@ -38,6 +38,6 @@ class AirflowOrchestrator(Orchestrator):
                 dag_group.persistent_volume_claim,
                 log_group.persistent_volume_claim,
                 DagRetrievalJob(airflow_options),
-                AirflowIngress(),
+                AirflowIngress(airflow_options),
             ]
         )
