@@ -1,11 +1,11 @@
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class RedisOptions:
     def __init__(
         self,
         port: int = 6379,
-        host: str = LabelHandler().redis_service_name,
+        host: str = ValueOrchestrator().redis_service_name,
         proto: str = "redis://",
         password: str = "",
         db_num: int = 1,

@@ -11,6 +11,7 @@ class AirflowOptions:
         dag_sync_image: str,
         dag_sync_command: List[str],
         dag_sync_schedule: str,
+        domain_name: str = "avionix-airflow.com",
         dag_storage: str = "50Mi",
         logs_storage: str = "50Mi",
         default_executor_cpu: int = 5,
@@ -25,6 +26,7 @@ class AirflowOptions:
         self.dag_sync_image = dag_sync_image
         self.dag_sync_command = dag_sync_command
         self.dag_sync_schedule = dag_sync_schedule
+        self.domain_name = domain_name
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

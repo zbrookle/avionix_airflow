@@ -1,6 +1,6 @@
 from avionix.kubernetes_objects.core import EnvVar
 
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class SqlOptions:
@@ -8,7 +8,7 @@ class SqlOptions:
         self,
         user: str = "airflow",
         password: str = "airflow",
-        host: str = LabelHandler().database_service_name,
+        host: str = ValueOrchestrator().database_service_name,
         port: int = 5432,
         db: str = "airflow",
         extras="",

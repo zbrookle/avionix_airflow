@@ -8,7 +8,7 @@ from avionix_airflow.kubernetes.airflow.airflow_service import (
     WebserverService,
 )
 from avionix_airflow.kubernetes.base_service import AirflowService
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.postgres.database_service import DatabaseService
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
@@ -23,8 +23,8 @@ def get_node_port(service: AirflowService):
 
 
 services = [
-    WebserverService(LabelHandler()),
-    FlowerService(LabelHandler()),
+    WebserverService(ValueOrchestrator()),
+    FlowerService(ValueOrchestrator()),
     DatabaseService(SqlOptions()),
 ]
 
@@ -32,8 +32,8 @@ services = [
 @pytest.mark.parametrize(
     "service",
     [
-        WebserverService(LabelHandler()),
-        FlowerService(LabelHandler()),
+        WebserverService(ValueOrchestrator()),
+        FlowerService(ValueOrchestrator()),
         DatabaseService(SqlOptions()),
     ],
 )

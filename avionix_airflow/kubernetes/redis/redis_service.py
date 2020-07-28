@@ -1,11 +1,11 @@
 from avionix_airflow.kubernetes.base_service import AirflowService
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 
 
 class RedisService(AirflowService):
     def __init__(self, redis_options: RedisOptions):
-        labels = LabelHandler()
+        labels = ValueOrchestrator()
         super().__init__(
             labels.redis_service_name,
             redis_options.port,

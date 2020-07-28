@@ -12,7 +12,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
 )
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
@@ -29,7 +29,7 @@ class AirflowPodTemplate(PodTemplateSpec):
         dag_volume_group = AirflowDagVolumeGroup(airflow_options)
         super().__init__(
             AirflowMeta(
-                name="airflow-master-pod", labels=LabelHandler().master_node_labels
+                name="airflow-master-pod", labels=ValueOrchestrator().master_node_labels
             ),
             spec=PodSpec(
                 [
@@ -53,6 +53,6 @@ class AirflowDeployment(Deployment):
             AirflowMeta(name="airflow-master-deployment"),
             DeploymentSpec(
                 AirflowPodTemplate(sql_options, redis_options, airflow_options),
-                LabelSelector(LabelHandler().master_node_labels),
+                LabelSelector(ValueOrchestrator().master_node_labels),
             ),
         )

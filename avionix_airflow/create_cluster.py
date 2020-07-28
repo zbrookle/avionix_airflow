@@ -1,9 +1,9 @@
 from avionix import ChartBuilder, ChartInfo
 from avionix.errors import ChartAlreadyInstalledError
-from docker.build_image import build_airflow_image
+from avionix_airflow.docker._build_image import build_airflow_image
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 
@@ -26,7 +26,7 @@ def get_chart_builder(
         (
             PostgresOrchestrator(sql_options)
             + AirflowOrchestrator(
-                sql_options, redis_options, LabelHandler(), airflow_options
+                sql_options, redis_options, ValueOrchestrator(), airflow_options
             )
             + RedisOrchestrator(redis_options)
         ).get_kube_parts(),
@@ -39,6 +39,7 @@ from avionix_airflow.tests.utils import parse_shell_script, dag_copy_loc
 
 
 def main():
+    build_airflow_image()
     airflow_options = AirflowOptions(
         dag_sync_image="alpine/git",
         dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc),],

@@ -9,11 +9,12 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
 )
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
+from avionix_airflow.kubernetes.airflow.ingress_controller import AirflowIngress
 
 
 class AirflowOrchestrator(Orchestrator):
@@ -21,7 +22,7 @@ class AirflowOrchestrator(Orchestrator):
         self,
         sql_options: SqlOptions,
         redis_options: RedisOptions,
-        label: LabelHandler,
+        label: ValueOrchestrator,
         airflow_options: AirflowOptions,
     ):
         dag_group = AirflowDagVolumeGroup(airflow_options)
@@ -37,5 +38,6 @@ class AirflowOrchestrator(Orchestrator):
                 dag_group.persistent_volume_claim,
                 log_group.persistent_volume_claim,
                 DagRetrievalJob(airflow_options),
+                AirflowIngress(airflow_options),
             ]
         )

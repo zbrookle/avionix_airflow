@@ -7,7 +7,7 @@ from avionix.kubernetes_objects.core import (
 )
 from avionix.kubernetes_objects.meta import LabelSelector
 
-from avionix_airflow.kubernetes.label_handler import LabelHandler
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
@@ -16,7 +16,7 @@ class PostgresPodTemplate(PodTemplateSpec):
     def __init__(self, sql_options: SqlOptions):
         super().__init__(
             AirflowMeta(
-                name="postgres-database-pod", labels=LabelHandler().database_labels
+                name="postgres-database-pod", labels=ValueOrchestrator().database_labels
             ),
             spec=PodSpec(
                 [
@@ -38,6 +38,6 @@ class DatabaseDeployment(Deployment):
             AirflowMeta(name="postgres-database-deployment"),
             DeploymentSpec(
                 PostgresPodTemplate(sql_options),
-                LabelSelector(LabelHandler().database_labels),
+                LabelSelector(ValueOrchestrator().database_labels),
             ),
         )

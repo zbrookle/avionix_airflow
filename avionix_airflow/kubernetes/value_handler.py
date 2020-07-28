@@ -1,4 +1,4 @@
-class LabelHandler:
+class ValueOrchestrator:
     @property
     def master_node_labels(self):
         return {"pod-job": "master-node"}
@@ -21,15 +21,15 @@ class LabelHandler:
 
     @property
     def redis_service_name(self):
-        return "redis-connection"
+        return "redis-svc"
 
     @property
     def flower_service_name(self):
-        return "flower-connection"
+        return "flower-svc"
 
     @property
     def webserver_service_name(self):
-        return "webserver-connection"
+        return "webserver-svc"
 
     @property
     def master_deployment_name(self):
@@ -42,3 +42,15 @@ class LabelHandler:
     @property
     def redis_deployment_name(self):
         return "redis-deployment"
+
+    @property
+    def webserver_port_name(self):
+        return "webserver-port"
+
+    @property
+    def webserver_node_port(self):
+        return 8080
+
+    @property
+    def flower_node_port(self):
+        return 30003
