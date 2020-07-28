@@ -6,10 +6,9 @@ import pytest
 
 from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
-from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS, kubectl_name_dict
 from avionix_airflow.teardown_cluster import teardown
+from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS, kubectl_name_dict
 
 
 @pytest.fixture

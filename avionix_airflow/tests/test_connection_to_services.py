@@ -11,6 +11,7 @@ from avionix_airflow.kubernetes.base_service import AirflowService
 from avionix_airflow.kubernetes.postgres.database_service import DatabaseService
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.tests.markers import network_test
 
 
 @pytest.fixture
@@ -37,5 +38,6 @@ services = [
         DatabaseService(SqlOptions()),
     ],
 )
+@network_test
 def test_connections(service, host):
     Telnet(host=host, port=get_node_port(service))

@@ -1,5 +1,7 @@
-import requests
 import pytest
+import requests
+
+from avionix_airflow.tests.markers import network_test
 
 
 @pytest.fixture
@@ -13,9 +15,12 @@ class Request502Error(Exception):
 
 @pytest.mark.parametrize(
     "path,expected_text",
-    [("airflow", "<title>Airflow - DAGs</title>"), ("flower/", "I'm flower")],
+    [
+        ("airflow", "<title>Airflow - DAGs</title>"),
+        ("flower/", "<title>Flower</title>"),
+    ],
 )
-@pytest.mark.flaky
+@network_test
 def test_url_connection(domain: str, path: str, expected_text: str):
     request_url = f"{domain}/{path}"
     response = requests.get(request_url)
