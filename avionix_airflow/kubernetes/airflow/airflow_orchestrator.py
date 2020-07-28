@@ -9,12 +9,12 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
 )
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
+from avionix_airflow.kubernetes.airflow.ingress_controller import AirflowIngress
 from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
-from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
-from avionix_airflow.kubernetes.airflow.ingress_controller import AirflowIngress
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowOrchestrator(Orchestrator):

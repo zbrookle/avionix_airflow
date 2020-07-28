@@ -7,9 +7,9 @@ from avionix.kubernetes_objects.core import (
 )
 from avionix.kubernetes_objects.meta import LabelSelector
 
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class RedisPodTemplate(PodTemplateSpec):

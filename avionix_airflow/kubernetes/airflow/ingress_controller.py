@@ -1,11 +1,12 @@
 from avionix.kubernetes_objects.extensions import (
+    HTTPIngressPath,
+    HTTPIngressRuleValue,
     Ingress,
-    IngressSpec,
     IngressBackend,
     IngressRule,
-    HTTPIngressRuleValue,
-    HTTPIngressPath,
+    IngressSpec,
 )
+
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 

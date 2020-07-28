@@ -5,10 +5,10 @@ from avionix.testing.installation_context import ChartInstallationContext
 import pytest
 
 from avionix_airflow import get_chart_builder
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
-from avionix_airflow.tests.utils import parse_shell_script, dag_copy_loc
 from avionix_airflow.docker import build_airflow_image
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.tests.utils import dag_copy_loc, parse_shell_script
 
 
 @pytest.fixture

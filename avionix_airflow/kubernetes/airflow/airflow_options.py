@@ -1,4 +1,5 @@
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
+
 from avionix.kubernetes_objects.core import EnvVar
 
 

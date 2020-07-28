@@ -1,5 +1,6 @@
-from avionix.testing import kubectl_get
 from pathlib import Path
+
+from avionix.testing import kubectl_get
 
 
 def kubectl_get_airflow(resource: str):

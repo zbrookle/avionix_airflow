@@ -1,6 +1,6 @@
 from avionix_airflow.kubernetes.base_service import AirflowService
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class RedisService(AirflowService):

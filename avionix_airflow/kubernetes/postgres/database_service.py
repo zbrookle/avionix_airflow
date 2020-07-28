@@ -1,6 +1,6 @@
 from avionix_airflow.kubernetes.base_service import AirflowService
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class DatabaseService(AirflowService):

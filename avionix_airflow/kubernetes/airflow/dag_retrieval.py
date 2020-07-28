@@ -1,13 +1,14 @@
 from avionix.kubernetes_objects.batch import (
     CronJob,
     CronJobSpec,
-    JobTemplateSpec,
     JobSpec,
+    JobTemplateSpec,
 )
-from avionix.kubernetes_objects.core import PodTemplateSpec, PodSpec, Container
-from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
-from avionix_airflow.kubernetes.airflow.airflow_storage import AirflowDagVolumeGroup
+from avionix.kubernetes_objects.core import Container, PodSpec, PodTemplateSpec
+
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.airflow.airflow_storage import AirflowDagVolumeGroup
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
 
 class DagRetrievalJob(CronJob):

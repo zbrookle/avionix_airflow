@@ -1,10 +1,10 @@
 from avionix import ChartBuilder, ChartInfo
-from avionix_airflow.docker._build_image import build_airflow_image
 
+from avionix_airflow.docker._build_image import build_airflow_image
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 def get_chart_builder(
@@ -34,7 +34,7 @@ def get_chart_builder(
     return builder
 
 
-from avionix_airflow.tests.utils import parse_shell_script, dag_copy_loc
+from avionix_airflow.tests.utils import dag_copy_loc, parse_shell_script
 
 
 def main():

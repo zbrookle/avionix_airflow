@@ -7,9 +7,9 @@ from avionix.kubernetes_objects.core import (
 )
 from avionix.kubernetes_objects.meta import LabelSelector
 
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class PostgresPodTemplate(PodTemplateSpec):

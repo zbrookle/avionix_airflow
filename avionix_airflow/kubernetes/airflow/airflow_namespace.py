@@ -1,5 +1,6 @@
 from avionix import ObjectMeta
 from avionix.kubernetes_objects.core import Namespace, NamespaceSpec
+
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 
 
