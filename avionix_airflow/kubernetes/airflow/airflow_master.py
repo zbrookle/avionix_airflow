@@ -1,5 +1,5 @@
 from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
-from avionix.kubernetes_objects.core import PodSecurityContext, PodSpec, PodTemplateSpec
+from avionix.kubernetes_objects.core import PodSpec, PodTemplateSpec
 from avionix.kubernetes_objects.meta import LabelSelector
 
 from avionix_airflow.kubernetes.airflow.airflow_containers import (

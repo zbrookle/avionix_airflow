@@ -30,8 +30,20 @@ class SqlOptions:
             if var.name in {"POSTGRES_USER", "POSTGRES_PASSWORD"}
         ]
 
-    def get_postgres_connection_string(self):
+    @property
+    def _postgres_user_host_string(self):
         return (
-            f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}{self.POSTGRES_EXTRAS}"
+            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
+            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
+
+    @property
+    def sql_alchemy_connection_string(self):
+        return (
+            f"postgresql+psycopg2://{self._postgres_user_host_string}"
+            f"{self.POSTGRES_EXTRAS}"
+        )
+
+    @property
+    def sql_uri(self):
+        return f"postgres://{self._postgres_user_host_string}"

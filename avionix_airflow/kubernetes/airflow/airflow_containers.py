@@ -15,6 +15,9 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 
+class CoreEnvVar(EnvVar):
+    def __init__(self, name: str, value):
+        super().__init__("AIRFLOW__CORE__" + name, value)
 
 class AirflowContainer(Container):
     def __init__(
@@ -46,7 +49,8 @@ class AirflowContainer(Container):
         env = (
             self._sql_options.get_airflow_environment()
             + self._get_airflow_env()
-            + self._get_celery_env() + self._get_kubernetes_env()
+            + self._get_celery_env()
+            + self._get_kubernetes_env()
         )
         return env
 
@@ -58,21 +62,22 @@ class AirflowContainer(Container):
             ),
             EnvVar(
                 "AIRFLOW__CELERY__RESULT_BACKEND",
-                self._sql_options.get_postgres_connection_string(),
+                self._sql_options.sql_alchemy_connection_string,
             ),
         ]
 
     def _get_airflow_env(self):
         return [
-            EnvVar("AIRFLOW__CORE__EXECUTOR", self._airflow_options.core_executor),
-            EnvVar(
-                "AIRFLOW__CORE__SQL_ALCHEMY_CONN",
-                self._sql_options.get_postgres_connection_string(),
+            CoreEnvVar("EXECUTOR", self._airflow_options.core_executor),
+            CoreEnvVar("SQL_ALCHEMY_CONN",
+                self._sql_options.sql_alchemy_connection_string,
             ),
-            EnvVar(
-                "AIRFLOW__CORE__DEFAULT_TIMEZONE",
+            EnvVar("AIRFLOW_CONN_POSTGRES_BACKEND", self._sql_options.sql_uri,),
+            CoreEnvVar(
+                "DEFAULT_TIMEZONE",
                 self._airflow_options.default_time_zone,
             ),
+            CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False")
         ]
 
     def _get_kubernetes_env(self):
