@@ -1,6 +1,11 @@
 from typing import Dict, List, Optional
 
 from avionix.kubernetes_objects.core import EnvVar
+from cryptography.fernet import Fernet
+
+
+def _create_fernet_key():
+    return Fernet.generate_key().decode("utf-8")
 
 
 class AirflowOptions:
@@ -23,6 +28,7 @@ class AirflowOptions:
         core_executor: str = "CeleryExecutor",
         namespace: str = "airflow",
         additional_vars: Optional[Dict[str, str]] = None,
+        fernet_key: str = _create_fernet_key(),
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -37,6 +43,7 @@ class AirflowOptions:
         self.core_executor = core_executor
         self.namespace = namespace
         self.__additional_vars = additional_vars if additional_vars is not None else {}
+        self.fernet_key = fernet_key
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

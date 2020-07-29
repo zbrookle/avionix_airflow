@@ -16,6 +16,7 @@ class RedisOptions:
         self.password = password
         self.db_num = db_num
 
-    def get_redis_connection_string(self):
+    @property
+    def redis_connection_string(self):
         prefix = f":{self.password}" if self.password else ""
         return f"{self.proto}{prefix}{self.host}:{self.port}/{self.db_num}"
