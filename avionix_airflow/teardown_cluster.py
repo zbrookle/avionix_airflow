@@ -1,6 +1,7 @@
+from logging import info
+
 from avionix import ChartBuilder
 from avionix.testing import kubectl_get
-from logging import info
 
 
 def teardown(builder: ChartBuilder):

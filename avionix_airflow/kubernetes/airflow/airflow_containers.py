@@ -1,11 +1,6 @@
 from typing import List, Optional
 
-from avionix.kubernetes_objects.core import (
-    Container,
-    ContainerPort,
-    EnvVar,
-    SecurityContext,
-)
+from avionix.kubernetes_objects.core import Container, ContainerPort, EnvVar
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
