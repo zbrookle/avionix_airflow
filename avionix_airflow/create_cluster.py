@@ -5,7 +5,7 @@ from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrat
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-
+from avionix_airflow.host_settings import add_host
 
 def get_chart_builder(
     airflow_options: AirflowOptions,
@@ -38,6 +38,7 @@ from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS
 
 def main():
     build_airflow_image()
+    add_host(TEST_AIRFLOW_OPTIONS)
     get_chart_builder(TEST_AIRFLOW_OPTIONS).install_chart()
 
 

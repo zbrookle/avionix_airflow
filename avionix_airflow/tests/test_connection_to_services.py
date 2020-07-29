@@ -12,11 +12,12 @@ from avionix_airflow.kubernetes.postgres.database_service import DatabaseService
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.tests.markers import network_test
+from avionix_airflow.kubernetes.utils import get_minikube_ip
 
 
 @pytest.fixture
 def host():
-    return check_output(["minikube", "ip"]).decode("utf-8").strip()
+    return get_minikube_ip()
 
 
 def get_node_port(service: AirflowService):
