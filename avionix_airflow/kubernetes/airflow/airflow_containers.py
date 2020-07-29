@@ -1,6 +1,12 @@
 from typing import List, Optional
 
-from avionix.kubernetes_objects.core import Container, ContainerPort, EnvVar
+from avionix.kubernetes_objects.core import (
+    Container,
+    ContainerPort,
+    EnvVar,
+    HTTPGetAction,
+    Probe,
+)
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
@@ -10,6 +16,11 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
 )
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+
+
+class AirflowProbe(Probe):
+    def __init__(self, path: str, port: int, host: str):
+        super().__init__(http_get=HTTPGetAction(path=path, port=port, host=host))
 
 
 class CoreEnvVar(EnvVar):
@@ -26,6 +37,7 @@ class AirflowContainer(Container):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         ports: Optional[List[ContainerPort]] = None,
+        readiness_probe: Optional[Probe] = None,
     ):
         self._sql_options = sql_options
         self._redis_options = redis_options
@@ -42,6 +54,7 @@ class AirflowContainer(Container):
                 AirflowDagVolumeGroup(airflow_options).volume_mount,
                 ExternalStorageVolumeGroup(airflow_options).volume_mount,
             ],
+            readiness_probe=readiness_probe,
         )
 
     def _get_environment(self):
@@ -98,6 +111,7 @@ class WebserverUI(AirflowContainer):
             redis_options,
             airflow_options,
             ports=[ContainerPort(8080, host_port=8080)],
+            readiness_probe=AirflowProbe("/airflow", 8080, "0.0.0.0"),
         )
 
 
@@ -121,5 +135,10 @@ class FlowerUI(AirflowContainer):
         airflow_options: AirflowOptions,
     ):
         super().__init__(
-            "flower", ["flower"], sql_options, redis_options, airflow_options
+            "flower",
+            ["flower"],
+            sql_options,
+            redis_options,
+            airflow_options,
+            readiness_probe=Probe(http_get=HTTPGetAction("/flower/", 5555,)),
         )
