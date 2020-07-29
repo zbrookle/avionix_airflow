@@ -56,7 +56,7 @@ class AirflowContainer(Container):
         return [
             EnvVar(
                 "AIRFLOW__CELERY__BROKER_URL",
-                self._redis_options.get_redis_connection_string(),
+                self._redis_options.redis_connection_string,
             ),
             EnvVar(
                 "AIRFLOW__CELERY__RESULT_BACKEND",
