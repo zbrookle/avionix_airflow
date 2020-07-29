@@ -54,7 +54,9 @@ def build_chart(airflow_options, sql_options, redis_options):
     build_airflow_image()
     builder = get_chart_builder(airflow_options, sql_options, redis_options)
     try:
-        with ChartInstallationContext(builder,):
+        with ChartInstallationContext(
+            builder, expected_status={"1/1", "3/3"}, status_field="READY"
+        ):
             while True:
                 deployments = kubectl_name_dict("deployments")
                 if deployments_are_ready(deployments):
