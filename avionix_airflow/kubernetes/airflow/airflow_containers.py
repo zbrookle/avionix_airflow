@@ -73,6 +73,7 @@ class AirflowContainer(Container):
             EnvVar("AIRFLOW_CONN_POSTGRES_BACKEND", self._sql_options.sql_uri,),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_time_zone,),
             CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False"),
+            CoreEnvVar("FERNET_KEY", self._airflow_options.fernet_key),
         ]
 
     def _get_kubernetes_env(self):
