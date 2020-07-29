@@ -1,4 +1,3 @@
-from subprocess import check_output
 from telnetlib import Telnet
 
 import pytest
@@ -12,11 +11,6 @@ from avionix_airflow.kubernetes.postgres.database_service import DatabaseService
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.tests.markers import network_test
-
-
-@pytest.fixture
-def host():
-    return check_output(["minikube", "ip"]).decode("utf-8").strip()
 
 
 def get_node_port(service: AirflowService):

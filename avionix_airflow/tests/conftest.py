@@ -6,6 +6,8 @@ import pytest
 
 from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
+from avionix_airflow.host_settings import add_host
+from avionix_airflow.kubernetes.utils import get_minikube_ip
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
 from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS, kubectl_name_dict
@@ -14,6 +16,11 @@ from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS, kubectl_name_dict
 @pytest.fixture
 def label():
     return ValueOrchestrator()
+
+
+@pytest.fixture
+def host():
+    return get_minikube_ip()
 
 
 @pytest.fixture(scope="session")
@@ -30,6 +37,8 @@ def deployments_are_ready(deployments: dict):
 
 @pytest.fixture(scope="session", autouse=True)
 def build_chart(airflow_options):
+    add_host(airflow_options, force=True)
+
     build_airflow_image()
     builder = get_chart_builder(airflow_options)
     try:

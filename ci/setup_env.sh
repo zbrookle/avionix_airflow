@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+
 MINICONDA_DIR="$HOME/miniconda3"
 
 
@@ -125,6 +126,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 
 minikube start
+minikube addons enable ingress
 
 # Install DB for Linux
 
