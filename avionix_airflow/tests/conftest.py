@@ -25,8 +25,14 @@ def host():
     return get_minikube_ip()
 
 
+def pytest_addoption(parser):
+    parser.addoption("--executor", action="store", default="CeleryExecutor")
+
+
 @pytest.fixture(scope="session")
-def airflow_options():
+def airflow_options(pytestconfig):
+    options = TEST_AIRFLOW_OPTIONS
+    options.core_executor = pytestconfig.getoption("executor")
     return TEST_AIRFLOW_OPTIONS
 
 
