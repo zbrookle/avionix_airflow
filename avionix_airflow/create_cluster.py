@@ -1,11 +1,12 @@
 from avionix import ChartBuilder, ChartInfo
 
 from avionix_airflow.docker._build_image import build_airflow_image
+from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.host_settings import add_host
+
 
 def get_chart_builder(
     airflow_options: AirflowOptions,
