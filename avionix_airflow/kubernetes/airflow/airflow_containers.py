@@ -6,6 +6,7 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
+    ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
@@ -39,6 +40,7 @@ class AirflowContainer(Container):
             volume_mounts=[
                 AirflowLogVolumeGroup(airflow_options).volume_mount,
                 AirflowDagVolumeGroup(airflow_options).volume_mount,
+                ExternalStorageVolumeGroup(airflow_options).volume_mount,
             ],
         )
 

@@ -125,3 +125,10 @@ class AirflowDagVolumeGroup(AirflowPersistentVolumeGroup):
             access_modes=options.access_modes,
             folder="dags",
         )
+
+
+class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
+    def __init__(self, options: AirflowOptions):
+        super().__init__(
+            "tmp", options.dag_storage, access_modes=options.access_modes, folder="tmp"
+        )
