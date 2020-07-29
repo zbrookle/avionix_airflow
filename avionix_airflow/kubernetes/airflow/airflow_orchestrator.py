@@ -8,6 +8,7 @@ from avionix_airflow.kubernetes.airflow.airflow_service import (
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
+    ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
 from avionix_airflow.kubernetes.airflow.ingress_controller import AirflowIngress
@@ -27,6 +28,7 @@ class AirflowOrchestrator(Orchestrator):
     ):
         dag_group = AirflowDagVolumeGroup(airflow_options)
         log_group = AirflowLogVolumeGroup(airflow_options)
+        external_volume_group = ExternalStorageVolumeGroup(airflow_options)
         super().__init__(
             [
                 AirflowNamespace(airflow_options),
@@ -37,6 +39,8 @@ class AirflowOrchestrator(Orchestrator):
                 log_group.persistent_volume,
                 dag_group.persistent_volume_claim,
                 log_group.persistent_volume_claim,
+                external_volume_group.persistent_volume,
+                external_volume_group.persistent_volume_claim,
                 DagRetrievalJob(airflow_options),
                 AirflowIngress(airflow_options),
             ]

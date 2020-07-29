@@ -21,6 +21,7 @@ class AirflowOptions:
         domain_name: str = "www.avionix-airflow.com",
         dag_storage: str = "50Mi",
         logs_storage: str = "50Mi",
+        external_storage: str = "50Mi",
         default_executor_cpu: int = 5,
         default_executor_memory: int = 2,
         access_modes: Optional[List[str]] = None,
@@ -32,6 +33,7 @@ class AirflowOptions:
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
+        self.external_storage = external_storage
         self.default_executor_cpu = default_executor_cpu
         self.default_executor_memory = default_executor_memory
         self.access_modes = self.__get_access_modes(access_modes)
