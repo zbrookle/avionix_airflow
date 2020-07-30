@@ -34,5 +34,5 @@ TEST_AIRFLOW_OPTIONS = AirflowOptions(
     dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
     dag_sync_schedule="* * * * *",
     default_timezone="est",
-    core_executor="KubernetesExecutor",
+    core_executor="CeleryExecutor",
 )

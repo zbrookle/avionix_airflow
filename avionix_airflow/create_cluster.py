@@ -29,6 +29,7 @@ def get_chart_builder(
             api_version="3.2.4", name="airflow", version="0.1.0", app_version="v1"
         ),
         orchestrator.get_kube_parts(),
+        keep_chart=True,
     )
     return builder
 

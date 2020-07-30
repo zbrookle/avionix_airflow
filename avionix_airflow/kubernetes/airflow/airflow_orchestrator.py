@@ -1,9 +1,13 @@
 from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_namespace import AirflowNamespace
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
     WebserverService,
+)
+from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
+    AirflowPodServiceAccount,
 )
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
@@ -44,4 +48,10 @@ class AirflowOrchestrator(Orchestrator):
         ]
         if airflow_options.in_celery_mode:
             components.append(FlowerService(label))
+        if airflow_options.in_kube_mode:
+            airflow_pod_service_account = AirflowPodServiceAccount()
+            role_group = AirflowPodRoleGroup(airflow_pod_service_account)
+            components.extend(
+                [airflow_pod_service_account, role_group.role, role_group.role_binding]
+            )
         super().__init__(components)

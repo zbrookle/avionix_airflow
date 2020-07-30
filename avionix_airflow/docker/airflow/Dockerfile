@@ -77,5 +77,5 @@ COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 RUN chmod +x /entrypoint.sh
 
 WORKDIR ${AIRFLOW_USER_HOME}
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["webserver"]
+#ENTRYPOINT ["/entrypoint.sh"]
+#CMD ["webserver"]
