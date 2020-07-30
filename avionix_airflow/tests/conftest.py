@@ -25,15 +25,11 @@ def host():
     return get_minikube_ip()
 
 
-def pytest_addoption(parser):
-    parser.addoption("--executor", action="store", default="CeleryExecutor")
-
-
-@pytest.fixture(scope="session")
-def airflow_options(pytestconfig):
+@pytest.fixture(scope="session", params=["CeleryExecutor", "KubernetesExecutor"])
+def airflow_options(request):
     options = TEST_AIRFLOW_OPTIONS
-    options.core_executor = pytestconfig.getoption("executor")
-    return TEST_AIRFLOW_OPTIONS
+    TEST_AIRFLOW_OPTIONS.core_executor = request.param
+    return options
 
 
 @pytest.fixture(scope="session")
@@ -61,7 +57,8 @@ def build_chart(airflow_options, sql_options, redis_options):
     builder = get_chart_builder(airflow_options, sql_options, redis_options)
     try:
         with ChartInstallationContext(
-            builder, expected_status={"1/1", "3/3"}, status_field="READY"
+            builder, expected_status={"1/1", "3/3"}, status_field="READY",
+                uninstall_func=lambda: teardown(builder)
         ):
             while True:
                 deployments = kubectl_name_dict("deployments")
