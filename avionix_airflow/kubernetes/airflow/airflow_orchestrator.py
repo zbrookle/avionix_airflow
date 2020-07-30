@@ -29,19 +29,19 @@ class AirflowOrchestrator(Orchestrator):
         dag_group = AirflowDagVolumeGroup(airflow_options)
         log_group = AirflowLogVolumeGroup(airflow_options)
         external_volume_group = ExternalStorageVolumeGroup(airflow_options)
-        super().__init__(
-            [
-                AirflowNamespace(airflow_options),
-                AirflowDeployment(sql_options, redis_options, airflow_options),
-                WebserverService(label),
-                FlowerService(label),
-                dag_group.persistent_volume,
-                log_group.persistent_volume,
-                dag_group.persistent_volume_claim,
-                log_group.persistent_volume_claim,
-                external_volume_group.persistent_volume,
-                external_volume_group.persistent_volume_claim,
-                DagRetrievalJob(airflow_options),
-                AirflowIngress(airflow_options),
-            ]
-        )
+        components = [
+            AirflowNamespace(airflow_options),
+            AirflowDeployment(sql_options, redis_options, airflow_options),
+            WebserverService(label),
+            dag_group.persistent_volume,
+            log_group.persistent_volume,
+            dag_group.persistent_volume_claim,
+            log_group.persistent_volume_claim,
+            external_volume_group.persistent_volume,
+            external_volume_group.persistent_volume_claim,
+            DagRetrievalJob(airflow_options),
+            AirflowIngress(airflow_options),
+        ]
+        if airflow_options.in_celery_mode:
+            components.append(FlowerService(label))
+        super().__init__(components)

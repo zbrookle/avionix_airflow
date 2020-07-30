@@ -57,8 +57,10 @@ def build_chart(airflow_options, sql_options, redis_options):
     builder = get_chart_builder(airflow_options, sql_options, redis_options)
     try:
         with ChartInstallationContext(
-            builder, expected_status={"1/1", "3/3"}, status_field="READY",
-                uninstall_func=lambda: teardown(builder)
+            builder,
+            expected_status={"1/1", "3/3"},
+            status_field="READY",
+            uninstall_func=lambda: teardown(builder),
         ):
             while True:
                 deployments = kubectl_name_dict("deployments")

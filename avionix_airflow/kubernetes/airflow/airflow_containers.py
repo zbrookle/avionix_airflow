@@ -49,13 +49,16 @@ class AirflowContainer(Container):
             image_pull_policy="Never",
             env=self._get_environment(),
             ports=ports,
-            volume_mounts=[
-                AirflowLogVolumeGroup(airflow_options).volume_mount,
-                AirflowDagVolumeGroup(airflow_options).volume_mount,
-                ExternalStorageVolumeGroup(airflow_options).volume_mount,
-            ],
+            volume_mounts=self._get_volume_mounts(),
             readiness_probe=readiness_probe,
         )
+
+    def _get_volume_mounts(self):
+        return [
+            AirflowLogVolumeGroup(self._airflow_options).volume_mount,
+            AirflowDagVolumeGroup(self._airflow_options).volume_mount,
+            ExternalStorageVolumeGroup(self._airflow_options).volume_mount,
+        ]
 
     def _get_environment(self):
         env = (
@@ -93,7 +96,13 @@ class AirflowContainer(Container):
 
     def _get_kubernetes_env(self):
         return [
-            EnvVar("AIRFLOW__KUBERNETES__NAMESPACE", self._airflow_options.namespace)
+            EnvVar("AIRFLOW__KUBERNETES__NAMESPACE", self._airflow_options.namespace),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM",
+                AirflowDagVolumeGroup(
+                    self._airflow_options
+                ).persistent_volume_claim.metadata.name,
+            ),
         ]
 
 

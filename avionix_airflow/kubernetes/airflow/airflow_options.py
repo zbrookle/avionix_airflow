@@ -56,3 +56,7 @@ class AirflowOptions:
     @property
     def extra_env_vars(self):
         return [EnvVar(name, value) for name, value in self.__additional_vars.items()]
+
+    @property
+    def in_celery_mode(self):
+        return self.core_executor == "CeleryExecutor"
