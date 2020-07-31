@@ -20,6 +20,13 @@ from avionix_airflow.tests.utils import (
 )
 
 
+class AvionixAirflowChartInstallationContext(ChartInstallationContext):
+    def get_status_resources(self):
+        resources = super().get_status_resources()
+        new_resources = resources.filter(regex=".*deployment.*")
+        return new_resources
+
+
 @pytest.fixture
 def label():
     return ValueOrchestrator()
@@ -67,7 +74,7 @@ def build_chart(airflow_options, sql_options, redis_options):
     build_airflow_image()
     builder = get_chart_builder(airflow_options, sql_options, redis_options)
     try:
-        with ChartInstallationContext(
+        with AvionixAirflowChartInstallationContext(
             builder,
             expected_status={"1/1", "3/3"},
             status_field="READY",

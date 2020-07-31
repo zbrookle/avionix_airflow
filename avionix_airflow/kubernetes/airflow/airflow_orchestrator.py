@@ -2,6 +2,7 @@ from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_namespace import AirflowNamespace
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
+from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
     WebserverService,
@@ -45,6 +46,7 @@ class AirflowOrchestrator(Orchestrator):
             external_volume_group.persistent_volume_claim,
             DagRetrievalJob(airflow_options),
             AirflowIngress(airflow_options),
+            AirflowSecret(sql_options, airflow_options, redis_options),
         ]
         if airflow_options.in_celery_mode:
             components.append(FlowerService(label))

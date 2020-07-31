@@ -3,9 +3,10 @@ from typing import List, Optional
 from avionix.kubernetes_objects.core import (
     Container,
     ContainerPort,
+    EnvFromSource,
     EnvVar,
-    HTTPGetAction,
     Probe,
+    SecretEnvSource,
 )
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
@@ -15,12 +16,9 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
+from avionix_airflow.kubernetes.probes import AvionixAirflowProbe
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
-
-
-class AirflowProbe(Probe):
-    def __init__(self, path: str, port: int, host: str):
-        super().__init__(http_get=HTTPGetAction(path=path, port=port, host=host))
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class CoreEnvVar(EnvVar):
@@ -38,6 +36,7 @@ class AirflowContainer(Container):
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
     ):
+        values = ValueOrchestrator()
         self._sql_options = sql_options
         self._redis_options = redis_options
         self._airflow_options = airflow_options
@@ -47,6 +46,11 @@ class AirflowContainer(Container):
             image="airflow-image",
             image_pull_policy="Never",
             env=self._get_environment(),
+            env_from=[
+                EnvFromSource(
+                    None, None, SecretEnvSource(values.secret_name, optional=False)
+                )
+            ],
             ports=ports,
             volume_mounts=self._get_volume_mounts(),
             readiness_probe=readiness_probe,
@@ -62,37 +66,18 @@ class AirflowContainer(Container):
 
     def _get_environment(self):
         env = (
-            self._sql_options.get_airflow_environment()
+            self._get_kubernetes_env()
             + self._get_airflow_env()
-            + self._get_celery_env()
-            + self._get_kubernetes_env()
             + self._airflow_options.extra_env_vars
         )
         return env
 
-    def _get_celery_env(self):
-        return [
-            EnvVar(
-                "AIRFLOW__CELERY__BROKER_URL",
-                self._redis_options.redis_connection_string,
-            ),
-            EnvVar(
-                "AIRFLOW__CELERY__RESULT_BACKEND",
-                self._sql_options.sql_alchemy_connection_string,
-            ),
-        ]
-
     def _get_airflow_env(self):
         return [
             CoreEnvVar("EXECUTOR", self._airflow_options.core_executor),
-            CoreEnvVar(
-                "SQL_ALCHEMY_CONN", self._sql_options.sql_alchemy_connection_string,
-            ),
-            EnvVar("AIRFLOW_CONN_POSTGRES_BACKEND", self._sql_options.sql_uri,),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_time_zone,),
             CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False"),
             CoreEnvVar("LOAD_EXAMPLES", "False"),
-            CoreEnvVar("FERNET_KEY", self._airflow_options.fernet_key),
             CoreEnvVar(
                 "DAGS_ARE_PAUSED_AT_CREATION",
                 str(self._airflow_options.dags_paused_at_creation),
@@ -142,7 +127,7 @@ class WebserverUI(AirflowContainer):
             redis_options,
             airflow_options,
             ports=[ContainerPort(8080, host_port=8080)],
-            readiness_probe=AirflowProbe("/airflow", 8080, "0.0.0.0"),
+            readiness_probe=AvionixAirflowProbe("/airflow", 8080, "0.0.0.0"),
         )
 
 
@@ -168,5 +153,5 @@ class FlowerUI(AirflowContainer):
             sql_options,
             redis_options,
             airflow_options,
-            readiness_probe=Probe(http_get=HTTPGetAction("/flower/", 5555,)),
+            readiness_probe=AvionixAirflowProbe("/flower/", 5555),
         )
