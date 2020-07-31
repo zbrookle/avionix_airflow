@@ -1,13 +1,10 @@
 from avionix import ChartBuilder, ChartInfo
 from avionix.chart import ChartMaintainer
 
-from avionix_airflow.docker._build_image import build_airflow_image
-from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS
 
 
 def get_chart_builder(
@@ -39,13 +36,3 @@ def get_chart_builder(
         orchestrator.get_kube_parts(),
     )
     return builder
-
-
-def main():
-    build_airflow_image()
-    add_host(TEST_AIRFLOW_OPTIONS)
-    get_chart_builder(TEST_AIRFLOW_OPTIONS).install_chart()
-
-
-if __name__ == "__main__":
-    main()

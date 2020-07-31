@@ -34,11 +34,3 @@ def skip_if_not_celery(airflow_options: AirflowOptions):
 
 
 dag_copy_loc = Path(__file__).parent / "sync_dags.sh"
-
-TEST_AIRFLOW_OPTIONS = AirflowOptions(
-    dag_sync_image="alpine/git",
-    dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
-    dag_sync_schedule="* * * * *",
-    default_timezone="est",
-    core_executor="KubernetesExecutor",
-)
