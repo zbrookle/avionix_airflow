@@ -1,4 +1,5 @@
 from avionix import ChartBuilder, ChartInfo
+from avionix.chart import ChartMaintainer
 
 from avionix_airflow.docker._build_image import build_airflow_image
 from avionix_airflow.host_settings import add_host
@@ -6,6 +7,7 @@ from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrat
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS
 
 
 def get_chart_builder(
@@ -19,21 +21,24 @@ def get_chart_builder(
     :param airflow_options:
     :return: Avionix ChartBuilder object that can be used to install airflow
     """
-    orchestrator = PostgresOrchestrator(sql_options) + AirflowOrchestrator(
+    orchestrator = AirflowOrchestrator(
         sql_options, redis_options, ValueOrchestrator(), airflow_options
     )
     if airflow_options.in_celery_mode:
         orchestrator += RedisOrchestrator(redis_options)
+    if sql_options.create_database_in_cluster:
+        orchestrator += PostgresOrchestrator(sql_options)
     builder = ChartBuilder(
         ChartInfo(
-            api_version="3.2.4", name="airflow", version="0.1.0", app_version="v1"
+            api_version="3.2.4",
+            name="airflow",
+            version="0.1.0",
+            app_version="v1",
+            maintainers=[ChartMaintainer("Zach Brookler", "zachb1996@yahoo.com")],
         ),
         orchestrator.get_kube_parts(),
     )
     return builder
-
-
-from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS
 
 
 def main():

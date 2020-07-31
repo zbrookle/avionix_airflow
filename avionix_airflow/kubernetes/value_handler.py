@@ -1,4 +1,8 @@
 class ValueOrchestrator:
+    def __init__(self, dashboard_service_account: str = "dashboard"):
+        self.dashboard_service_account = dashboard_service_account
+        self.secret_name = "airflow-secrets"
+
     @property
     def master_node_labels(self):
         return {"pod-job": "master-node"}
