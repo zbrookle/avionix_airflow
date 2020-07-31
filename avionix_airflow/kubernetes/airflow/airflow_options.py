@@ -30,6 +30,9 @@ class AirflowOptions:
         namespace: str = "airflow",
         additional_vars: Optional[Dict[str, str]] = None,
         fernet_key: str = _create_fernet_key(),
+        dags_paused_at_creation: bool = True,
+        worker_image: str = "airflow-image",
+        worker_image_tag: str = "latest",
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -46,6 +49,9 @@ class AirflowOptions:
         self.namespace = namespace
         self.__additional_vars = additional_vars if additional_vars is not None else {}
         self.fernet_key = fernet_key
+        self.dags_paused_at_creation = dags_paused_at_creation
+        self.worker_image = worker_image
+        self.worker_image_tag = worker_image_tag
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
@@ -56,3 +62,11 @@ class AirflowOptions:
     @property
     def extra_env_vars(self):
         return [EnvVar(name, value) for name, value in self.__additional_vars.items()]
+
+    @property
+    def in_celery_mode(self):
+        return self.core_executor == "CeleryExecutor"
+
+    @property
+    def in_kube_mode(self):
+        return self.core_executor == "KubernetesExecutor"

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from avionix.testing import kubectl_get
+import pytest
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions
 
@@ -27,6 +28,11 @@ def parse_shell_script(script_loc: str):
         return " ".join(commands)
 
 
+def skip_if_not_celery(airflow_options: AirflowOptions):
+    if not airflow_options.in_celery_mode:
+        pytest.skip("This functionality is only available with the celery executor")
+
+
 dag_copy_loc = Path(__file__).parent / "sync_dags.sh"
 
 TEST_AIRFLOW_OPTIONS = AirflowOptions(
@@ -34,4 +40,5 @@ TEST_AIRFLOW_OPTIONS = AirflowOptions(
     dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
     dag_sync_schedule="* * * * *",
     default_timezone="est",
+    core_executor="KubernetesExecutor",
 )

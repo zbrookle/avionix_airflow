@@ -32,7 +32,6 @@ class AirflowContainer(Container):
     def __init__(
         self,
         name: str,
-        args,
         sql_options: SqlOptions,
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
@@ -44,18 +43,22 @@ class AirflowContainer(Container):
         self._airflow_options = airflow_options
         super().__init__(
             name=name,
-            args=args,
+            args=[name],
             image="airflow-image",
             image_pull_policy="Never",
             env=self._get_environment(),
             ports=ports,
-            volume_mounts=[
-                AirflowLogVolumeGroup(airflow_options).volume_mount,
-                AirflowDagVolumeGroup(airflow_options).volume_mount,
-                ExternalStorageVolumeGroup(airflow_options).volume_mount,
-            ],
+            volume_mounts=self._get_volume_mounts(),
             readiness_probe=readiness_probe,
+            command=["/entrypoint.sh"],
         )
+
+    def _get_volume_mounts(self):
+        return [
+            AirflowLogVolumeGroup(self._airflow_options).volume_mount,
+            AirflowDagVolumeGroup(self._airflow_options).volume_mount,
+            ExternalStorageVolumeGroup(self._airflow_options).volume_mount,
+        ]
 
     def _get_environment(self):
         env = (
@@ -88,12 +91,41 @@ class AirflowContainer(Container):
             EnvVar("AIRFLOW_CONN_POSTGRES_BACKEND", self._sql_options.sql_uri,),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_time_zone,),
             CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False"),
+            CoreEnvVar("LOAD_EXAMPLES", "False"),
             CoreEnvVar("FERNET_KEY", self._airflow_options.fernet_key),
+            CoreEnvVar(
+                "DAGS_ARE_PAUSED_AT_CREATION",
+                str(self._airflow_options.dags_paused_at_creation),
+            ),
         ]
 
     def _get_kubernetes_env(self):
         return [
-            EnvVar("AIRFLOW__KUBERNETES__NAMESPACE", self._airflow_options.namespace)
+            EnvVar("AIRFLOW__KUBERNETES__NAMESPACE", self._airflow_options.namespace),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM",
+                AirflowDagVolumeGroup(
+                    self._airflow_options
+                ).persistent_volume_claim.metadata.name,
+            ),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM",
+                AirflowLogVolumeGroup(
+                    self._airflow_options
+                ).persistent_volume_claim.metadata.name,
+            ),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY",
+                self._airflow_options.worker_image,
+            ),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY",
+                "IfNotPresent",
+            ),
+            EnvVar(
+                "AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG",
+                self._airflow_options.worker_image_tag,
+            ),
         ]
 
 
@@ -106,7 +138,6 @@ class WebserverUI(AirflowContainer):
     ):
         super().__init__(
             "webserver",
-            ["webserver"],
             sql_options,
             redis_options,
             airflow_options,
@@ -122,9 +153,7 @@ class Scheduler(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
     ):
-        super().__init__(
-            "scheduler", ["scheduler"], sql_options, redis_options, airflow_options
-        )
+        super().__init__("scheduler", sql_options, redis_options, airflow_options)
 
 
 class FlowerUI(AirflowContainer):
@@ -136,7 +165,6 @@ class FlowerUI(AirflowContainer):
     ):
         super().__init__(
             "flower",
-            ["flower"],
             sql_options,
             redis_options,
             airflow_options,

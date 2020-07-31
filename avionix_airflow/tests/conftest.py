@@ -7,12 +7,17 @@ import pytest
 from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
 from avionix_airflow.host_settings import add_host
+from avionix_airflow.kubernetes.airflow import AirflowOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
 from avionix_airflow.kubernetes.utils import get_minikube_ip
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
-from avionix_airflow.tests.utils import TEST_AIRFLOW_OPTIONS, kubectl_name_dict
+from avionix_airflow.tests.utils import (
+    dag_copy_loc,
+    kubectl_name_dict,
+    parse_shell_script,
+)
 
 
 @pytest.fixture
@@ -25,9 +30,17 @@ def host():
     return get_minikube_ip()
 
 
-@pytest.fixture(scope="session")
-def airflow_options():
-    return TEST_AIRFLOW_OPTIONS
+@pytest.fixture(
+    scope="session", params=["CeleryExecutor", "KubernetesExecutor"],
+)
+def airflow_options(request):
+    return AirflowOptions(
+        dag_sync_image="alpine/git",
+        dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
+        dag_sync_schedule="* * * * *",
+        default_timezone="est",
+        core_executor=request.param,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -55,7 +68,10 @@ def build_chart(airflow_options, sql_options, redis_options):
     builder = get_chart_builder(airflow_options, sql_options, redis_options)
     try:
         with ChartInstallationContext(
-            builder, expected_status={"1/1", "3/3"}, status_field="READY"
+            builder,
+            expected_status={"1/1", "3/3"},
+            status_field="READY",
+            uninstall_func=lambda: teardown(builder),
         ):
             while True:
                 deployments = kubectl_name_dict("deployments")

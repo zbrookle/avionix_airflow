@@ -1,9 +1,13 @@
 from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_namespace import AirflowNamespace
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
     WebserverService,
+)
+from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
+    AirflowPodServiceAccount,
 )
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
@@ -29,19 +33,25 @@ class AirflowOrchestrator(Orchestrator):
         dag_group = AirflowDagVolumeGroup(airflow_options)
         log_group = AirflowLogVolumeGroup(airflow_options)
         external_volume_group = ExternalStorageVolumeGroup(airflow_options)
-        super().__init__(
-            [
-                AirflowNamespace(airflow_options),
-                AirflowDeployment(sql_options, redis_options, airflow_options),
-                WebserverService(label),
-                FlowerService(label),
-                dag_group.persistent_volume,
-                log_group.persistent_volume,
-                dag_group.persistent_volume_claim,
-                log_group.persistent_volume_claim,
-                external_volume_group.persistent_volume,
-                external_volume_group.persistent_volume_claim,
-                DagRetrievalJob(airflow_options),
-                AirflowIngress(airflow_options),
-            ]
-        )
+        components = [
+            AirflowNamespace(airflow_options),
+            AirflowDeployment(sql_options, redis_options, airflow_options),
+            WebserverService(label),
+            dag_group.persistent_volume,
+            log_group.persistent_volume,
+            dag_group.persistent_volume_claim,
+            log_group.persistent_volume_claim,
+            external_volume_group.persistent_volume,
+            external_volume_group.persistent_volume_claim,
+            DagRetrievalJob(airflow_options),
+            AirflowIngress(airflow_options),
+        ]
+        if airflow_options.in_celery_mode:
+            components.append(FlowerService(label))
+        if airflow_options.in_kube_mode:
+            airflow_pod_service_account = AirflowPodServiceAccount()
+            role_group = AirflowPodRoleGroup(airflow_pod_service_account)
+            components.extend(
+                [airflow_pod_service_account, role_group.role, role_group.role_binding]
+            )
+        super().__init__(components)

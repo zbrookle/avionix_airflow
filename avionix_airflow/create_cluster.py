@@ -19,17 +19,16 @@ def get_chart_builder(
     :param airflow_options:
     :return: Avionix ChartBuilder object that can be used to install airflow
     """
+    orchestrator = PostgresOrchestrator(sql_options) + AirflowOrchestrator(
+        sql_options, redis_options, ValueOrchestrator(), airflow_options
+    )
+    if airflow_options.in_celery_mode:
+        orchestrator += RedisOrchestrator(redis_options)
     builder = ChartBuilder(
         ChartInfo(
             api_version="3.2.4", name="airflow", version="0.1.0", app_version="v1"
         ),
-        (
-            PostgresOrchestrator(sql_options)
-            + AirflowOrchestrator(
-                sql_options, redis_options, ValueOrchestrator(), airflow_options
-            )
-            + RedisOrchestrator(redis_options)
-        ).get_kube_parts(),
+        orchestrator.get_kube_parts(),
     )
     return builder
 

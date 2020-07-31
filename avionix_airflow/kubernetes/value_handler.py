@@ -58,3 +58,7 @@ class ValueOrchestrator:
     @property
     def flower_node_port(self):
         return 30003
+
+    @property
+    def airflow_pod_service_account(self):
+        return "airflow-pod-account"

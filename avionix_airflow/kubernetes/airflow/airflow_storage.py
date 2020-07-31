@@ -3,6 +3,7 @@ from typing import List
 from avionix.kubernetes_objects.core import (
     Container,
     HostPathVolumeSource,
+    LabelSelector,
     PersistentVolume,
     PersistentVolumeClaim,
     PersistentVolumeClaimSpec,
@@ -22,7 +23,11 @@ class AirflowPersistentVolume(PersistentVolume):
         self, name: str, storage: str, host_path: str, access_modes: List[str]
     ):
         super().__init__(
-            AirflowMeta(name, annotations={"pv.beta.kubernetes.io/gid": "1001"}),
+            AirflowMeta(
+                name,
+                annotations={"pv.beta.kubernetes.io/gid": "1001"},
+                labels={"storage-type": name},
+            ),
             PersistentVolumeSpec(
                 access_modes,
                 capacity={"storage": storage},
@@ -49,6 +54,7 @@ class AirflowPersistentVolumeClaim(PersistentVolumeClaim):
             PersistentVolumeClaimSpec(
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
+                selector=LabelSelector({"storage-type": name}),
             ),
         )
 
@@ -73,17 +79,16 @@ class PermissionSettingContainer(Container):
 class AirflowPersistentVolumeGroup:
     def __init__(self, name: str, storage: str, access_modes: List[str], folder: str):
         host_path = "/tmp/data/airflow/" + folder
-        volume_name = f"{name}-volume"
-        self.__volume = AirflowVolume(volume_name, f"{name}-pv-claim")
+        self.__volume = AirflowVolume(name, name)
         self.__persistent_volume = AirflowPersistentVolume(
-            f"{name}-pv", storage, host_path, access_modes
+            name, storage, host_path, access_modes
         )
         self.__persistent_volume_claim = AirflowPersistentVolumeClaim(
             self.__volume.persistentVolumeClaim.claimName, access_modes, storage
         )
-        self.__volume_mount = AirflowVolumeMount(volume_name, folder=folder)
+        self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
-            f"" f"{name}-permission-container", self.__volume_mount
+            f"{name}-permission-container", self.__volume_mount
         )
 
     @property

@@ -15,6 +15,23 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 class AirflowIngress(Ingress):
     def __init__(self, airflow_options: AirflowOptions):
         values = ValueOrchestrator()
+        ingress_paths = [
+            HTTPIngressPath(
+                IngressBackend(
+                    values.webserver_service_name, values.webserver_port_name,
+                ),
+                path="/airflow",
+            ),
+        ]
+        if airflow_options.in_celery_mode:
+            ingress_paths.append(
+                HTTPIngressPath(
+                    IngressBackend(
+                        values.flower_service_name, values.flower_port_name,
+                    ),
+                    path="/flower",
+                )
+            )
         super().__init__(
             AirflowMeta(
                 "airflow-ingress",
@@ -24,24 +41,7 @@ class AirflowIngress(Ingress):
                 backend=IngressBackend("default-http-backend", 80),
                 rules=[
                     IngressRule(
-                        HTTPIngressRuleValue(
-                            [
-                                HTTPIngressPath(
-                                    IngressBackend(
-                                        values.webserver_service_name,
-                                        values.webserver_port_name,
-                                    ),
-                                    path="/airflow",
-                                ),
-                                HTTPIngressPath(
-                                    IngressBackend(
-                                        values.flower_service_name,
-                                        values.flower_port_name,
-                                    ),
-                                    path="/flower",
-                                ),
-                            ]
-                        ),
+                        HTTPIngressRuleValue(ingress_paths),
                         host=airflow_options.domain_name,
                     )
                 ],
