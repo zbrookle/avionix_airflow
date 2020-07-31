@@ -4,4 +4,3 @@
 sudo chmod 646 /etc/hosts
 
 pytest
-pytest KubernetesExecutor
