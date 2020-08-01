@@ -40,3 +40,16 @@ class FlowerService(MasterNodeService):
             values,
             values.flower_port_name,
         )
+
+
+class StatsDService(MasterNodeService):
+    __statsd_port = 8125
+
+    def __init__(self, values: ValueOrchestrator):
+        super().__init__(
+            values.statsd_service_name,
+            self.__statsd_port,
+            values.statsd_node_port,
+            values,
+            values.statsd_port_name,
+        )
