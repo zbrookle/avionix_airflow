@@ -1,5 +1,4 @@
 from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
-from avionix_airflow.kubernetes.airflow.airflow_namespace import AirflowNamespace
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
@@ -35,7 +34,6 @@ class AirflowOrchestrator(Orchestrator):
         log_group = AirflowLogVolumeGroup(airflow_options)
         external_volume_group = ExternalStorageVolumeGroup(airflow_options)
         components = [
-            AirflowNamespace(airflow_options),
             AirflowDeployment(sql_options, redis_options, airflow_options),
             WebserverService(label),
             dag_group.persistent_volume,
