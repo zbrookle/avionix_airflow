@@ -44,7 +44,6 @@ def get_chart_builder(
                         "storageClassName": "standard",
                         "resources": {"requests": {"storage": "100M"}},
                     },
-                    "service": {"type": "NodePort", "nodePort": 30012},
                 },
             ),
             ChartDependency(
@@ -122,7 +121,7 @@ def get_chart_builder(
                             "org_role": "Admin",
                         },
                         "auth.basic": {"enabled": False},
-                    }
+                    },
                 },
             ),
         ]
