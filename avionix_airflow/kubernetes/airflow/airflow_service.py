@@ -1,5 +1,6 @@
 from avionix_airflow.kubernetes.base_service import AirflowService
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from typing import Optional
 
 
 class MasterNodeService(AirflowService):
@@ -10,9 +11,16 @@ class MasterNodeService(AirflowService):
         node_port: int,
         label: ValueOrchestrator,
         port_name: str = "http",
+        protocol: Optional[str] = None,
     ):
         super().__init__(
-            name, port, port, node_port, label.master_node_labels, port_name=port_name
+            name,
+            port,
+            port,
+            node_port,
+            label.master_node_labels,
+            port_name=port_name,
+            protocol=protocol,
         )
 
 
@@ -52,4 +60,5 @@ class StatsDService(MasterNodeService):
             values.statsd_node_port,
             values,
             values.statsd_port_name,
+            protocol="UDP",
         )

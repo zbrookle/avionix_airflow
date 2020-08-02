@@ -5,7 +5,7 @@ from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
     WebserverService,
-    StatsDService
+    StatsDService,
 )
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
     AirflowPodServiceAccount,
@@ -30,7 +30,7 @@ class AirflowOrchestrator(Orchestrator):
         redis_options: RedisOptions,
         values: ValueOrchestrator,
         airflow_options: AirflowOptions,
-        monitoring: bool = True
+        monitoring: bool = True,
     ):
         dag_group = AirflowDagVolumeGroup(airflow_options)
         log_group = AirflowLogVolumeGroup(airflow_options)

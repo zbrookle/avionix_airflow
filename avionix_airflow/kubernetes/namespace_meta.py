@@ -2,6 +2,7 @@ from typing import Optional
 
 from avionix import ObjectMeta
 
+
 class AirflowMeta(ObjectMeta):
     def __init__(self, name: str, labels: Optional[dict] = None, *args, **kwargs):
         if labels is None:
