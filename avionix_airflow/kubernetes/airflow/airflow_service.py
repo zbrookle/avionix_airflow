@@ -1,6 +1,7 @@
+from typing import Optional
+
 from avionix_airflow.kubernetes.base_service import AirflowService
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from typing import Optional
 
 
 class MasterNodeService(AirflowService):

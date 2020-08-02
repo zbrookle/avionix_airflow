@@ -1,5 +1,5 @@
 from avionix import ChartBuilder, ChartInfo
-from avionix.chart import ChartMaintainer, ChartDependency
+from avionix.chart import ChartDependency, ChartMaintainer
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions

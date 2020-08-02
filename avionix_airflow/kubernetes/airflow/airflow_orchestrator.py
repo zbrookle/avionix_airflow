@@ -4,8 +4,8 @@ from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
-    WebserverService,
     StatsDService,
+    WebserverService,
 )
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
     AirflowPodServiceAccount,
