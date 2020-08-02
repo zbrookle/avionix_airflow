@@ -44,6 +44,7 @@ def get_chart_builder(
                         "storageClassName": "standard",
                         "resources": {"requests": {"storage": "100M"}},
                     },
+                    "service": {"type": "NodePort", "nodePort": 30012},
                 },
             ),
             ChartDependency(
@@ -71,7 +72,12 @@ def get_chart_builder(
                                     "manage_template": True,
                                     "template_name": "airflow",
                                     "overwrite_template": False,
-                                }
+                                },
+                                "file": {
+                                    "files": ["stdout", "/tmp/metrics.out"],
+                                    "data_format": "json",
+                                    "json_timestamp_units": "1s",
+                                },
                             }
                         ],
                         "inputs": [{"statsd": {"service_address": ":8125"}}],
@@ -84,6 +90,26 @@ def get_chart_builder(
                 "https://kubernetes-charts.storage.googleapis.com/",
                 "stable",
                 values={
+                    "datasources": {
+                        "datasources.yaml": {
+                            "apiVersion": 1,
+                            "datasources": [
+                                {
+                                    "default": True,
+                                    "name": "airflow",
+                                    "type": "elasticsearch",
+                                    "access": "proxy",
+                                    "database": "[airflow-]*",
+                                    "url": "http://elasticsearch-master:9200",
+                                    "jsonData": {
+                                        "interval": "Daily",
+                                        "esVersion": 70,
+                                        "timeField": "@timestamp",
+                                    },
+                                }
+                            ],
+                        }
+                    },
                     "grafana.ini": {
                         "server": {
                             "domain": "www.avionix-airflow.com",
