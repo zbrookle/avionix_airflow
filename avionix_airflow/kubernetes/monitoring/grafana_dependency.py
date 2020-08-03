@@ -1,6 +1,7 @@
 from avionix import ChartDependency
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from pathlib import Path
 
 
 class GrafanaDependency(ChartDependency):
@@ -42,9 +43,37 @@ class GrafanaDependency(ChartDependency):
                     "auth.anonymous": {
                         "enabled": True,
                         "org_name": "Main Org.",
-                        "org_role": "Admin",
+                        "org_role": monitoring_options.grafana_role,
                     },
                     "auth.basic": {"enabled": False},
                 },
+                "dashboards": {
+                    "default": {"airflow-dashboard": {"json": self.dashboard_json}}
+                },
+                "dashboardProviders": {
+                    "dashboardproviders.yaml": {
+                        "apiVersion": 1,
+                        "providers": [
+                            {
+                                "name": "default",
+                                "orgId": 1,
+                                "folder": "",
+                                "type": "file",
+                                "disableDeletion": False,
+                                "editable": True,
+                                "options": {
+                                    "path": "/var/lib/grafana/dashboards/default"
+                                },
+                            }
+                        ],
+                    }
+                },
             },
         )
+
+    @property
+    def dashboard_json(self):
+        with open(
+            Path(__file__).parent / "dashboards" / "grafana_dashboard.json"
+        ) as dashboard_file:
+            return dashboard_file.read()
