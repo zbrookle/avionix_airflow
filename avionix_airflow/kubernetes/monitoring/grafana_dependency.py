@@ -1,8 +1,12 @@
 from avionix import ChartDependency
+from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 
 
 class GrafanaDependency(ChartDependency):
-    def __init__(self):
+    def __init__(
+        self, monitoring_options: MonitoringOptions, airflow_options: AirflowOptions
+    ):
         super().__init__(
             "grafana",
             "5.5.2",
@@ -19,7 +23,7 @@ class GrafanaDependency(ChartDependency):
                                 "type": "elasticsearch",
                                 "access": "proxy",
                                 "database": "[airflow-]*",
-                                "url": "http://elasticsearch-master:9200",
+                                "url": monitoring_options.elastic_search_uri,
                                 "jsonData": {
                                     "interval": "Daily",
                                     "esVersion": 70,
@@ -31,7 +35,7 @@ class GrafanaDependency(ChartDependency):
                 },
                 "grafana.ini": {
                     "server": {
-                        "domain": "www.avionix-airflow.com",
+                        "domain": airflow_options.domain_name,
                         "root_url": "%(protocol)s://%(domain)s/grafana",
                         "serve_from_sub_path": True,
                     },
