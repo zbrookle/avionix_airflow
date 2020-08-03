@@ -1,129 +1,40 @@
 from avionix import ChartBuilder, ChartInfo
-from avionix.chart import ChartDependency, ChartMaintainer
+from avionix.chart import ChartMaintainer
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.kubernetes.monitoring import (
+    ElasticSearchDependency,
+    GrafanaDependency,
+    MonitoringOptions,
+    TelegrafDependency,
+)
 
 
 def get_chart_builder(
     airflow_options: AirflowOptions,
     sql_options: SqlOptions = SqlOptions(),
     redis_options: RedisOptions = RedisOptions(),
-    monitoring: bool = True,
+    monitoring_options: MonitoringOptions = MonitoringOptions(),
 ):
     """
     :param sql_options:
     :param redis_options:
     :param airflow_options:
+    :param monitoring_options:
     :return: Avionix ChartBuilder object that can be used to install airflow
     """
     orchestrator = AirflowOrchestrator(
         sql_options, redis_options, ValueOrchestrator(), airflow_options
     )
     dependencies = []
-    if monitoring:
+    if monitoring_options.enabled:
         dependencies = [
-            ChartDependency(
-                "elasticsearch",
-                "7.8.1",
-                "https://helm.elastic.co",
-                "elastic",
-                values={
-                    "replicas": 1,
-                    "minimumMasterNodes": 1,
-                    "antiAffinity": "soft",
-                    "esJavaOpts": "-Xmx128m -Xms128m",
-                    "resources": {
-                        "requests": {"cpu": "100m", "memory": "512M"},
-                        "limits": {"cpu": "1000m", "memory": "512M"},
-                    },
-                    "volumeClaimTemplate": {
-                        "accessModes": ["ReadWriteOnce"],
-                        "storageClassName": "standard",
-                        "resources": {"requests": {"storage": "100M"}},
-                    },
-                },
-            ),
-            ChartDependency(
-                "telegraf",
-                "1.7.21",
-                "https://helm.influxdata.com/",
-                "influxdata",
-                values={
-                    "replicaCount": 1,
-                    "env": [{"name": "HOSTNAME", "value": "telegraf"}],
-                    "service": {
-                        "enabled": True,
-                        "type": "ClusterIP",
-                        "annotations": {},
-                    },
-                    "serviceAccount": {"create": True},
-                    "config": {
-                        "outputs": [
-                            {
-                                "elasticsearch": {
-                                    "urls": ["http://elasticsearch-master:9200"],
-                                    "timeout": "5s",
-                                    "health_check_interval": "10s",
-                                    "index_name": "airflow-%Y.%m.%d",
-                                    "manage_template": True,
-                                    "template_name": "airflow",
-                                    "overwrite_template": False,
-                                },
-                                "file": {
-                                    "files": ["stdout", "/tmp/metrics.out"],
-                                    "data_format": "json",
-                                    "json_timestamp_units": "1s",
-                                },
-                            }
-                        ],
-                        "inputs": [{"statsd": {"service_address": ":8125"}}],
-                    },
-                },
-            ),
-            ChartDependency(
-                "grafana",
-                "5.5.2",
-                "https://kubernetes-charts.storage.googleapis.com/",
-                "stable",
-                values={
-                    "datasources": {
-                        "datasources.yaml": {
-                            "apiVersion": 1,
-                            "datasources": [
-                                {
-                                    "default": True,
-                                    "name": "airflow",
-                                    "type": "elasticsearch",
-                                    "access": "proxy",
-                                    "database": "[airflow-]*",
-                                    "url": "http://elasticsearch-master:9200",
-                                    "jsonData": {
-                                        "interval": "Daily",
-                                        "esVersion": 70,
-                                        "timeField": "@timestamp",
-                                    },
-                                }
-                            ],
-                        }
-                    },
-                    "grafana.ini": {
-                        "server": {
-                            "domain": "www.avionix-airflow.com",
-                            "root_url": "%(protocol)s://%(domain)s/grafana",
-                            "serve_from_sub_path": True,
-                        },
-                        "auth.anonymous": {
-                            "enabled": True,
-                            "org_name": "Main Org.",
-                            "org_role": "Admin",
-                        },
-                        "auth.basic": {"enabled": False},
-                    },
-                },
-            ),
+            ElasticSearchDependency(),
+            GrafanaDependency(),
+            TelegrafDependency(),
         ]
     if airflow_options.in_celery_mode:
         orchestrator += RedisOrchestrator(redis_options)
