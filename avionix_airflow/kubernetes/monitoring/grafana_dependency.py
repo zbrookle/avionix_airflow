@@ -98,6 +98,7 @@ class GrafanaDependency(ChartDependency):
             "url": f"{self.__sql_options.POSTGRES_HOST}:"
             f"{self.__sql_options.POSTGRES_PORT}",
             "database": self.__sql_options.POSTGRES_DB,
+            "user": self.__sql_options.POSTGRES_USER,
             "secureJsonData": {"password": self.__sql_options.POSTGRES_PASSWORD},
             "jsonData": {"sslmode": "disable"},
         }

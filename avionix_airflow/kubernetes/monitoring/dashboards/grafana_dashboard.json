@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1596492181062,
+  "iteration": 1596499731481,
   "links": [],
   "panels": [
     {
@@ -95,7 +94,7 @@
           "metrics": [
             {
               "$$hashKey": "object:2700",
-              "field": "airflow_dag_processing_last_run_seconds_ago_${dag_name}_dag.value",
+              "field": "airflow_dag_processing_last_run_seconds_ago_${dag_id}_dag.value",
               "id": "1",
               "meta": {},
               "settings": {},
@@ -857,24 +856,41 @@
   "templating": {
     "list": [
       {
+        "allValue": null,
         "current": {
-          "selected": false,
-          "text": "test",
-          "value": "test"
+          "selected": true,
+          "text": "other_test",
+          "value": "other_test"
         },
+        "datasource": "Postgres",
+        "definition": "SELECT\n\ndag_id\nFROM dag\n",
         "hide": 0,
-        "label": "Dag Name",
-        "name": "dag_name",
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "dag_id",
         "options": [
           {
             "selected": true,
+            "text": "other_test",
+            "value": "other_test"
+          },
+          {
+            "selected": false,
             "text": "test",
             "value": "test"
           }
         ],
-        "query": "test",
+        "query": "SELECT\n\ndag_id\nFROM dag\n",
+        "refresh": 0,
+        "regex": "",
         "skipUrlSync": false,
-        "type": "textbox"
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -898,5 +914,5 @@
   "timezone": "",
   "title": "Airflow Monitoring",
   "uid": "JeeFSC4Mk",
-  "version": 5
+  "version": 1
 }
