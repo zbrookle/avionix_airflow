@@ -16,7 +16,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1596499731481,
+  "id": 1,
+  "iteration": 1596500526998,
   "links": [],
   "panels": [
     {
@@ -80,7 +81,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:2702",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -93,7 +93,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:2700",
               "field": "airflow_dag_processing_last_run_seconds_ago_${dag_id}_dag.value",
               "id": "1",
               "meta": {},
@@ -173,7 +172,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:3130",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -186,7 +184,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:3128",
               "field": "airflow_scheduler_heartbeat.value",
               "id": "1",
               "meta": {},
@@ -198,7 +195,7 @@
           "timeField": "@timestamp"
         }
       ],
-      "timeFrom": "60",
+      "timeFrom": null,
       "timeShift": null,
       "title": "Scheduler Heart Beats",
       "type": "gauge"
@@ -498,7 +495,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:3072",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -511,7 +507,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:3070",
               "field": "airflow_dagbag_size.value",
               "id": "1",
               "meta": {},
@@ -578,7 +573,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:3049",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -591,7 +585,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:3047",
               "field": "airflow_dag_processing_total_parse_time.value",
               "id": "1",
               "meta": {},
@@ -658,7 +651,6 @@
           "alias": "",
           "bucketAggs": [
             {
-              "$$hashKey": "object:2680",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -671,7 +663,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:2678",
               "field": "airflow_dag_processing_last_run_seconds_ago*",
               "id": "1",
               "inlineScript": null,
@@ -739,7 +730,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:3152",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -752,7 +742,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:3150",
               "field": "airflow_ti_successes.value",
               "id": "1",
               "meta": {},
@@ -818,7 +807,6 @@
         {
           "bucketAggs": [
             {
-              "$$hashKey": "object:3174",
               "field": "@timestamp",
               "id": "2",
               "settings": {
@@ -831,7 +819,6 @@
           ],
           "metrics": [
             {
-              "$$hashKey": "object:3172",
               "field": "airflow_ti_failures.value",
               "id": "1",
               "meta": {},
