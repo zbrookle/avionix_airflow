@@ -1,6 +1,5 @@
 import re
 
-from pandas import DataFrame
 import pytest
 
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator

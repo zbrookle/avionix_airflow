@@ -1,4 +1,3 @@
-from logging import info
 import time
 
 from avionix.errors import NamespaceBeingTerminatedError
@@ -73,9 +72,6 @@ def deployments_are_ready(deployments: dict):
         if deployments[deployment]["READY"] != "1/1":
             return False
     return True
-
-
-# Need to wait for pvcs to uninstall at end!
 
 
 @pytest.fixture(scope="session", autouse=True)

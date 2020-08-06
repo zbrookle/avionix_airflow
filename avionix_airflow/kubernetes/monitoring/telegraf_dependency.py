@@ -11,7 +11,7 @@ class TelegrafDependency(ChartDependency):
             values={
                 "replicaCount": 1,
                 "env": [{"name": "HOSTNAME", "value": "telegraf"}],
-                "service": {"enabled": True, "type": "ClusterIP", "annotations": {},},
+                "service": {"enabled": True, "type": "ClusterIP", "annotations": {}},
                 "serviceAccount": {"create": True},
                 "config": {
                     "outputs": [
