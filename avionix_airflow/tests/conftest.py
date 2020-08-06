@@ -19,6 +19,7 @@ from avionix_airflow.tests.utils import (
     parse_shell_script,
 )
 from avionix_airflow.kubernetes.monitoring import MonitoringOptions
+from logging import info
 
 
 class AvionixAirflowChartInstallationContext(ChartInstallationContext):
@@ -48,6 +49,7 @@ def airflow_options(request):
         dag_sync_schedule="* * * * *",
         default_timezone="est",
         core_executor=request.param,
+        open_node_ports=True,
     )
 
 
@@ -73,10 +75,12 @@ def deployments_are_ready(deployments: dict):
     return True
 
 
+# Need to wait for pvcs to uninstall at end!
+
+
 @pytest.fixture(scope="session", autouse=True)
 def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
-    add_host(airflow_options, force=True)
-
+    # add_host(airflow_options, force=True)
     build_airflow_image()
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options

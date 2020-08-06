@@ -20,9 +20,9 @@ def get_node_port(service: AirflowService):
 @pytest.mark.parametrize(
     "service",
     [
-        WebserverService(ValueOrchestrator()),
+        WebserverService(ValueOrchestrator(), node_ports_open=True),
         DatabaseService(SqlOptions()),
-        FlowerService(ValueOrchestrator()),
+        FlowerService(ValueOrchestrator(), node_ports_open=True),
     ],
 )
 def test_connections(service, host, airflow_options):

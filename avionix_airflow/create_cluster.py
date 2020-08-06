@@ -51,6 +51,5 @@ def get_chart_builder(
         ),
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
-        create_namespace=True,
     )
     return builder
