@@ -16,7 +16,6 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
 from avionix_airflow.tests.utils import (
     dag_copy_loc,
-    kubectl_name_dict,
     parse_shell_script,
 )
 
@@ -67,13 +66,6 @@ def sql_options():
     return SqlOptions()
 
 
-def deployments_are_ready(deployments: dict):
-    for deployment in deployments:
-        if deployments[deployment]["READY"] != "1/1":
-            return False
-    return True
-
-
 @pytest.fixture(scope="session", autouse=True)
 def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
     add_host(airflow_options, force=True)
@@ -88,10 +80,6 @@ def build_chart(airflow_options, sql_options, redis_options, monitoring_options)
             status_field="READY",
             uninstall_func=lambda: teardown(builder),
         ):
-            while True:
-                deployments = kubectl_name_dict("deployments")
-                if deployments_are_ready(deployments):
-                    break
             yield
     except NamespaceBeingTerminatedError:
         builder.uninstall_chart()
