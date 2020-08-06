@@ -1,9 +1,10 @@
+import re
+
+from pandas import DataFrame
 import pytest
 
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.tests.utils import kubectl_name_dict, skip_if_not_celery
-from pandas import DataFrame
-import re
 
 
 @pytest.fixture(
@@ -61,8 +62,11 @@ def test_deployments_present(deployment, label, airflow_options):
 
 
 def filter_out_pvc(volume_info: dict):
-    return {volume: volume_info[volume] for volume in volume_info if not re.match(
-        "pvc-.*", volume)}
+    return {
+        volume: volume_info[volume]
+        for volume in volume_info
+        if not re.match("pvc-.*", volume)
+    }
 
 
 def test_volumes_present(label):

@@ -1,8 +1,10 @@
-from avionix import ChartDependency
-from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
-from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
-from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from pathlib import Path
+
+from avionix import ChartDependency
+
+from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
+from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
 
 class GrafanaDependency(ChartDependency):

@@ -1,3 +1,4 @@
+from logging import info
 import time
 
 from avionix.errors import NamespaceBeingTerminatedError
@@ -8,6 +9,7 @@ from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
 from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions
+from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
 from avionix_airflow.kubernetes.utils import get_minikube_ip
@@ -18,8 +20,6 @@ from avionix_airflow.tests.utils import (
     kubectl_name_dict,
     parse_shell_script,
 )
-from avionix_airflow.kubernetes.monitoring import MonitoringOptions
-from logging import info
 
 
 class AvionixAirflowChartInstallationContext(ChartInstallationContext):
@@ -80,7 +80,7 @@ def deployments_are_ready(deployments: dict):
 
 @pytest.fixture(scope="session", autouse=True)
 def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
-    # add_host(airflow_options, force=True)
+    add_host(airflow_options, force=True)
     build_airflow_image()
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options
