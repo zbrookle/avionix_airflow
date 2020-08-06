@@ -18,6 +18,7 @@ from avionix_airflow.tests.utils import (
     kubectl_name_dict,
     parse_shell_script,
 )
+from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 
 
 class AvionixAirflowChartInstallationContext(ChartInstallationContext):
@@ -51,6 +52,11 @@ def airflow_options(request):
 
 
 @pytest.fixture(scope="session")
+def monitoring_options():
+    return MonitoringOptions(grafana_role="Admin")
+
+
+@pytest.fixture(scope="session")
 def redis_options():
     return RedisOptions()
 
@@ -68,11 +74,13 @@ def deployments_are_ready(deployments: dict):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def build_chart(airflow_options, sql_options, redis_options):
+def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
     add_host(airflow_options, force=True)
 
     build_airflow_image()
-    builder = get_chart_builder(airflow_options, sql_options, redis_options)
+    builder = get_chart_builder(
+        airflow_options, sql_options, redis_options, monitoring_options
+    )
     try:
         with AvionixAirflowChartInstallationContext(
             builder,

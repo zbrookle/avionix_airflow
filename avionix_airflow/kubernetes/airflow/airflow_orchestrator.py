@@ -37,7 +37,7 @@ class AirflowOrchestrator(Orchestrator):
         external_volume_group = ExternalStorageVolumeGroup(airflow_options)
         components = [
             AirflowDeployment(sql_options, redis_options, airflow_options),
-            WebserverService(values),
+            WebserverService(values, airflow_options.open_node_ports),
             dag_group.persistent_volume,
             log_group.persistent_volume,
             dag_group.persistent_volume_claim,
@@ -49,9 +49,9 @@ class AirflowOrchestrator(Orchestrator):
             AirflowSecret(sql_options, airflow_options, redis_options),
         ]
         if monitoring:
-            components.append(StatsDService(values))
+            components.append(StatsDService(values, airflow_options.open_node_ports))
         if airflow_options.in_celery_mode:
-            components.append(FlowerService(values))
+            components.append(FlowerService(values, airflow_options.open_node_ports))
         if airflow_options.in_kube_mode:
             airflow_pod_service_account = AirflowPodServiceAccount()
             role_group = AirflowPodRoleGroup(airflow_pod_service_account)
