@@ -40,17 +40,19 @@ jobs:
     - name: Looking for unwanted patterns
       run: |
         chmod +x ci/code_checks.sh
+        conda activate avionix_airflow
         ci/code_checks.sh patterns
       if: always()
 
     - name: Linting
       run: |
+        conda activate avionix_airflow
         ci/code_checks.sh lint
       if: always()
 
     - name: Dependencies consistency
       run: |
-        source activate avionix_airflow
+        conda activate avionix_airflow
         ci/code_checks.sh dependencies
       if: always()
 
