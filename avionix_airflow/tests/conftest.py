@@ -1,6 +1,3 @@
-import time
-
-from avionix.errors import NamespaceBeingTerminatedError
 from avionix.testing.installation_context import ChartInstallationContext
 import pytest
 
