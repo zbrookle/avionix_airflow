@@ -13,6 +13,8 @@ def kubectl_get_airflow(resource: str):
 def kubectl_name_dict(resource: str):
     info = kubectl_get_airflow(resource)
     info_dict = {}
+    if "NAME" not in info.columns:
+        return info_dict
     for name in info["NAME"]:
         filtered = info[info["NAME"] == name].reset_index()
         columns = [
