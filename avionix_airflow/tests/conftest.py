@@ -79,6 +79,7 @@ def build_chart(airflow_options, sql_options, redis_options, monitoring_options)
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options
     )
+    print(kubectl_name_dict("persistentvolumeclaims"))
     with AvionixAirflowChartInstallationContext(
         builder,
         expected_status={"1/1", "3/3"},
