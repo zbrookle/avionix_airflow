@@ -31,16 +31,10 @@ jobs:
         environment-file: environment.yml
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
-    - name: Setup environment
-      run: |
-        chmod +x ci/setup_env.sh
-        ci/setup_env.sh
-      if: always()
-
     - name: Looking for unwanted patterns
+      shell: bash -l {0}
       run: |
         chmod +x ci/code_checks.sh
-        conda activate avionix_airflow
         ci/code_checks.sh patterns
       if: always()
 
@@ -78,6 +72,12 @@ jobs:
       run: |
         source activate avionix_airflow
         ci/code_checks.sh typing
+      if: always()
+
+    - name: Setup environment
+      run: |
+        chmod +x ci/setup_env.sh
+        ci/setup_env.sh
       if: always()
 
     - name: Unit tests
