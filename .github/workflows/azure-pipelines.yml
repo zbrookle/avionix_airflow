@@ -45,7 +45,6 @@ jobs:
 
     - name: Linting
       run: |
-        source activate avionix_airflow
         ci/code_checks.sh lint
       if: always()
 
