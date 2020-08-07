@@ -16,6 +16,7 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
 from avionix_airflow.tests.utils import (
     dag_copy_loc,
+    kubectl_name_dict,
     parse_shell_script,
 )
 
@@ -66,6 +67,14 @@ def sql_options():
     return SqlOptions()
 
 
+def deployments_are_ready():
+    deployments = kubectl_name_dict("deployment")
+    for deployment in deployments:
+        if deployments[deployment]["READY"] != "1/1":
+            return False
+    return True
+
+
 @pytest.fixture(scope="session", autouse=True)
 def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
     add_host(airflow_options, force=True)
@@ -73,19 +82,13 @@ def build_chart(airflow_options, sql_options, redis_options, monitoring_options)
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options
     )
-    try:
-        with AvionixAirflowChartInstallationContext(
-            builder,
-            expected_status={"1/1", "3/3"},
-            status_field="READY",
-            uninstall_func=lambda: teardown(builder),
-        ):
-            yield
-    except NamespaceBeingTerminatedError:
-        builder.uninstall_chart()
-        time.sleep(7)
-        with ChartInstallationContext(builder):
-            yield
-    else:
-        if builder.is_installed:
-            teardown(builder)
+    with AvionixAirflowChartInstallationContext(
+        builder,
+        expected_status={"1/1", "3/3"},
+        status_field="READY",
+        uninstall_func=lambda: teardown(builder),
+    ):
+        while True:
+            if deployments_are_ready():
+                break
+        yield
