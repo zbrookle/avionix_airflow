@@ -45,29 +45,6 @@ conda update -n base conda
 echo "conda info -a"
 conda info -a
 
-echo
-echo "set the compiler cache to work"
-if [ -z "$NOCACHE" ] && [ "${TRAVIS_OS_NAME}" == "linux" ]; then
-    echo "Using ccache"
-    export PATH=/usr/lib/ccache:/usr/lib64/ccache:$PATH
-    GCC=$(which gcc)
-    echo "gcc: $GCC"
-    CCACHE=$(which ccache)
-    echo "ccache: $CCACHE"
-    export CC='ccache gcc'
-elif [ -z "$NOCACHE" ] && [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-    echo "Install ccache"
-    brew install ccache > /dev/null 2>&1
-    echo "Using ccache"
-    export PATH=/usr/local/opt/ccache/libexec:$PATH
-    gcc=$(which gcc)
-    echo "gcc: $gcc"
-    CCACHE=$(which ccache)
-    echo "ccache: $CCACHE"
-else
-    echo "Not using ccache"
-fi
-
 echo "source deactivate"
 source deactivate
 
@@ -92,11 +69,6 @@ echo "activate avionix_airflow"
 conda activate avionix_airflow
 pip install -r ci/test-requirements.txt
 pip install -r requirements.txt
-
-echo
-echo "remove qt"
-echo "causes problems with the clipboard, we use xsel for that"
-conda remove qt -y --force || true
 
 echo
 echo "conda list"
@@ -127,15 +99,5 @@ chmod 700 get_helm.sh
 
 minikube start
 minikube addons enable ingress
-
-# Install DB for Linux
-
-if [[ -n ${SQL:0} ]]; then
-  echo "installing dbs"
-  mysql -e 'create database pandas_nosetest;'
-  psql -c 'create database pandas_nosetest;' -U postgres
-else
-   echo "not using dbs on non-linux Travis builds or Azure Pipelines"
-fi
 
 echo "done"
