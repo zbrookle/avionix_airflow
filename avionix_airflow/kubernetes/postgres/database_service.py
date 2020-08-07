@@ -12,4 +12,5 @@ class DatabaseService(AirflowService):
             target_port=sql_options.POSTGRES_PORT,
             node_port=30001,
             selector_labels=label.database_labels,
+            node_ports_open=True,
         )

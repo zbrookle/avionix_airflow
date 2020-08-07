@@ -15,6 +15,8 @@ class AirflowService(Service):
         selector_labels: dict,
         external_name: Optional[str] = None,
         port_name: Optional[str] = None,
+        protocol: Optional[str] = None,
+        node_ports_open: bool = False,
     ):
         super().__init__(
             AirflowMeta(name),
@@ -24,12 +26,13 @@ class AirflowService(Service):
                         name=port_name,
                         port=port,
                         target_port=target_port,
-                        node_port=node_port,
+                        node_port=node_port if node_ports_open else None,
+                        protocol=protocol,
                     )
                 ],
                 selector=selector_labels,
                 external_name=external_name,
-                type="NodePort",
-                external_traffic_policy="Local",
+                type="NodePort" if node_ports_open else "ClusterIP",
+                external_traffic_policy="Local" if node_ports_open else None,
             ),
         )

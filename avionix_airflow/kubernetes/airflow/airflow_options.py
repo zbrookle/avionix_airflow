@@ -33,6 +33,7 @@ class AirflowOptions:
         dags_paused_at_creation: bool = True,
         worker_image: str = "airflow-image",
         worker_image_tag: str = "latest",
+        open_node_ports: bool = False,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -52,6 +53,7 @@ class AirflowOptions:
         self.dags_paused_at_creation = dags_paused_at_creation
         self.worker_image = worker_image
         self.worker_image_tag = worker_image_tag
+        self.open_node_ports = open_node_ports
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

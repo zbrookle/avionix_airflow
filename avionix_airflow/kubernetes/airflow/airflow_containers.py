@@ -138,7 +138,13 @@ class Scheduler(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
     ):
-        super().__init__("scheduler", sql_options, redis_options, airflow_options)
+        super().__init__(
+            "scheduler",
+            sql_options,
+            redis_options,
+            airflow_options,
+            [ContainerPort(8125, host_port=8125)],
+        )
 
 
 class FlowerUI(AirflowContainer):

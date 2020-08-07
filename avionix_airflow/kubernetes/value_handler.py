@@ -2,6 +2,9 @@ class ValueOrchestrator:
     def __init__(self, dashboard_service_account: str = "dashboard"):
         self.dashboard_service_account = dashboard_service_account
         self.secret_name = "airflow-secrets"
+        self.statsd_service_name = "statsd"
+        self.statsd_node_port = 30004
+        self.statsd_port_name = "statsd"
 
     @property
     def master_node_labels(self):

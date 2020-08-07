@@ -1,15 +1,14 @@
 from logging import info
 
 from avionix import ChartBuilder
-from avionix.testing import kubectl_get
+
+from avionix_airflow.tests.utils import kubectl_name_dict
 
 
 def teardown(builder: ChartBuilder):
     builder.uninstall_chart()
-    info("Terminating...")
     while True:
-        namespaces_info = kubectl_get("namespace")
-        names = namespaces_info["NAME"]
-        if "airflow" not in names.values:
+        if not kubectl_name_dict("configmap"):
             break
+    info("Terminating...")
     info("airflow uninstalled")

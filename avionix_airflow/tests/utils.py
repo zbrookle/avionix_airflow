@@ -13,6 +13,8 @@ def kubectl_get_airflow(resource: str):
 def kubectl_name_dict(resource: str):
     info = kubectl_get_airflow(resource)
     info_dict = {}
+    if "NAME" not in info.columns:
+        return info_dict
     for name in info["NAME"]:
         filtered = info[info["NAME"] == name].reset_index()
         columns = [
@@ -34,11 +36,3 @@ def skip_if_not_celery(airflow_options: AirflowOptions):
 
 
 dag_copy_loc = Path(__file__).parent / "sync_dags.sh"
-
-TEST_AIRFLOW_OPTIONS = AirflowOptions(
-    dag_sync_image="alpine/git",
-    dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
-    dag_sync_schedule="* * * * *",
-    default_timezone="est",
-    core_executor="KubernetesExecutor",
-)

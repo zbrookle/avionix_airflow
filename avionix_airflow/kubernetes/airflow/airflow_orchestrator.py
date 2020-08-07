@@ -1,10 +1,10 @@
 from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
-from avionix_airflow.kubernetes.airflow.airflow_namespace import AirflowNamespace
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
+    StatsDService,
     WebserverService,
 )
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
@@ -28,16 +28,16 @@ class AirflowOrchestrator(Orchestrator):
         self,
         sql_options: SqlOptions,
         redis_options: RedisOptions,
-        label: ValueOrchestrator,
+        values: ValueOrchestrator,
         airflow_options: AirflowOptions,
+        monitoring: bool = True,
     ):
         dag_group = AirflowDagVolumeGroup(airflow_options)
         log_group = AirflowLogVolumeGroup(airflow_options)
         external_volume_group = ExternalStorageVolumeGroup(airflow_options)
         components = [
-            AirflowNamespace(airflow_options),
             AirflowDeployment(sql_options, redis_options, airflow_options),
-            WebserverService(label),
+            WebserverService(values, airflow_options.open_node_ports),
             dag_group.persistent_volume,
             log_group.persistent_volume,
             dag_group.persistent_volume_claim,
@@ -48,8 +48,10 @@ class AirflowOrchestrator(Orchestrator):
             AirflowIngress(airflow_options),
             AirflowSecret(sql_options, airflow_options, redis_options),
         ]
+        if monitoring:
+            components.append(StatsDService(values, airflow_options.open_node_ports))
         if airflow_options.in_celery_mode:
-            components.append(FlowerService(label))
+            components.append(FlowerService(values, airflow_options.open_node_ports))
         if airflow_options.in_kube_mode:
             airflow_pod_service_account = AirflowPodServiceAccount()
             role_group = AirflowPodRoleGroup(airflow_pod_service_account)

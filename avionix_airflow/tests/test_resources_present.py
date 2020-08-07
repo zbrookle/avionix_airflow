@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
@@ -58,8 +60,16 @@ def test_deployments_present(deployment, label, airflow_options):
     assert deployment_info[deployment]["READY"] == "1/1"
 
 
+def filter_out_pvc(volume_info: dict):
+    return {
+        volume: volume_info[volume]
+        for volume in volume_info
+        if not re.match("pvc-.*", volume)
+    }
+
+
 def test_volumes_present(label):
-    volume_info = kubectl_name_dict("persistentvolume")
+    volume_info = filter_out_pvc(kubectl_name_dict("persistentvolume"))
     for volume in volume_info:
         volume_specific_info = volume_info[volume]
         assert volume_specific_info["CAPACITY"] == "50Mi"

@@ -12,4 +12,5 @@ class RedisService(AirflowService):
             redis_options.port,
             30002,
             selector_labels=labels.redis_labels,
+            node_ports_open=True,
         )

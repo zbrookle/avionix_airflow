@@ -1,6 +1,3 @@
-import time
-
-from avionix.errors import NamespaceBeingTerminatedError
 from avionix.testing.installation_context import ChartInstallationContext
 import pytest
 
@@ -8,6 +5,7 @@ from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
 from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions
+from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
 from avionix_airflow.kubernetes.utils import get_minikube_ip
@@ -47,7 +45,13 @@ def airflow_options(request):
         dag_sync_schedule="* * * * *",
         default_timezone="est",
         core_executor=request.param,
+        open_node_ports=True,
     )
+
+
+@pytest.fixture(scope="session")
+def monitoring_options():
+    return MonitoringOptions(grafana_role="Admin")
 
 
 @pytest.fixture(scope="session")
@@ -60,7 +64,8 @@ def sql_options():
     return SqlOptions()
 
 
-def deployments_are_ready(deployments: dict):
+def deployments_are_ready():
+    deployments = kubectl_name_dict("deployment")
     for deployment in deployments:
         if deployments[deployment]["READY"] != "1/1":
             return False
@@ -68,28 +73,19 @@ def deployments_are_ready(deployments: dict):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def build_chart(airflow_options, sql_options, redis_options):
+def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
     add_host(airflow_options, force=True)
-
     build_airflow_image()
-    builder = get_chart_builder(airflow_options, sql_options, redis_options)
-    try:
-        with AvionixAirflowChartInstallationContext(
-            builder,
-            expected_status={"1/1", "3/3"},
-            status_field="READY",
-            uninstall_func=lambda: teardown(builder),
-        ):
-            while True:
-                deployments = kubectl_name_dict("deployments")
-                if deployments_are_ready(deployments):
-                    break
-            yield
-    except NamespaceBeingTerminatedError:
-        builder.uninstall_chart()
-        time.sleep(7)
-        with ChartInstallationContext(builder):
-            yield
-    else:
-        if builder.is_installed:
-            teardown(builder)
+    builder = get_chart_builder(
+        airflow_options, sql_options, redis_options, monitoring_options
+    )
+    with AvionixAirflowChartInstallationContext(
+        builder,
+        expected_status={"1/1", "3/3"},
+        status_field="READY",
+        uninstall_func=lambda: teardown(builder),
+    ):
+        while True:
+            if deployments_are_ready():
+                break
+        yield

@@ -22,6 +22,9 @@ class AirflowIngress(Ingress):
                 ),
                 path="/airflow",
             ),
+            HTTPIngressPath(
+                IngressBackend("airflow-grafana", "service"), path="/grafana"
+            ),
         ]
         if airflow_options.in_celery_mode:
             ingress_paths.append(
