@@ -1,0 +1,17 @@
+name: avionix_airflow
+dependencies:
+  # Test requirements
+  - black
+  - flake8
+  - mypy
+  - isort
+  - pytest
+  - pandas
+  - requests
+  - pytest
+  - pytest-rerunfailures
+  - cryptography
+  - pip:
+    # Main requirements
+    - git+https://github.com/zbrookle/avionix.git@add_chart_dependency_resolution
+    - python-hosts
