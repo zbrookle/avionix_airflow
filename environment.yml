@@ -1,4 +1,4 @@
-name: test
+name: avionix_airflow
 dependencies:
   - pip
 
