@@ -17,7 +17,7 @@ class ElasticSearchResource:
         access: str = "proxy",
         json_data: Optional[Dict[str, str]] = None,
         default: bool = False,
-        logging_on: bool = False
+        logging_on: bool = False,
     ):
         if json_data is None:
             json_data = {
@@ -60,7 +60,7 @@ class GrafanaDependency(ChartDependency):
                         "datasources": [
                             self.__metrics_datasource,
                             self.__airflow_database_datasource,
-                            self.__logs_datasource
+                            self.__logs_datasource,
                         ],
                     }
                 },
@@ -123,7 +123,7 @@ class GrafanaDependency(ChartDependency):
             "filebeat-logs",
             "[filebeat-7.8.1-]*",
             self.__monitoring_options.elastic_search_uri,
-            logging_on=True
+            logging_on=True,
         ).dict
 
     @property

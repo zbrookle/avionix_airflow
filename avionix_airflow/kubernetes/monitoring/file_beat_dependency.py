@@ -26,7 +26,7 @@ class FileBeatDependency(ChartDependency):
                                     }
                                 }
                             ],
-                        }
+                        },
                     ],
                     "output.elasticsearch": {
                         "host": "${NODE_NAME}",
