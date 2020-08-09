@@ -5,6 +5,38 @@ from avionix import ChartDependency
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
+from typing import Optional, Dict
+
+
+class ElasticSearchResource:
+    def __init__(
+        self,
+        name: str,
+        database: str,
+        url: str,
+        access: str = "proxy",
+        json_data: Optional[Dict[str, str]] = None,
+        default: bool = False,
+        logging_on: bool = False
+    ):
+        if json_data is None:
+            json_data = {
+                "interval": "Daily",
+                "esVersion": 70,
+                "timeField": "@timestamp",
+            }
+        if logging_on:
+            json_data["logMessageField"] = "message"
+            json_data["logLevelField"] = "fields.level"
+        self.dict = {
+            "default": default,
+            "name": name,
+            "type": "elasticsearch",
+            "access": access,
+            "database": database,
+            "url": url,
+            "jsonData": json_data,
+        }
 
 
 class GrafanaDependency(ChartDependency):
@@ -26,8 +58,9 @@ class GrafanaDependency(ChartDependency):
                     "datasources.yaml": {
                         "apiVersion": 1,
                         "datasources": [
-                            self.__elasticsearch_datasource,
+                            self.__metrics_datasource,
                             self.__airflow_database_datasource,
+                            self.__logs_datasource
                         ],
                     }
                 },
@@ -76,20 +109,22 @@ class GrafanaDependency(ChartDependency):
             return dashboard_file.read()
 
     @property
-    def __elasticsearch_datasource(self):
-        return {
-            "default": True,
-            "name": "airflow",
-            "type": "elasticsearch",
-            "access": "proxy",
-            "database": "[airflow-]*",
-            "url": self.__monitoring_options.elastic_search_uri,
-            "jsonData": {
-                "interval": "Daily",
-                "esVersion": 70,
-                "timeField": "@timestamp",
-            },
-        }
+    def __metrics_datasource(self):
+        return ElasticSearchResource(
+            "airflow",
+            "[airflow-]*",
+            self.__monitoring_options.elastic_search_uri,
+            default=True,
+        ).dict
+
+    @property
+    def __logs_datasource(self):
+        return ElasticSearchResource(
+            "filebeat-logs",
+            "[filebeat-7.8.1-]*",
+            self.__monitoring_options.elastic_search_uri,
+            logging_on=True
+        ).dict
 
     @property
     def __airflow_database_datasource(self):

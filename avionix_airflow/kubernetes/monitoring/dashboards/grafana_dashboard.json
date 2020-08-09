@@ -16,17 +16,115 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1596500526998,
+  "id": 2,
+  "iteration": 1597006042499,
   "links": [],
   "panels": [
     {
+      "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
+      },
+      "id": 38,
+      "panels": [],
+      "title": "Overall Cluster",
+      "type": "row"
+    },
+    {
+      "datasource": "filebeat-logs",
+      "description": "All logs for the entire cluster",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "kubernetes.namespace"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 340
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 17,
+        "x": 0,
+        "y": 1
+      },
+      "id": 34,
+      "options": {
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "7.1.1",
+      "targets": [
+        {
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0,
+                "trimEdges": 0
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "metrics": [
+            {
+              "field": "select field",
+              "id": "1",
+              "meta": {},
+              "settings": {},
+              "type": "logs"
+            }
+          ],
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Cluster Logs",
+      "type": "logs"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
       },
       "id": 30,
       "title": "Dag Specific Metrics",
@@ -56,10 +154,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 5,
         "x": 0,
-        "y": 1
+        "y": 10
       },
       "id": 22,
       "options": {
@@ -111,17 +209,72 @@
       "type": "stat"
     },
     {
+      "datasource": "filebeat-logs",
+      "description": "Logs specific to the selected dag",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 5,
+        "y": 10
+      },
+      "id": 36,
+      "options": {
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "7.1.1",
+      "targets": [
+        {
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0,
+                "trimEdges": 0
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "metrics": [
+            {
+              "field": "select field",
+              "id": "1",
+              "meta": {},
+              "settings": {},
+              "type": "logs"
+            }
+          ],
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Dag Logs",
+      "type": "logs"
+    },
+    {
       "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 18
       },
       "id": 28,
       "panels": [],
-      "title": "Scheduler Metrics",
+      "title": "Scheduler",
       "type": "row"
     },
     {
@@ -151,7 +304,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 7
+        "y": 19
       },
       "id": 2,
       "interval": "60",
@@ -227,7 +380,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 7
+        "y": 19
       },
       "id": 12,
       "options": {
@@ -304,7 +457,7 @@
         "h": 5,
         "w": 4,
         "x": 9,
-        "y": 7
+        "y": 19
       },
       "id": 18,
       "options": {
@@ -382,7 +535,7 @@
         "h": 5,
         "w": 4,
         "x": 13,
-        "y": 7
+        "y": 19
       },
       "id": 24,
       "options": {
@@ -433,13 +586,69 @@
       "type": "stat"
     },
     {
+      "datasource": "filebeat-logs",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 17,
+        "x": 0,
+        "y": 24
+      },
+      "id": 32,
+      "options": {
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "7.1.1",
+      "repeat": null,
+      "targets": [
+        {
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0,
+                "trimEdges": 0
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "metrics": [
+            {
+              "field": "select field",
+              "id": "1",
+              "meta": {},
+              "settings": {},
+              "type": "logs"
+            }
+          ],
+          "query": "kubernetes.container.name:scheduler",
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Scheduler Logs",
+      "type": "logs"
+    },
+    {
       "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 31
       },
       "id": 8,
       "panels": [],
@@ -473,7 +682,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 13
+        "y": 32
       },
       "id": 6,
       "options": {
@@ -551,7 +760,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 13
+        "y": 32
       },
       "id": 10,
       "options": {
@@ -628,7 +837,7 @@
         "h": 5,
         "w": 4,
         "x": 9,
-        "y": 13
+        "y": 32
       },
       "id": 26,
       "options": {
@@ -708,7 +917,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 18
+        "y": 37
       },
       "id": 14,
       "options": {
@@ -785,7 +994,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 18
+        "y": 37
       },
       "id": 16,
       "options": {
@@ -836,7 +1045,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "10s",
+  "refresh": false,
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -900,6 +1109,6 @@
   },
   "timezone": "",
   "title": "Airflow Monitoring",
-  "uid": "JeeFSC4Mk",
-  "version": 1
+  "uid": "WhKj4pSGk",
+  "version": 4
 }
