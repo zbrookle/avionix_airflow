@@ -13,6 +13,7 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
 from avionix_airflow.tests.utils import (
     dag_copy_loc,
+    filter_out_pvc,
     kubectl_name_dict,
     parse_shell_script,
 )
@@ -79,7 +80,9 @@ def build_chart(airflow_options, sql_options, redis_options, monitoring_options)
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options
     )
-    print(kubectl_name_dict("persistentvolumeclaims"))
+    while True:
+        if not filter_out_pvc(kubectl_name_dict("persistentvolume")):
+            break
     with AvionixAirflowChartInstallationContext(
         builder,
         expected_status={"1/1", "3/3"},

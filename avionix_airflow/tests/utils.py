@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from avionix.testing import kubectl_get
 import pytest
@@ -22,6 +23,14 @@ def kubectl_name_dict(resource: str):
         ]
         info_dict[name] = {column: filtered[column][0] for column in columns}
     return info_dict
+
+
+def filter_out_pvc(volume_info: dict):
+    return {
+        volume: volume_info[volume]
+        for volume in volume_info
+        if not re.match("pvc-.*", volume)
+    }
 
 
 def parse_shell_script(script_loc: str):

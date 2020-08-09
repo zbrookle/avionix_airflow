@@ -1,9 +1,11 @@
-import re
-
 import pytest
 
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.tests.utils import kubectl_name_dict, skip_if_not_celery
+from avionix_airflow.tests.utils import (
+    filter_out_pvc,
+    kubectl_name_dict,
+    skip_if_not_celery,
+)
 
 
 @pytest.fixture(
@@ -58,14 +60,6 @@ def test_deployments_present(deployment, label, airflow_options):
     deployment_info = kubectl_name_dict("deployment")
     assert deployment in deployment_info
     assert deployment_info[deployment]["READY"] == "1/1"
-
-
-def filter_out_pvc(volume_info: dict):
-    return {
-        volume: volume_info[volume]
-        for volume in volume_info
-        if not re.match("pvc-.*", volume)
-    }
 
 
 def test_volumes_present(label):
