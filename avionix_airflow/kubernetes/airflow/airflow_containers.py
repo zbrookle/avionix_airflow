@@ -114,7 +114,7 @@ class AirflowContainer(Container):
         return [
             ElasticSearchEnvVar("HOST", self._monitoring_options.elastic_search_uri),
             ElasticSearchEnvVar("WRITE_STDOUT", "True"),
-            ElasticSearchEnvVar("JSON_FORMAT", "True"),
+            ElasticSearchEnvVar("JSON_FORMAT", "False"),
         ]
 
     @property
