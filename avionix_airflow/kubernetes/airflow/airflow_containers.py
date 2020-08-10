@@ -42,6 +42,11 @@ class ElasticSearchEnvVar(AirflowEnvVar):
         super().__init__("ELASTICSEARCH__" + name, value)
 
 
+class KubernetesWorkerPodEnvVar(AirflowEnvVar):
+    def __init__(self, name: str, value):
+        super().__init__("KUBERNETES_ENVIRONMENT_VARIABLES__" + name, value)
+
+
 class AirflowContainer(Container):
     def __init__(
         self,
@@ -135,7 +140,13 @@ class AirflowContainer(Container):
             KubernetesEnvVar(
                 "WORKER_CONTAINER_TAG", self._airflow_options.worker_image_tag,
             ),
-        ]
+        ] + self._worker_pod_settings
+
+    @property
+    def _worker_pod_settings(self):
+        airflow_env = [var for var in self._airflow_env if "EXECUTOR" not in var.name]
+        worker_env: List[AirflowEnvVar] = airflow_env + self._elastic_search_env
+        return [KubernetesWorkerPodEnvVar(var.name, var.value) for var in worker_env]
 
 
 class WebserverUI(AirflowContainer):
