@@ -16,8 +16,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1597006042499,
+  "id": 1,
+  "iteration": 1597088471892,
   "links": [],
   "panels": [
     {
@@ -227,7 +227,7 @@
       "options": {
         "showLabels": false,
         "showTime": false,
-        "sortOrder": "Descending",
+        "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
       "pluginVersion": "7.1.1",
@@ -254,6 +254,7 @@
               "type": "logs"
             }
           ],
+          "query": "kubernetes.labels.dag_id:$dag_id",
           "refId": "A",
           "timeField": "@timestamp"
         }
@@ -587,6 +588,7 @@
     },
     {
       "datasource": "filebeat-logs",
+      "description": "Logs from the airflow scheduler",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -1055,8 +1057,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "other_test",
-          "value": "other_test"
+          "text": "sleepy_test",
+          "value": "sleepy_test"
         },
         "datasource": "Postgres",
         "definition": "SELECT\n\ndag_id\nFROM dag\n",
@@ -1065,20 +1067,9 @@
         "label": null,
         "multi": false,
         "name": "dag_id",
-        "options": [
-          {
-            "selected": true,
-            "text": "other_test",
-            "value": "other_test"
-          },
-          {
-            "selected": false,
-            "text": "test",
-            "value": "test"
-          }
-        ],
+        "options": [],
         "query": "SELECT\n\ndag_id\nFROM dag\n",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1109,6 +1100,6 @@
   },
   "timezone": "",
   "title": "Airflow Monitoring",
-  "uid": "WhKj4pSGk",
-  "version": 4
+  "uid": "OF7_YTIMk",
+  "version": 1
 }
