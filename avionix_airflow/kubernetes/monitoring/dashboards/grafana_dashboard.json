@@ -17,114 +17,16 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1597088471892,
+  "iteration": 1597089164090,
   "links": [],
   "panels": [
     {
-      "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
-      },
-      "id": 38,
-      "panels": [],
-      "title": "Overall Cluster",
-      "type": "row"
-    },
-    {
-      "datasource": "filebeat-logs",
-      "description": "All logs for the entire cluster",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": null
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "kubernetes.namespace"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 340
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 17,
-        "x": 0,
-        "y": 1
-      },
-      "id": 34,
-      "options": {
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
-      },
-      "pluginVersion": "7.1.1",
-      "targets": [
-        {
-          "bucketAggs": [
-            {
-              "field": "@timestamp",
-              "id": "2",
-              "settings": {
-                "interval": "auto",
-                "min_doc_count": 0,
-                "trimEdges": 0
-              },
-              "type": "date_histogram"
-            }
-          ],
-          "metrics": [
-            {
-              "field": "select field",
-              "id": "1",
-              "meta": {},
-              "settings": {},
-              "type": "logs"
-            }
-          ],
-          "refId": "A",
-          "timeField": "@timestamp"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Cluster Logs",
-      "type": "logs"
-    },
-    {
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
       },
       "id": 30,
       "title": "Dag Specific Metrics",
@@ -157,7 +59,7 @@
         "h": 8,
         "w": 5,
         "x": 0,
-        "y": 10
+        "y": 1
       },
       "id": 22,
       "options": {
@@ -221,7 +123,7 @@
         "h": 8,
         "w": 12,
         "x": 5,
-        "y": 10
+        "y": 1
       },
       "id": 36,
       "options": {
@@ -271,7 +173,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 9
       },
       "id": 28,
       "panels": [],
@@ -305,7 +207,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 19
+        "y": 10
       },
       "id": 2,
       "interval": "60",
@@ -381,7 +283,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 19
+        "y": 10
       },
       "id": 12,
       "options": {
@@ -458,7 +360,7 @@
         "h": 5,
         "w": 4,
         "x": 9,
-        "y": 19
+        "y": 10
       },
       "id": 18,
       "options": {
@@ -536,7 +438,7 @@
         "h": 5,
         "w": 4,
         "x": 13,
-        "y": 19
+        "y": 10
       },
       "id": 24,
       "options": {
@@ -599,7 +501,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 24
+        "y": 15
       },
       "id": 32,
       "options": {
@@ -650,7 +552,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 22
       },
       "id": 8,
       "panels": [],
@@ -684,7 +586,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 32
+        "y": 23
       },
       "id": 6,
       "options": {
@@ -762,7 +664,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 32
+        "y": 23
       },
       "id": 10,
       "options": {
@@ -839,7 +741,7 @@
         "h": 5,
         "w": 4,
         "x": 9,
-        "y": 32
+        "y": 23
       },
       "id": 26,
       "options": {
@@ -919,7 +821,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 37
+        "y": 28
       },
       "id": 14,
       "options": {
@@ -996,7 +898,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 37
+        "y": 28
       },
       "id": 16,
       "options": {
@@ -1056,7 +958,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "sleepy_test",
           "value": "sleepy_test"
         },
