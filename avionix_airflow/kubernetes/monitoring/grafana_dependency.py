@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from avionix import ChartDependency
 
@@ -15,7 +15,7 @@ class ElasticSearchResource:
         database: str,
         url: str,
         access: str = "proxy",
-        json_data: Optional[Dict[str, str]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
         default: bool = False,
         logging_on: bool = False,
     ):
