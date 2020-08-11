@@ -1,2 +1,3 @@
 include versioneer.py
 include avionix_airflow/_version.py
+recursive-include avionix_airflow/*
