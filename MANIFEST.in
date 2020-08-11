@@ -1,0 +1,9 @@
+include versioneer.py
+include avionix_airflow/_version.py
+include avionix_airflow/docker/airflow/config/airflow.cfg
+include avionix_airflow/docker/airflow/Dockerfile
+include avionix_airflow/docker/airflow/script/entrypoint.sh
+include avionix_airflow/kubernetes/monitoring/dashboards/grafana_dashboard.json
+include avionix_airflow/kubernetes/monitoring/event_js/event.js
+
+

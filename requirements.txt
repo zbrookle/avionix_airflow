@@ -1,3 +1,3 @@
-git+https://github.com/zbrookle/avionix.git@add_chart_dependency_resolution
+avionix@git+https://github.com/zbrookle/avionix.git@add_chart_dependency_resolution
 python-hosts==1.0.0
 cryptography==3.0
