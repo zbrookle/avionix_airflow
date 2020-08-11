@@ -1,3 +1,7 @@
 include versioneer.py
 include avionix_airflow/_version.py
-recursive-include avionix_airflow/*
+include avionix_airflow/docker/airflow/config/airflow.cfg
+include avionix_airflow/docker/airflow/Dockerfile
+include avionix_airflow/docker/airflow/script/entrypoint.sh
+
+
