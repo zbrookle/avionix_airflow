@@ -34,6 +34,7 @@ class AirflowOptions:
         worker_image: str = "airflow-image",
         worker_image_tag: str = "latest",
         open_node_ports: bool = False,
+        local_mode: bool = False,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -54,6 +55,9 @@ class AirflowOptions:
         self.worker_image = worker_image
         self.worker_image_tag = worker_image_tag
         self.open_node_ports = open_node_ports
+        self.local_mode = local_mode
+        if worker_image == "airflow-image" and not self.local_mode:
+            self.worker_image = "zachb1996/avionix_airflow:latest"
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

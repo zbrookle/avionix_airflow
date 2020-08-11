@@ -47,6 +47,7 @@ def airflow_options(request):
         default_timezone="est",
         core_executor=request.param,
         open_node_ports=True,
+        local_mode=True,
     )
 
 

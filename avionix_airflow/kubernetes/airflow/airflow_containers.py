@@ -66,7 +66,9 @@ class AirflowContainer(Container):
         super().__init__(
             name=name,
             args=[name],
-            image="airflow-image",
+            image="airflow-image"
+            if airflow_options.local_mode
+            else "zachb1996/avionix_airflow:latest",
             image_pull_policy="Never",
             env=self._get_environment(),
             env_from=[
