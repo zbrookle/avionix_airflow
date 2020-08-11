@@ -21,4 +21,4 @@ jobs:
           repository: zachb1996/avionix_airflow
           tags: latest
           cache_froms: zachb1996/avionix_airflow:latest
-          dockerfile: avionix_airflow/docker/airflow/Dockerfile
+          dockerfile: avionix_airflow/docker/airflow
