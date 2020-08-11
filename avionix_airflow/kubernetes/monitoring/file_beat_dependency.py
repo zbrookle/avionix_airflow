@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from avionix import ChartDependency
-from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from yaml import dump
+
+from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 
 
 class FileBeatsContainerInput:
@@ -14,11 +17,23 @@ class FileBeatsContainerInput:
                         "host": "${NODE_NAME}",
                         "matchers": [{"logs_path": {"logs_path": f"{logs_path}/"}}],
                     }
-                }
+                },
+                {
+                    "script": {
+                        "lang": "javascript",
+                        "id": "airflow_log_generator",
+                        "source": self.js_event_code,
+                    }
+                },
             ],
         }
         if index:
             self.dict["index"] = "%{[agent.name]}-" + index + "%{+yyyy.MM.dd}"
+
+    @property
+    def js_event_code(self):
+        with open(Path(__file__).parent / "event_js" / "event.js") as event_js:
+            return event_js.read()
 
 
 class FileBeatDependency(ChartDependency):

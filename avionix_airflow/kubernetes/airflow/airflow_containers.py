@@ -119,17 +119,11 @@ class AirflowContainer(Container):
 
     @property
     def _kubernetes_env(self):
-        return [
+        kube_settings = [
             KubernetesEnvVar("NAMESPACE", self._airflow_options.namespace),
             KubernetesEnvVar(
                 "DAGS_VOLUME_CLAIM",
                 AirflowDagVolumeGroup(
-                    self._airflow_options
-                ).persistent_volume_claim.metadata.name,
-            ),
-            KubernetesEnvVar(
-                "LOGS_VOLUME_CLAIM",
-                AirflowLogVolumeGroup(
                     self._airflow_options
                 ).persistent_volume_claim.metadata.name,
             ),
@@ -141,6 +135,16 @@ class AirflowContainer(Container):
                 "WORKER_CONTAINER_TAG", self._airflow_options.worker_image_tag,
             ),
         ] + self._worker_pod_settings
+        if not self._monitoring_options.enabled:
+            kube_settings.append(
+                KubernetesEnvVar(
+                    "LOGS_VOLUME_CLAIM",
+                    AirflowLogVolumeGroup(
+                        self._airflow_options
+                    ).persistent_volume_claim.metadata.name,
+                )
+            )
+        return kube_settings
 
     @property
     def _worker_pod_settings(self):
