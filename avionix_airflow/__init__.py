@@ -5,6 +5,7 @@ from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
+from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 
 from ._version import get_versions
 __version__ = get_versions()['version']
