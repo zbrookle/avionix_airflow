@@ -26,7 +26,7 @@ setup(
     maintainer="Zach Brookler",
     maintainer_email="zachb1996@yahoo.com",
     description="A package for deploying airflow to kubernetes with included "
-                "monitoring (grafana and elasticsearch integration)",
+    "monitoring (grafana and elasticsearch integration)",
     python_requires=">=3.6.1",
     install_requires=[read_file("requirements.txt").split("\n")],
     project_urls={
@@ -36,8 +36,16 @@ setup(
     },
     url="https://github.com/zbrookle/avionix_airflow",
     download_url="https://github.com/zbrookle/avionix_airflow/archive/master.zip",
-    keywords=["kuberenetes", "helm", "docker", "infrastructure", "airflow",
-              "grafana", "elasticsearch", "filebeat"],
+    keywords=[
+        "kuberenetes",
+        "helm",
+        "docker",
+        "infrastructure",
+        "airflow",
+        "grafana",
+        "elasticsearch",
+        "filebeat",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
