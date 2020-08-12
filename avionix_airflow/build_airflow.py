@@ -42,13 +42,14 @@ def get_chart_builder(
     dependencies = cloud_options.get_cloud_dependencies()
     if monitoring_options.enabled:
         dependencies += [
-            ElasticSearchDependency(),
             GrafanaDependency(
                 monitoring_options, airflow_options, sql_options, cloud_options
             ),
-            TelegrafDependency(),
+            TelegrafDependency(monitoring_options),
             FileBeatDependency(monitoring_options),
         ]
+        if monitoring_options.enable_elasticsearch_dependency:
+            dependencies.append(ElasticSearchDependency())
     if airflow_options.in_celery_mode:
         orchestrator += RedisOrchestrator(redis_options)
     if sql_options.create_database_in_cluster:
