@@ -56,7 +56,7 @@ class AirflowOrchestrator(Orchestrator):
             external_volume_group.persistent_volume,
             external_volume_group.persistent_volume_claim,
             DagRetrievalJob(airflow_options, cloud_options),
-            AirflowIngress(airflow_options),
+            AirflowIngress(airflow_options, cloud_options),
             AirflowSecret(sql_options, airflow_options, redis_options),
         ]
         if monitoring_options.enabled:

@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Dict, List
 
 from avionix import ChartDependency
 from avionix.kubernetes_objects.base_objects import KubernetesBaseObject
 from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
+from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
 
 class CloudOptions(ABC):
+    service_type = "LoadBalancer"
+
     def __init__(self, storage_class: StorageClass, volume_mode: str):
         self.storage_class = storage_class
         self.volume_mode = volume_mode
@@ -26,4 +29,14 @@ class CloudOptions(ABC):
 
     @abstractmethod
     def get_cloud_dependencies(self) -> List[ChartDependency]:
+        pass
+
+    @property
+    @abstractmethod
+    def ingress_annotations(self) -> Dict[str, str]:
+        pass
+
+    @property
+    @abstractmethod
+    def default_backend(self) -> IngressBackend:
         pass
