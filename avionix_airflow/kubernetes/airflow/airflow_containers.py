@@ -70,7 +70,7 @@ class AirflowContainer(Container):
             if airflow_options.local_mode
             else "zachb1996/avionix_airflow:latest",
             image_pull_policy="Never" if airflow_options.local_mode
-            else "Always",
+            else "IfNotPresent",
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
