@@ -1,8 +1,10 @@
+from typing import Optional
+
 from python_hosts import Hosts, HostsEntry
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions
 from avionix_airflow.kubernetes.utils import get_minikube_ip
-from typing import Optional
+
 
 def add_host(
     airflow_options: AirflowOptions,
