@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from avionix import ChartDependency
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
@@ -45,6 +46,7 @@ class GrafanaDependency(ChartDependency):
         monitoring_options: MonitoringOptions,
         airflow_options: AirflowOptions,
         sql_options: SqlOptions,
+        cloud_options: CloudOptions,
     ):
         self.__monitoring_options = monitoring_options
         self.__sql_options = sql_options
@@ -98,6 +100,7 @@ class GrafanaDependency(ChartDependency):
                         ],
                     }
                 },
+                "service": {"type": cloud_options.service_type},
             },
         )
 

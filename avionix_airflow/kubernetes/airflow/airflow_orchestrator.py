@@ -48,7 +48,7 @@ class AirflowOrchestrator(Orchestrator):
                 monitoring_options,
                 cloud_options,
             ),
-            WebserverService(values, airflow_options.open_node_ports),
+            WebserverService(values, airflow_options.open_node_ports, cloud_options),
             dag_group.persistent_volume,
             log_group.persistent_volume,
             dag_group.persistent_volume_claim,
@@ -62,7 +62,9 @@ class AirflowOrchestrator(Orchestrator):
         if monitoring_options.enabled:
             components.append(StatsDService(values, airflow_options.open_node_ports))
         if airflow_options.in_celery_mode:
-            components.append(FlowerService(values, airflow_options.open_node_ports))
+            components.append(
+                FlowerService(values, airflow_options.open_node_ports, cloud_options)
+            )
         if airflow_options.in_kube_mode:
             airflow_pod_service_account = AirflowPodServiceAccount()
             role_group = AirflowPodRoleGroup(airflow_pod_service_account)
