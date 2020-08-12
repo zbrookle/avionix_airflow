@@ -18,8 +18,18 @@ from avionix.kubernetes_objects.core import (
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
+class VolumeMixin:
+    def __init__(self, airflow_options: AirflowOptions):
+        self._airflow_options = airflow_options
 
-class AirflowPersistentVolume(PersistentVolume):
+    @property
+    def _storage_class(self):
+        if self._airflow_options.aws_efs_id:
+            return "efs-sc"
+        return "standard"
+
+
+class AirflowPersistentVolume(PersistentVolume, VolumeMixin):
     def __init__(
         self,
         name: str,
@@ -28,14 +38,14 @@ class AirflowPersistentVolume(PersistentVolume):
         access_modes: List[str],
         airflow_options: AirflowOptions,
     ):
-        self.__airflow_options = airflow_options
+        VolumeMixin.__init__(self, airflow_options)
         volume_spec = PersistentVolumeSpec(
             access_modes,
             capacity={"storage": storage},
             host_path=HostPathVolumeSource(host_path, type="DirectoryOrCreate"),
-            storage_class_name=self.__storage_class,
+            storage_class_name=self._storage_class,
         )
-        if self.__airflow_options.aws_efs_id:
+        if self._airflow_options.aws_efs_id:
             volume_spec.csi = CSIPersistentVolumeSource(
                 driver="efs.csi.aws.com", volume_handle=airflow_options.aws_efs_id
             )
@@ -48,14 +58,8 @@ class AirflowPersistentVolume(PersistentVolume):
                 annotations={"pv.beta.kubernetes.io/gid": "1001"},
                 labels={"storage-type": name},
             ),
-            volume_spec,
+            volume_spec
         )
-
-    @property
-    def __storage_class(self):
-        if self.__airflow_options.aws_efs_id:
-            return "efs-sc"
-        return "standard"
 
 
 class AirflowVolume(Volume):
@@ -68,15 +72,19 @@ class AirflowVolume(Volume):
         )
 
 
-class AirflowPersistentVolumeClaim(PersistentVolumeClaim):
-    def __init__(self, name: str, access_modes: List[str], storage: str):
+class AirflowPersistentVolumeClaim(PersistentVolumeClaim, VolumeMixin):
+    def __init__(self, name: str, access_modes: List[str], storage: str,
+                 airflow_options: AirflowOptions):
+        VolumeMixin.__init__(self, airflow_options)
+
         super().__init__(
             AirflowMeta(name),
             PersistentVolumeClaimSpec(
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
                 selector=LabelSelector({"storage-type": name}),
-            ),
+                storage_class_name=self._storage_class
+            )
         )
 
 
@@ -112,7 +120,7 @@ class AirflowPersistentVolumeGroup:
             name, storage, host_path, access_modes, airflow_options
         )
         self.__persistent_volume_claim = AirflowPersistentVolumeClaim(
-            self.__volume.persistentVolumeClaim.claimName, access_modes, storage
+            self.__volume.persistentVolumeClaim.claimName, access_modes, storage, airflow_options
         )
         self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
