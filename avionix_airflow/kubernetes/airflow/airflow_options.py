@@ -57,7 +57,7 @@ class AirflowOptions:
         self.open_node_ports = open_node_ports
         self.local_mode = local_mode
         if worker_image == "airflow-image" and not self.local_mode:
-            self.worker_image = "zachb1996/avionix_airflow:latest"
+            self.worker_image = "zachb1996/avionix_airflow"
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
