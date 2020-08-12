@@ -18,6 +18,7 @@ from avionix.kubernetes_objects.core import (
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
+
 class VolumeMixin:
     def __init__(self, airflow_options: AirflowOptions):
         self._airflow_options = airflow_options
@@ -47,7 +48,8 @@ class AirflowPersistentVolume(PersistentVolume, VolumeMixin):
         )
         if self._airflow_options.aws_efs_id:
             volume_spec.csi = CSIPersistentVolumeSource(
-                driver="efs.csi.aws.com", volume_handle=airflow_options.aws_efs_id
+                driver="efs.csi.aws.com",
+                volume_handle=f"{airflow_options.aws_efs_id}:/{name}"
             )
             volume_spec.hostPath = None
             volume_spec.volumeMode = "Filesystem"
@@ -58,7 +60,7 @@ class AirflowPersistentVolume(PersistentVolume, VolumeMixin):
                 annotations={"pv.beta.kubernetes.io/gid": "1001"},
                 labels={"storage-type": name},
             ),
-            volume_spec
+            volume_spec,
         )
 
 
@@ -73,8 +75,13 @@ class AirflowVolume(Volume):
 
 
 class AirflowPersistentVolumeClaim(PersistentVolumeClaim, VolumeMixin):
-    def __init__(self, name: str, access_modes: List[str], storage: str,
-                 airflow_options: AirflowOptions):
+    def __init__(
+        self,
+        name: str,
+        access_modes: List[str],
+        storage: str,
+        airflow_options: AirflowOptions,
+    ):
         VolumeMixin.__init__(self, airflow_options)
 
         super().__init__(
@@ -83,8 +90,8 @@ class AirflowPersistentVolumeClaim(PersistentVolumeClaim, VolumeMixin):
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
                 selector=LabelSelector({"storage-type": name}),
-                storage_class_name=self._storage_class
-            )
+                storage_class_name=self._storage_class,
+            ),
         )
 
 
@@ -120,7 +127,10 @@ class AirflowPersistentVolumeGroup:
             name, storage, host_path, access_modes, airflow_options
         )
         self.__persistent_volume_claim = AirflowPersistentVolumeClaim(
-            self.__volume.persistentVolumeClaim.claimName, access_modes, storage, airflow_options
+            self.__volume.persistentVolumeClaim.claimName,
+            access_modes,
+            storage,
+            airflow_options,
         )
         self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
