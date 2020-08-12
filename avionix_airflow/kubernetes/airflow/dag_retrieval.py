@@ -8,14 +8,13 @@ from avionix.kubernetes_objects.core import Container, PodSpec, PodTemplateSpec
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import AirflowDagVolumeGroup
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
 
 class DagRetrievalJob(CronJob):
-    def __init__(
-        self, airflow_options: AirflowOptions,
-    ):
-        dag_volume_group = AirflowDagVolumeGroup(airflow_options)
+    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
+        dag_volume_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
         super().__init__(
             AirflowMeta("dag-sync-job"),
             spec=CronJobSpec(

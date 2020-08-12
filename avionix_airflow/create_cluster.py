@@ -2,6 +2,8 @@ from avionix import ChartBuilder, ChartInfo
 from avionix.chart import ChartMaintainer
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.cloud.local.local_options import LocalOptions
 from avionix_airflow.kubernetes.monitoring import (
     ElasticSearchDependency,
     FileBeatDependency,
@@ -19,12 +21,14 @@ def get_chart_builder(
     sql_options: SqlOptions = SqlOptions(),
     redis_options: RedisOptions = RedisOptions(),
     monitoring_options: MonitoringOptions = MonitoringOptions(),
+    cloud_options: CloudOptions = LocalOptions(),
 ):
     """
     :param sql_options:
     :param redis_options:
     :param airflow_options:
     :param monitoring_options:
+    :param cloud_options:
     :return: Avionix ChartBuilder object that can be used to install airflow
     """
     orchestrator = AirflowOrchestrator(
@@ -33,10 +37,11 @@ def get_chart_builder(
         ValueOrchestrator(),
         airflow_options,
         monitoring_options,
+        cloud_options,
     )
-    dependencies = []
+    dependencies = cloud_options.get_cloud_dependencies()
     if monitoring_options.enabled:
-        dependencies = [
+        dependencies += [
             ElasticSearchDependency(),
             GrafanaDependency(monitoring_options, airflow_options, sql_options),
             TelegrafDependency(),
@@ -58,4 +63,5 @@ def get_chart_builder(
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
     )
+    builder.kubernetes_objects += cloud_options.get_platform_dependent_kube_objects()
     return builder

@@ -35,7 +35,6 @@ class AirflowOptions:
         worker_image_tag: str = "latest",
         open_node_ports: bool = False,
         local_mode: bool = False,
-        aws_efs_id: str = "",
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -59,7 +58,6 @@ class AirflowOptions:
         self.local_mode = local_mode
         if worker_image == "airflow-image" and not self.local_mode:
             self.worker_image = "zachb1996/avionix_airflow:latest"
-        self.aws_efs_id = aws_efs_id
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
