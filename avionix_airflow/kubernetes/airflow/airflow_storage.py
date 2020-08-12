@@ -39,6 +39,8 @@ class AirflowPersistentVolume(PersistentVolume):
             volume_spec.csi = CSIPersistentVolumeSource(
                 driver="efs.csi.aws.com", volume_handle=airflow_options.aws_efs_id
             )
+            volume_spec.hostPath = None
+            volume_spec.volumeMode = "Filesystem"
 
         super().__init__(
             AirflowMeta(
