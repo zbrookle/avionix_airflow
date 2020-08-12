@@ -7,7 +7,6 @@ from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AwsOptions(CloudOptions):
@@ -60,5 +59,4 @@ class AwsOptions(CloudOptions):
 
     @property
     def default_backend(self) -> IngressBackend:
-        values = ValueOrchestrator()
-        return IngressBackend(values.webserver_service_name, values.webserver_port_name)
+        return None
