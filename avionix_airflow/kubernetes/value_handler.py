@@ -5,10 +5,16 @@ class ValueOrchestrator:
         self.statsd_service_name = "statsd"
         self.statsd_node_port = 30004
         self.statsd_port_name = "statsd"
+        self.elasticsearch_proxy_port = 9200
+        self.elasticsearch_proxy_service_name = "elasticsearch-master"
 
     @property
     def master_node_labels(self):
         return {"pod-job": "master-node"}
+
+    @property
+    def elasticsearch_proxy_labels(self):
+        return {"pod-job": "es-proxy"}
 
     @property
     def database_labels(self):

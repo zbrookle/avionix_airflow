@@ -56,12 +56,13 @@ class FileBeatDependency(ChartDependency):
                             ],
                             "output.elasticsearch": {
                                 "host": "${NODE_NAME}",
-                                "hosts": "${ELASTICSEARCH_HOSTS:%s}"
-                                % self.__monitoring_options.elastic_search_uri,
+                                "hosts": [self.__monitoring_options.elastic_search_proxy_uri],
                             },
+                            "setup.ilm.enabled": False
                         }
                     )
                 },
                 "podAnnotations": cloud_options.elasticsearch_connection_annotations,
+                "image": "docker.elastic.co/beats/filebeat-oss"
             },
         )

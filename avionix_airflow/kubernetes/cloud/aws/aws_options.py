@@ -7,6 +7,12 @@ from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service import (
+    AwsElasticSearchProxyService,
+)
+from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_deployment import (
+    AwsElasticSearchProxyDeployment,
+)
 
 
 class AwsOptions(CloudOptions):
@@ -84,8 +90,15 @@ class AwsOptions(CloudOptions):
                 values={
                     "extraArgs": {"default-role": self.__default_role},
                     "rbac": {"create": True},
-                    "podAnnotations": {"helm.sh/hook": "pre-install"},
-                    "host": {"iptables": True, "interface": "eni+"}
+                    "host": {"iptables": True, "interface": "eni+"},
                 },
-            ),
+            )
+        ]
+
+    def get_elastic_search_proxy_elements(
+        self, elastic_search_uri: str
+    ) -> List[KubernetesBaseObject]:
+        return [
+            AwsElasticSearchProxyService(),
+            AwsElasticSearchProxyDeployment(self, elastic_search_uri),
         ]

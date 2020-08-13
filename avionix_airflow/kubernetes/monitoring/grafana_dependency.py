@@ -121,7 +121,7 @@ class GrafanaDependency(ChartDependency):
         return ElasticSearchResource(
             "airflow",
             "[airflow-]*",
-            self.__monitoring_options.elastic_search_uri,
+            self.__monitoring_options.elastic_search_proxy_uri,
             default=True,
         ).dict
 
@@ -130,7 +130,7 @@ class GrafanaDependency(ChartDependency):
         return ElasticSearchResource(
             "filebeat-logs",
             "[filebeat-7.8.1-]*",
-            self.__monitoring_options.elastic_search_uri,
+            self.__monitoring_options.elastic_search_proxy_uri,
             logging_on=True,
         ).dict
 

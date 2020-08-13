@@ -51,3 +51,9 @@ class CloudOptions(ABC):
     @abstractmethod
     def pre_install_dependencies(self) -> List[ChartDependency]:
         return []
+
+    @abstractmethod
+    def get_elastic_search_proxy_elements(
+        self, elastic_search_uri: str
+    ) -> List[KubernetesBaseObject]:
+        pass

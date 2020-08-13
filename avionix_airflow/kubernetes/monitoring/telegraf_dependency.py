@@ -22,7 +22,7 @@ class TelegrafDependency(ChartDependency):
                     "outputs": [
                         {
                             "elasticsearch": {
-                                "urls": [monitoring_options.elastic_search_uri],
+                                "urls": [monitoring_options.elastic_search_proxy_uri],
                                 "timeout": "5s",
                                 "health_check_interval": "10s",
                                 "index_name": "airflow-%Y.%m.%d",

@@ -32,7 +32,8 @@ class AvionixChartInfo(ChartInfo):
 def get_preinstall_builder(cloud_options: CloudOptions = LocalOptions()):
     builder = ChartBuilder(
         AvionixChartInfo("airflow-pre-install", cloud_options.pre_install_dependencies),
-        [], namespace=cloud_options.preinstall_namepsace
+        [],
+        namespace=cloud_options.preinstall_namepsace,
     )
     return builder
 
@@ -81,4 +82,11 @@ def get_chart_builder(
         namespace=airflow_options.namespace,
     )
     builder.kubernetes_objects += cloud_options.get_platform_dependent_kube_objects()
+    if (
+        monitoring_options.enabled
+        and not monitoring_options.enable_elasticsearch_dependency
+    ):
+        builder.kubernetes_objects += cloud_options.get_elastic_search_proxy_elements(
+            monitoring_options.elastic_search_uri
+        )
     return builder

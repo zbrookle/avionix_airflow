@@ -50,3 +50,8 @@ class LocalOptions(CloudOptions):
     @property
     def pre_install_dependencies(self) -> List[ChartDependency]:
         return []
+
+    def get_elastic_search_proxy_elements(
+        self, elastic_search_uri: str
+    ) -> List[KubernetesBaseObject]:
+        return []
