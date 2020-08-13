@@ -65,6 +65,17 @@ class AwsOptions(CloudOptions):
                     "autoDiscoverAwsVpcID": True,
                 },
             ),
+            ChartDependency(
+                "kube2iam",
+                "2.5.1",
+                "https://kubernetes-charts.storage.googleapis.com/",
+                "stable",
+                values={
+                    "extraArgs": {"default-role": self.__default_role},
+                    "rbac": {"create": True},
+                    "host": {"iptables": True, "interface": "eni+"},
+                },
+            )
         ]
 
     @property
@@ -78,22 +89,6 @@ class AwsOptions(CloudOptions):
     @property
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         return {"iam.amazonaws.com/role": self.__elastic_search_access_role}
-
-    @property
-    def pre_install_dependencies(self):
-        return [
-            ChartDependency(
-                "kube2iam",
-                "2.5.1",
-                "https://kubernetes-charts.storage.googleapis.com/",
-                "stable",
-                values={
-                    "extraArgs": {"default-role": self.__default_role},
-                    "rbac": {"create": True},
-                    "host": {"iptables": True, "interface": "eni+"},
-                },
-            )
-        ]
 
     def get_elastic_search_proxy_elements(
         self, elastic_search_uri: str

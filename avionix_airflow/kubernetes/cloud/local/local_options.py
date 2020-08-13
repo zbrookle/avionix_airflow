@@ -47,10 +47,6 @@ class LocalOptions(CloudOptions):
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         return {}
 
-    @property
-    def pre_install_dependencies(self) -> List[ChartDependency]:
-        return []
-
     def get_elastic_search_proxy_elements(
         self, elastic_search_uri: str
     ) -> List[KubernetesBaseObject]:

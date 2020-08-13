@@ -28,16 +28,6 @@ class AvionixChartInfo(ChartInfo):
             dependencies=dependencies,
         )
 
-
-def get_preinstall_builder(cloud_options: CloudOptions = LocalOptions()):
-    builder = ChartBuilder(
-        AvionixChartInfo("airflow-pre-install", cloud_options.pre_install_dependencies),
-        [],
-        namespace=cloud_options.preinstall_namepsace,
-    )
-    return builder
-
-
 def get_chart_builder(
     airflow_options: AirflowOptions,
     sql_options: SqlOptions = SqlOptions(),

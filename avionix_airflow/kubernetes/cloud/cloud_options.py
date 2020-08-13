@@ -47,11 +47,6 @@ class CloudOptions(ABC):
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         pass
 
-    @property
-    @abstractmethod
-    def pre_install_dependencies(self) -> List[ChartDependency]:
-        return []
-
     @abstractmethod
     def get_elastic_search_proxy_elements(
         self, elastic_search_uri: str
