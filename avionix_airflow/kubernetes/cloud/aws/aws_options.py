@@ -10,10 +10,17 @@ from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 
 
 class AwsOptions(CloudOptions):
-    def __init__(self, efs_id: str, cluster_name: str, elastic_search_access_role: str):
+    def __init__(
+        self,
+        efs_id: str,
+        cluster_name: str,
+        elastic_search_access_role_arn: str,
+        default_role_arn: str,
+    ):
         self.__efs_id = efs_id
         self.__cluster_name = cluster_name
-        self.__elastic_search_access_role = elastic_search_access_role
+        self.__elastic_search_access_role = elastic_search_access_role_arn
+        self.__default_role = default_role_arn
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -52,12 +59,6 @@ class AwsOptions(CloudOptions):
                     "autoDiscoverAwsVpcID": True,
                 },
             ),
-            ChartDependency(
-                "kube2iam",
-                "2.5.1",
-                "https://kubernetes-charts.storage.googleapis.com/",
-                "stable",
-            ),
         ]
 
     @property
@@ -71,3 +72,20 @@ class AwsOptions(CloudOptions):
     @property
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         return {"iam.amazonaws.com/role": self.__elastic_search_access_role}
+
+    @property
+    def pre_install_dependencies(self):
+        return [
+            ChartDependency(
+                "kube2iam",
+                "2.5.1",
+                "https://kubernetes-charts.storage.googleapis.com/",
+                "stable",
+                values={
+                    "extraArgs": {"default-role": self.__default_role},
+                    "rbac": {"create": True},
+                    "podAnnotations": {"helm.sh/hook": "pre-install"},
+                    "host": {"iptables": True, "interface": "eni+"}
+                },
+            ),
+        ]

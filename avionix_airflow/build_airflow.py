@@ -32,7 +32,7 @@ class AvionixChartInfo(ChartInfo):
 def get_preinstall_builder(cloud_options: CloudOptions = LocalOptions()):
     builder = ChartBuilder(
         AvionixChartInfo("airflow-pre-install", cloud_options.pre_install_dependencies),
-        cloud_options.preinstall_namepsace,
+        [], namespace=cloud_options.preinstall_namepsace
     )
     return builder
 

@@ -46,3 +46,7 @@ class LocalOptions(CloudOptions):
     @property
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         return {}
+
+    @property
+    def pre_install_dependencies(self) -> List[ChartDependency]:
+        return []
