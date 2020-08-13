@@ -151,7 +151,7 @@ class AirflowContainer(Container):
                 KubernetesEnvVar(
                     "LOGS_VOLUME_CLAIM",
                     AirflowLogVolumeGroup(
-                        self._airflow_options
+                        self._airflow_options, self._cloud_options
                     ).persistent_volume_claim.metadata.name,
                 )
             )
@@ -212,6 +212,7 @@ class FlowerUI(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
         super().__init__(
             "flower",
@@ -219,5 +220,6 @@ class FlowerUI(AirflowContainer):
             redis_options,
             airflow_options,
             monitoring_options,
+            cloud_options=cloud_options,
             readiness_probe=AvionixAirflowProbe("/flower/", 5555),
         )

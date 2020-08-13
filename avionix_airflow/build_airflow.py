@@ -45,8 +45,8 @@ def get_chart_builder(
             GrafanaDependency(
                 monitoring_options, airflow_options, sql_options, cloud_options
             ),
-            TelegrafDependency(monitoring_options),
-            FileBeatDependency(monitoring_options),
+            TelegrafDependency(monitoring_options, cloud_options),
+            FileBeatDependency(monitoring_options, cloud_options),
         ]
         if monitoring_options.enable_elasticsearch_dependency:
             dependencies.append(ElasticSearchDependency())

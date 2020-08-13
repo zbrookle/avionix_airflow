@@ -48,7 +48,11 @@ class AirflowPodTemplate(PodTemplateSpec):
             values.airflow_pod_service_account if airflow_options.in_kube_mode else None
         )
         super().__init__(
-            AirflowMeta(name="airflow-master-pod", labels=values.master_node_labels),
+            AirflowMeta(
+                name="airflow-master-pod",
+                labels=values.master_node_labels,
+                annotations=cloud_options.elasticsearch_connection_annotations,
+            ),
             spec=PodSpec(
                 self.__get_containers(),
                 volumes=[
@@ -84,6 +88,7 @@ class AirflowPodTemplate(PodTemplateSpec):
                     self.__redis_options,
                     self.__airflow_options,
                     self.__monitoring_options,
+                    self.__cloud_options,
                 )
             )
         return pods

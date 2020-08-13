@@ -10,9 +10,10 @@ from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 
 
 class AwsOptions(CloudOptions):
-    def __init__(self, efs_id: str, cluster_name: str):
+    def __init__(self, efs_id: str, cluster_name: str, elastic_search_access_role: str):
         self.__efs_id = efs_id
         self.__cluster_name = cluster_name
+        self.__elastic_search_access_role = elastic_search_access_role
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -50,7 +51,13 @@ class AwsOptions(CloudOptions):
                     "autoDiscoverAwsRegion": True,
                     "autoDiscoverAwsVpcID": True,
                 },
-            )
+            ),
+            ChartDependency(
+                "kube2iam",
+                "2.5.1",
+                "https://kubernetes-charts.storage.googleapis.com/",
+                "stable",
+            ),
         ]
 
     @property
@@ -60,3 +67,7 @@ class AwsOptions(CloudOptions):
     @property
     def default_backend(self) -> IngressBackend:
         return None
+
+    @property
+    def elasticsearch_connection_annotations(self) -> Dict[str, str]:
+        return {"iam.amazonaws.com/role": self.__elastic_search_access_role}

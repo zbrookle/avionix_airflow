@@ -42,3 +42,7 @@ class LocalOptions(CloudOptions):
     @property
     def default_backend(self) -> IngressBackend:
         return IngressBackend("default-http-backend", 80)
+
+    @property
+    def elasticsearch_connection_annotations(self) -> Dict[str, str]:
+        return {}

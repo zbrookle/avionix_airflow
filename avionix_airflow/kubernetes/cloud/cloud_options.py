@@ -40,3 +40,8 @@ class CloudOptions(ABC):
     @abstractmethod
     def default_backend(self) -> IngressBackend:
         pass
+
+    @property
+    @abstractmethod
+    def elasticsearch_connection_annotations(self) -> Dict[str, str]:
+        pass
