@@ -10,6 +10,7 @@ from avionix.kubernetes_objects.storage import StorageClass
 
 class CloudOptions(ABC):
     service_type = "LoadBalancer"
+    preinstall_namepsace = "kube-system"
 
     def __init__(self, storage_class: StorageClass, volume_mode: str):
         self.storage_class = storage_class
@@ -45,3 +46,8 @@ class CloudOptions(ABC):
     @abstractmethod
     def elasticsearch_connection_annotations(self) -> Dict[str, str]:
         pass
+
+    @property
+    @abstractmethod
+    def pre_install_dependencies(self) -> List[ChartDependency]:
+        return []

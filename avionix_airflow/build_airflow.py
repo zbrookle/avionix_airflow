@@ -1,4 +1,4 @@
-from avionix import ChartBuilder, ChartInfo
+from avionix import ChartBuilder, ChartInfo, ChartDependency
 from avionix.chart import ChartMaintainer
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
@@ -14,6 +14,27 @@ from avionix_airflow.kubernetes.monitoring import (
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from typing import List
+
+
+class AvionixChartInfo(ChartInfo):
+    def __init__(self, name: str, dependencies: List[ChartDependency]):
+        super().__init__(
+            api_version="3.2.4",
+            name=name,
+            version="0.1.0",
+            app_version="v1",
+            maintainers=[ChartMaintainer("Zach Brookler", "zachb1996@yahoo.com")],
+            dependencies=dependencies,
+        )
+
+
+def get_preinstall_builder(cloud_options: CloudOptions = LocalOptions()):
+    builder = ChartBuilder(
+        AvionixChartInfo("airflow-pre-install", cloud_options.pre_install_dependencies),
+        cloud_options.preinstall_namepsace,
+    )
+    return builder
 
 
 def get_chart_builder(
@@ -55,14 +76,7 @@ def get_chart_builder(
     if sql_options.create_database_in_cluster:
         orchestrator += PostgresOrchestrator(sql_options)
     builder = ChartBuilder(
-        ChartInfo(
-            api_version="3.2.4",
-            name="airflow",
-            version="0.1.0",
-            app_version="v1",
-            maintainers=[ChartMaintainer("Zach Brookler", "zachb1996@yahoo.com")],
-            dependencies=dependencies,
-        ),
+        AvionixChartInfo("airflow", dependencies),
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
     )
