@@ -1,16 +1,17 @@
 from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
-from avionix.kubernetes_objects.meta import LabelSelector
-from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
-from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix.kubernetes_objects.core import (
-    PodTemplateSpec,
-    PodSpec,
     Container,
     ContainerPort,
-    Probe,
     HTTPGetAction,
+    PodSpec,
+    PodTemplateSpec,
+    Probe,
 )
+from avionix.kubernetes_objects.meta import LabelSelector
+
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AwsElasticSearchProxyDeployment(Deployment):
@@ -20,9 +21,7 @@ class AwsElasticSearchProxyDeployment(Deployment):
         probe = Probe(http_get=HTTPGetAction(path="/_cluster/health", port="https"))
 
         super().__init__(
-            AirflowMeta(
-                "aws-es-proxy",
-            ),
+            AirflowMeta("aws-es-proxy",),
             DeploymentSpec(
                 replicas=1,
                 selector=LabelSelector(values.elasticsearch_proxy_labels),
@@ -43,7 +42,7 @@ class AwsElasticSearchProxyDeployment(Deployment):
                                     "0.0.0.0:9200",
                                     "-endpoint",
                                     elastic_search_uri,
-                                    "-verbose"
+                                    "-verbose",
                                 ],
                                 ports=[
                                     ContainerPort(9200, protocol="TCP", name="https")

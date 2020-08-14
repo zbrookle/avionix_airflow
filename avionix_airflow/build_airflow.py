@@ -1,4 +1,6 @@
-from avionix import ChartBuilder, ChartInfo, ChartDependency
+from typing import List
+
+from avionix import ChartBuilder, ChartDependency, ChartInfo
 from avionix.chart import ChartMaintainer
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions, AirflowOrchestrator
@@ -14,7 +16,6 @@ from avionix_airflow.kubernetes.monitoring import (
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from typing import List
 
 
 class AvionixChartInfo(ChartInfo):
@@ -27,6 +28,7 @@ class AvionixChartInfo(ChartInfo):
             maintainers=[ChartMaintainer("Zach Brookler", "zachb1996@yahoo.com")],
             dependencies=dependencies,
         )
+
 
 def get_chart_builder(
     airflow_options: AirflowOptions,

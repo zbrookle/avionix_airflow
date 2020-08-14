@@ -6,13 +6,13 @@ from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
 from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
-from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
-from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service import (
-    AwsElasticSearchProxyService,
-)
 from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_deployment import (
     AwsElasticSearchProxyDeployment,
 )
+from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service import (
+    AwsElasticSearchProxyService,
+)
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 
 
 class AwsOptions(CloudOptions):
@@ -75,7 +75,7 @@ class AwsOptions(CloudOptions):
                     "rbac": {"create": True},
                     "host": {"iptables": True, "interface": "eni+"},
                 },
-            )
+            ),
         ]
 
     @property
