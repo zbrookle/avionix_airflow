@@ -42,11 +42,12 @@ def host():
 def airflow_options(request):
     return AirflowOptions(
         dag_sync_image="alpine/git",
-        dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
+        dag_sync_command=["/bin/sh", "-c", parse_shell_script(str(dag_copy_loc))],
         dag_sync_schedule="* * * * *",
         default_timezone="est",
         core_executor=request.param,
         open_node_ports=True,
+        local_mode=True,
     )
 
 

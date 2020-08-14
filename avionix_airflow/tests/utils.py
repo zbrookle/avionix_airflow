@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+from typing import Dict
 
 from avionix.testing import kubectl_get
 import pytest
@@ -13,7 +14,7 @@ def kubectl_get_airflow(resource: str):
 
 def kubectl_name_dict(resource: str):
     info = kubectl_get_airflow(resource)
-    info_dict = {}
+    info_dict: Dict[str, Dict[str, str]] = {}
     if "NAME" not in info.columns:
         return info_dict
     for name in info["NAME"]:

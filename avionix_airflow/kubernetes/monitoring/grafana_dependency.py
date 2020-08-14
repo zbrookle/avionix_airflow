@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from avionix import ChartDependency
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
@@ -45,61 +46,68 @@ class GrafanaDependency(ChartDependency):
         monitoring_options: MonitoringOptions,
         airflow_options: AirflowOptions,
         sql_options: SqlOptions,
+        cloud_options: CloudOptions,
     ):
         self.__monitoring_options = monitoring_options
         self.__sql_options = sql_options
+        self.__airflow_options = airflow_options
+        self.__cloud_options = cloud_options
         super().__init__(
             "grafana",
             "5.5.2",
             "https://kubernetes-charts.storage.googleapis.com/",
             "stable",
-            values={
-                "datasources": {
-                    "datasources.yaml": {
-                        "apiVersion": 1,
-                        "datasources": [
-                            self.__metrics_datasource,
-                            self.__airflow_database_datasource,
-                            self.__logs_datasource,
-                        ],
-                    }
-                },
-                "grafana.ini": {
-                    "server": {
-                        "domain": airflow_options.domain_name,
-                        "root_url": "%(protocol)s://%(domain)s/grafana",
-                        "serve_from_sub_path": True,
-                    },
-                    "auth.anonymous": {
-                        "enabled": True,
-                        "org_name": "Main Org.",
-                        "org_role": monitoring_options.grafana_role,
-                    },
-                    "auth.basic": {"enabled": False},
-                },
-                "dashboards": {
-                    "default": {"airflow-dashboard": {"json": self.dashboard_json}}
-                },
-                "dashboardProviders": {
-                    "dashboardproviders.yaml": {
-                        "apiVersion": 1,
-                        "providers": [
-                            {
-                                "name": "default",
-                                "orgId": 1,
-                                "folder": "",
-                                "type": "file",
-                                "disableDeletion": False,
-                                "editable": True,
-                                "options": {
-                                    "path": "/var/lib/grafana/dashboards/default"
-                                },
-                            }
-                        ],
-                    }
-                },
-            },
+            values=self.__values_yaml,
         )
+
+    @property
+    def __values_yaml(self):
+        return {
+            "datasources": {
+                "datasources.yaml": {
+                    "apiVersion": 1,
+                    "datasources": [
+                        self.__metrics_datasource,
+                        self.__airflow_database_datasource,
+                        self.__logs_datasource,
+                    ],
+                }
+            },
+            "grafana.ini": {
+                "server": {
+                    "domain": self.__airflow_options.domain_name,
+                    "root_url": "%(protocol)s://%(domain)s/grafana",
+                    "serve_from_sub_path": True,
+                },
+                "auth.anonymous": {
+                    "enabled": True,
+                    "org_name": "Main Org.",
+                    "org_role": self.__monitoring_options.grafana_role,
+                },
+                "auth.basic": {"enabled": False},
+            },
+            "dashboards": {
+                "default": {"airflow-dashboard": {"json": self.dashboard_json}}
+            },
+            "dashboardProviders": {
+                "dashboardproviders.yaml": {
+                    "apiVersion": 1,
+                    "providers": [
+                        {
+                            "name": "default",
+                            "orgId": 1,
+                            "folder": "",
+                            "type": "file",
+                            "disableDeletion": False,
+                            "editable": True,
+                            "options": {"path": "/var/lib/grafana/dashboards/default"},
+                        }
+                    ],
+                }
+            },
+            "service": {"type": self.__cloud_options.service_type},
+            "podAnnotations": self.__cloud_options.elasticsearch_connection_annotations,
+        }
 
     @property
     def dashboard_json(self):
@@ -113,7 +121,7 @@ class GrafanaDependency(ChartDependency):
         return ElasticSearchResource(
             "airflow",
             "[airflow-]*",
-            self.__monitoring_options.elastic_search_uri,
+            self.__monitoring_options.elastic_search_proxy_uri,
             default=True,
         ).dict
 
@@ -122,7 +130,7 @@ class GrafanaDependency(ChartDependency):
         return ElasticSearchResource(
             "filebeat-logs",
             "[filebeat-7.8.1-]*",
-            self.__monitoring_options.elastic_search_uri,
+            self.__monitoring_options.elastic_search_proxy_uri,
             logging_on=True,
         ).dict
 

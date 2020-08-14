@@ -2,7 +2,6 @@ from typing import List
 
 from avionix.kubernetes_objects.core import (
     Container,
-    HostPathVolumeSource,
     LabelSelector,
     PersistentVolume,
     PersistentVolumeClaim,
@@ -15,25 +14,36 @@ from avionix.kubernetes_objects.core import (
 )
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 
 
 class AirflowPersistentVolume(PersistentVolume):
     def __init__(
-        self, name: str, storage: str, host_path: str, access_modes: List[str]
+        self,
+        name: str,
+        storage: str,
+        host_path: str,
+        access_modes: List[str],
+        cloud_options: CloudOptions,
     ):
+        self._cloud_options = cloud_options
+        volume_spec = PersistentVolumeSpec(
+            access_modes,
+            capacity={"storage": storage},
+            host_path=self._cloud_options.get_host_path_volume_source(host_path),
+            storage_class_name=self._cloud_options.storage_class.metadata.name,
+            volume_mode=self._cloud_options.volume_mode,
+            csi=self._cloud_options.get_csi_persistent_volume_source(name),
+        )
+
         super().__init__(
             AirflowMeta(
                 name,
                 annotations={"pv.beta.kubernetes.io/gid": "1001"},
                 labels={"storage-type": name},
             ),
-            PersistentVolumeSpec(
-                access_modes,
-                capacity={"storage": storage},
-                host_path=HostPathVolumeSource(host_path, type="DirectoryOrCreate"),
-                storage_class_name="standard",
-            ),
+            volume_spec,
         )
 
 
@@ -48,13 +58,21 @@ class AirflowVolume(Volume):
 
 
 class AirflowPersistentVolumeClaim(PersistentVolumeClaim):
-    def __init__(self, name: str, access_modes: List[str], storage: str):
+    def __init__(
+        self,
+        name: str,
+        access_modes: List[str],
+        storage: str,
+        cloud_options: CloudOptions,
+    ):
+        self._cloud_options = cloud_options
         super().__init__(
             AirflowMeta(name),
             PersistentVolumeClaimSpec(
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
                 selector=LabelSelector({"storage-type": name}),
+                storage_class_name=self._cloud_options.storage_class.metadata.name,
             ),
         )
 
@@ -77,14 +95,24 @@ class PermissionSettingContainer(Container):
 
 
 class AirflowPersistentVolumeGroup:
-    def __init__(self, name: str, storage: str, access_modes: List[str], folder: str):
+    def __init__(
+        self,
+        name: str,
+        storage: str,
+        access_modes: List[str],
+        folder: str,
+        cloud_options: CloudOptions,
+    ):
         host_path = "/tmp/data/airflow/" + folder
         self.__volume = AirflowVolume(name, name)
         self.__persistent_volume = AirflowPersistentVolume(
-            name, storage, host_path, access_modes
+            name, storage, host_path, access_modes, cloud_options
         )
         self.__persistent_volume_claim = AirflowPersistentVolumeClaim(
-            self.__volume.persistentVolumeClaim.claimName, access_modes, storage
+            self.__volume.persistentVolumeClaim.claimName,
+            access_modes,
+            storage,
+            cloud_options,
         )
         self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
@@ -113,27 +141,33 @@ class AirflowPersistentVolumeGroup:
 
 
 class AirflowLogVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, options: AirflowOptions):
+    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         super().__init__(
             "logs",
-            options.log_storage,
-            access_modes=options.access_modes,
+            airflow_options.log_storage,
+            access_modes=airflow_options.access_modes,
             folder="logs",
+            cloud_options=cloud_options,
         )
 
 
 class AirflowDagVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, options: AirflowOptions):
+    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         super().__init__(
             "dags",
-            options.dag_storage,
-            access_modes=options.access_modes,
+            airflow_options.dag_storage,
+            access_modes=airflow_options.access_modes,
             folder="dags",
+            cloud_options=cloud_options,
         )
 
 
 class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, options: AirflowOptions):
+    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         super().__init__(
-            "tmp", options.dag_storage, access_modes=options.access_modes, folder="tmp"
+            "tmp",
+            airflow_options.dag_storage,
+            access_modes=airflow_options.access_modes,
+            folder="tmp",
+            cloud_options=cloud_options,
         )

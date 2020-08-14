@@ -3,6 +3,7 @@ from pathlib import Path
 from avionix import ChartDependency
 from yaml import dump
 
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 
 
@@ -37,7 +38,9 @@ class FileBeatsContainerInput:
 
 
 class FileBeatDependency(ChartDependency):
-    def __init__(self, monitoring_options: MonitoringOptions):
+    def __init__(
+        self, monitoring_options: MonitoringOptions, cloud_options: CloudOptions
+    ):
         self.__monitoring_options = monitoring_options
         super().__init__(
             "filebeat",
@@ -53,11 +56,15 @@ class FileBeatDependency(ChartDependency):
                             ],
                             "output.elasticsearch": {
                                 "host": "${NODE_NAME}",
-                                "hosts": "${ELASTICSEARCH_HOSTS:%s}"
-                                % self.__monitoring_options.elastic_search_uri,
+                                "hosts": [
+                                    self.__monitoring_options.elastic_search_proxy_uri
+                                ],
                             },
+                            "setup.ilm.enabled": False,
                         }
                     )
-                }
+                },
+                "podAnnotations": cloud_options.elasticsearch_connection_annotations,
+                "image": "docker.elastic.co/beats/filebeat-oss",
             },
         )

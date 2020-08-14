@@ -1,8 +1,13 @@
 from avionix import ChartDependency
 
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
+
 
 class TelegrafDependency(ChartDependency):
-    def __init__(self):
+    def __init__(
+        self, monitoring_options: MonitoringOptions, cloud_options: CloudOptions
+    ):
         super().__init__(
             "telegraf",
             "1.7.21",
@@ -17,7 +22,7 @@ class TelegrafDependency(ChartDependency):
                     "outputs": [
                         {
                             "elasticsearch": {
-                                "urls": ["http://elasticsearch-master:9200"],
+                                "urls": [monitoring_options.elastic_search_proxy_uri],
                                 "timeout": "5s",
                                 "health_check_interval": "10s",
                                 "index_name": "airflow-%Y.%m.%d",
@@ -34,5 +39,6 @@ class TelegrafDependency(ChartDependency):
                     ],
                     "inputs": [{"statsd": {"service_address": ":8125"}}],
                 },
+                "podAnnotations": cloud_options.elasticsearch_connection_annotations,
             },
         )

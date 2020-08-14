@@ -18,7 +18,6 @@ class AirflowOptions:
         dag_sync_image: str,
         dag_sync_command: List[str],
         dag_sync_schedule: str,
-        domain_name: str = "www.avionix-airflow.com",
         dag_storage: str = "50Mi",
         logs_storage: str = "50Mi",
         external_storage: str = "50Mi",
@@ -28,12 +27,14 @@ class AirflowOptions:
         default_timezone: str = "utc",
         core_executor: str = "CeleryExecutor",
         namespace: str = "airflow",
+        domain_name: Optional[str] = "www.avionix-airflow.com",
         additional_vars: Optional[Dict[str, str]] = None,
         fernet_key: str = _create_fernet_key(),
         dags_paused_at_creation: bool = True,
         worker_image: str = "airflow-image",
         worker_image_tag: str = "latest",
         open_node_ports: bool = False,
+        local_mode: bool = False,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -54,6 +55,9 @@ class AirflowOptions:
         self.worker_image = worker_image
         self.worker_image_tag = worker_image_tag
         self.open_node_ports = open_node_ports
+        self.local_mode = local_mode
+        if worker_image == "airflow-image" and not self.local_mode:
+            self.worker_image = "zachb1996/avionix_airflow"
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):

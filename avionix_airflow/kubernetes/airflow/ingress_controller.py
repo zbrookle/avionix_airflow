@@ -8,12 +8,13 @@ from avionix.kubernetes_objects.extensions import (
 )
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowIngress(Ingress):
-    def __init__(self, airflow_options: AirflowOptions):
+    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         values = ValueOrchestrator()
         ingress_paths = [
             HTTPIngressPath(
@@ -35,13 +36,12 @@ class AirflowIngress(Ingress):
                     path="/flower",
                 )
             )
+        annotations = {"nginx.ingress.kubernetes.io/ssl-redirect": "false"}
+        annotations.update(cloud_options.ingress_annotations)
         super().__init__(
-            AirflowMeta(
-                "airflow-ingress",
-                annotations={"nginx.ingress.kubernetes.io/ssl-redirect": "false"},
-            ),
+            AirflowMeta("airflow-ingress", annotations=annotations),
             IngressSpec(
-                backend=IngressBackend("default-http-backend", 80),
+                backend=cloud_options.default_backend,
                 rules=[
                     IngressRule(
                         HTTPIngressRuleValue(ingress_paths),

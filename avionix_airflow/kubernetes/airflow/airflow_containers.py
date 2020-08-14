@@ -15,6 +15,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowLogVolumeGroup,
     ExternalStorageVolumeGroup,
 )
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.probes import AvionixAirflowProbe
@@ -55,6 +56,7 @@ class AirflowContainer(Container):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
     ):
@@ -63,11 +65,14 @@ class AirflowContainer(Container):
         self._redis_options = redis_options
         self._airflow_options = airflow_options
         self._monitoring_options = monitoring_options
+        self._cloud_options = cloud_options
         super().__init__(
             name=name,
             args=[name],
-            image="airflow-image",
-            image_pull_policy="Never",
+            image="airflow-image"
+            if airflow_options.local_mode
+            else "zachb1996/avionix_airflow:latest",
+            image_pull_policy="Never" if airflow_options.local_mode else "IfNotPresent",
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
@@ -82,9 +87,15 @@ class AirflowContainer(Container):
 
     def _get_volume_mounts(self):
         return [
-            AirflowLogVolumeGroup(self._airflow_options).volume_mount,
-            AirflowDagVolumeGroup(self._airflow_options).volume_mount,
-            ExternalStorageVolumeGroup(self._airflow_options).volume_mount,
+            AirflowLogVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume_mount,
+            AirflowDagVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume_mount,
+            ExternalStorageVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume_mount,
         ]
 
     def _get_environment(self):
@@ -112,7 +123,9 @@ class AirflowContainer(Container):
     @property
     def _elastic_search_env(self):
         return [
-            ElasticSearchEnvVar("HOST", self._monitoring_options.elastic_search_uri),
+            ElasticSearchEnvVar(
+                "HOST", self._monitoring_options.elastic_search_proxy_uri
+            ),
             ElasticSearchEnvVar("WRITE_STDOUT", "True"),
             ElasticSearchEnvVar("JSON_FORMAT", "False"),
         ]
@@ -124,7 +137,7 @@ class AirflowContainer(Container):
             KubernetesEnvVar(
                 "DAGS_VOLUME_CLAIM",
                 AirflowDagVolumeGroup(
-                    self._airflow_options
+                    self._airflow_options, self._cloud_options
                 ).persistent_volume_claim.metadata.name,
             ),
             KubernetesEnvVar(
@@ -140,7 +153,7 @@ class AirflowContainer(Container):
                 KubernetesEnvVar(
                     "LOGS_VOLUME_CLAIM",
                     AirflowLogVolumeGroup(
-                        self._airflow_options
+                        self._airflow_options, self._cloud_options
                     ).persistent_volume_claim.metadata.name,
                 )
             )
@@ -160,6 +173,7 @@ class WebserverUI(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
         super().__init__(
             "webserver",
@@ -167,6 +181,7 @@ class WebserverUI(AirflowContainer):
             redis_options,
             airflow_options,
             monitoring_options,
+            cloud_options,
             ports=[ContainerPort(8080, host_port=8080)],
             readiness_probe=AvionixAirflowProbe("/airflow", 8080, "0.0.0.0"),
         )
@@ -179,6 +194,7 @@ class Scheduler(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
         super().__init__(
             "scheduler",
@@ -186,6 +202,7 @@ class Scheduler(AirflowContainer):
             redis_options,
             airflow_options,
             monitoring_options,
+            cloud_options,
             [ContainerPort(8125, host_port=8125)],
         )
 
@@ -197,6 +214,7 @@ class FlowerUI(AirflowContainer):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
         super().__init__(
             "flower",
@@ -204,5 +222,6 @@ class FlowerUI(AirflowContainer):
             redis_options,
             airflow_options,
             monitoring_options,
+            cloud_options=cloud_options,
             readiness_probe=AvionixAirflowProbe("/flower/", 5555),
         )

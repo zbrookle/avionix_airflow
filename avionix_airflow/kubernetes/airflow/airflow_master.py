@@ -18,6 +18,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowLogVolumeGroup,
     ExternalStorageVolumeGroup,
 )
+from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
@@ -32,20 +33,26 @@ class AirflowPodTemplate(PodTemplateSpec):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
-        log_volume_group = AirflowLogVolumeGroup(airflow_options)
-        dag_volume_group = AirflowDagVolumeGroup(airflow_options)
-        external_storage = ExternalStorageVolumeGroup(airflow_options)
+        log_volume_group = AirflowLogVolumeGroup(airflow_options, cloud_options)
+        dag_volume_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
+        external_storage = ExternalStorageVolumeGroup(airflow_options, cloud_options)
         values = ValueOrchestrator()
         self.__sql_options = sql_options
         self.__redis_options = redis_options
         self.__airflow_options = airflow_options
         self.__monitoring_options = monitoring_options
+        self.__cloud_options = cloud_options
         service_account = (
             values.airflow_pod_service_account if airflow_options.in_kube_mode else None
         )
         super().__init__(
-            AirflowMeta(name="airflow-master-pod", labels=values.master_node_labels),
+            AirflowMeta(
+                name="airflow-master-pod",
+                labels=values.master_node_labels,
+                annotations=cloud_options.elasticsearch_connection_annotations,
+            ),
             spec=PodSpec(
                 self.__get_containers(),
                 volumes=[
@@ -64,12 +71,14 @@ class AirflowPodTemplate(PodTemplateSpec):
                 self.__redis_options,
                 self.__airflow_options,
                 self.__monitoring_options,
+                self.__cloud_options,
             ),
             Scheduler(
                 self.__sql_options,
                 self.__redis_options,
                 self.__airflow_options,
                 self.__monitoring_options,
+                self.__cloud_options,
             ),
         ]
         if self.__airflow_options.in_celery_mode:
@@ -79,6 +88,7 @@ class AirflowPodTemplate(PodTemplateSpec):
                     self.__redis_options,
                     self.__airflow_options,
                     self.__monitoring_options,
+                    self.__cloud_options,
                 )
             )
         return pods
@@ -91,12 +101,17 @@ class AirflowDeployment(Deployment):
         redis_options: RedisOptions,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
     ):
         super().__init__(
             AirflowMeta(name="airflow-master-deployment"),
             DeploymentSpec(
                 AirflowPodTemplate(
-                    sql_options, redis_options, airflow_options, monitoring_options
+                    sql_options,
+                    redis_options,
+                    airflow_options,
+                    monitoring_options,
+                    cloud_options,
                 ),
                 LabelSelector(ValueOrchestrator().master_node_labels),
                 strategy=DeploymentStrategy(
