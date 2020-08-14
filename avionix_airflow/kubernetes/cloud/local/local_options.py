@@ -20,7 +20,7 @@ class LocalOptions(CloudOptions):
             storage_class=StorageClass(
                 ObjectMeta(name="standard"), None, None, None, "efs.csi.aws.com", None
             ),
-            volume_mode="hostPath",
+            volume_mode="Filesystem",
         )
 
     def get_csi_persistent_volume_source(self, name: str) -> CSIPersistentVolumeSource:
