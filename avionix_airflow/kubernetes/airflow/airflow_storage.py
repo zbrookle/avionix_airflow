@@ -2,8 +2,6 @@ from typing import List
 
 from avionix.kubernetes_objects.core import (
     Container,
-    CSIPersistentVolumeSource,
-    HostPathVolumeSource,
     LabelSelector,
     PersistentVolume,
     PersistentVolumeClaim,
