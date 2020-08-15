@@ -33,6 +33,7 @@ class AwsOptions(CloudOptions):
         external_dns_role_arn: str,
         domain: str,
         domain_filters: Optional[List[str]] = None,
+        use_ssl: bool = False,
     ):
         self.__efs_id = efs_id
         self.__cluster_name = cluster_name
@@ -43,6 +44,7 @@ class AwsOptions(CloudOptions):
         self.__domain_filters = domain_filters
         self.__external_dns_role_arn = external_dns_role_arn
         self.__values = ValueOrchestrator()
+        self.__use_ssl = use_ssl
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -119,7 +121,7 @@ class AwsOptions(CloudOptions):
                         "PathPatternConfig": {"Values": [f"{path}*"]},
                     }
                 ]
-            ),
+            )
         )
 
     def _get_redirect(self, path: str, query: str = ""):
@@ -136,7 +138,7 @@ class AwsOptions(CloudOptions):
                         "StatusCode": "HTTP_302",
                     },
                 }
-            ),
+            )
         )
 
     @property
@@ -144,17 +146,17 @@ class AwsOptions(CloudOptions):
         ingress_prefix = "alb.ingress.kubernetes.io"
         webserver_name = self.__values.webserver_service_name
         grafana_name = self.__values.grafana_service_name
-        conditions_prefix = f"{ingress_prefix}/conditions/"
-        return {
+        conditions_prefix = f"{ingress_prefix}/conditions"
+        annotations = {
             "kubernetes.io/ingress.class": "alb",
             "external-dns.alpha.kubernetes.io/hostname": self.__domain,
             f"{ingress_prefix}/target-type": "ip",
             f"{ingress_prefix}/scheme": "internal",
             f"{conditions_prefix}.{webserver_name}": self._get_wildcard_path_pattern(
-                "/grafana"
+                "/airflow"
             ),
             f"{conditions_prefix}.{grafana_name}": self._get_wildcard_path_pattern(
-                "/airflow"
+                "/grafana"
             ),
             f"{ingress_prefix}/actions.{self._grafana_redirect}": self._get_redirect(
                 "/grafana/", "orgid=1"
@@ -163,6 +165,9 @@ class AwsOptions(CloudOptions):
                 "/airflow/admin"
             ),
         }
+        if self.__use_ssl:
+            annotations["alb.ingress.kubernetes.io/listen-ports"] = '[{"HTTPS":443}]'
+        return annotations
 
     @property
     def extra_ingress_paths(self) -> List[AirflowIngressPath]:
