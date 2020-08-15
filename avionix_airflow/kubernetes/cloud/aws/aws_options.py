@@ -22,6 +22,7 @@ class AwsOptions(CloudOptions):
     _use_annotation = "use-annotation"
     _grafana_redirect = "grafana-redirect"
     _airflow_redirect = "airflow-redirect"
+    ingress_path_service_suffix = "*"
 
     def __init__(
         self,
@@ -123,7 +124,7 @@ class AwsOptions(CloudOptions):
             "RedirectConfig": {
                 "Host": "#{host}",
                 "Path": path,
-                "Port": "#{port}",
+                "Port": "80",
                 "Protocol": "HTTP",
                 "Query": query,
                 "StatusCode": "HTTP_302",
@@ -131,25 +132,17 @@ class AwsOptions(CloudOptions):
         }
         if self.__use_ssl:
             redirect["RedirectConfig"]["Protocol"] = "HTTPS"
+            redirect["RedirectConfig"]["Port"] = "443"
         return dumps(redirect)
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
         ingress_prefix = "alb.ingress.kubernetes.io"
-        webserver_name = self.__values.webserver_service_name
-        grafana_name = self.__values.grafana_service_name
-        conditions_prefix = f"{ingress_prefix}/conditions"
         annotations = {
             "kubernetes.io/ingress.class": "alb",
             "external-dns.alpha.kubernetes.io/hostname": self.__domain,
             f"{ingress_prefix}/target-type": "ip",
             f"{ingress_prefix}/scheme": "internal",
-            f"{conditions_prefix}.{webserver_name}": self._get_wildcard_path_pattern(
-                "/airflow"
-            ),
-            f"{conditions_prefix}.{grafana_name}": self._get_wildcard_path_pattern(
-                "/grafana"
-            ),
             f"{ingress_prefix}/actions.{self._grafana_redirect}": self._get_redirect(
                 "/grafana/", "orgid=1"
             ),
@@ -158,12 +151,25 @@ class AwsOptions(CloudOptions):
             ),
         }
         if self.__use_ssl:
-            annotations["alb.ingress.kubernetes.io/listen-ports"] = '[{"HTTPS":443}]'
+            annotations[
+                "alb.ingress.kubernetes.io/listen-ports"
+            ] = '[{"HTTPS":443, "HTTP":80 }]'
+            annotations["alb.ingress.kubernetes.io/actions.ssl-redirect"] = dumps(
+                {
+                    "Type": "redirect",
+                    "RedirectConfig": {
+                        "Protocol": "HTTPS",
+                        "Port": "443",
+                        "StatusCode": "HTTP_301",
+                    },
+                }
+            )
+
         return annotations
 
     @property
     def extra_ingress_paths(self) -> List[AirflowIngressPath]:
-        return [
+        ingress_paths = [
             AirflowIngressPath(
                 self._grafana_redirect, self._use_annotation, path="/grafana"
             ),
@@ -171,6 +177,11 @@ class AwsOptions(CloudOptions):
                 self._airflow_redirect, self._use_annotation, path="/airflow"
             ),
         ]
+        if self.__use_ssl:
+            return [
+                AirflowIngressPath("ssl-redirect", self._use_annotation, path="/*"),
+            ] + ingress_paths
+        return ingress_paths
 
     @property
     def default_backend(self) -> IngressBackend:

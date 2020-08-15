@@ -12,6 +12,7 @@ from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 class CloudOptions(ABC):
     service_type = "LoadBalancer"
     preinstall_namepsace = "kube-system"
+    ingress_path_service_suffix = ""
 
     def __init__(self, storage_class: StorageClass, volume_mode: str):
         self.storage_class = storage_class

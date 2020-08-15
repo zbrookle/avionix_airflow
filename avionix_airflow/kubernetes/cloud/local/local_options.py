@@ -38,7 +38,7 @@ class LocalOptions(CloudOptions):
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
-        return {}
+        return {"nginx.ingress.kubernetes.io/ssl-redirect": "false"}
 
     @property
     def default_backend(self) -> IngressBackend:

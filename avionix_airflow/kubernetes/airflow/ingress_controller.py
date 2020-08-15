@@ -15,28 +15,28 @@ from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 class AirflowIngress(Ingress):
     def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         values = ValueOrchestrator()
-        ingress_paths = [
+        ingress_paths = cloud_options.extra_ingress_paths + [
             AirflowIngressPath(
                 values.webserver_service_name,
                 values.webserver_port_name,
-                path="/airflow",
+                path="/airflow" + cloud_options.ingress_path_service_suffix,
             ),
             AirflowIngressPath(
                 values.grafana_service_name,
                 values.grafana_service_port,
-                path="/grafana",
+                path="/grafana" + cloud_options.ingress_path_service_suffix,
             ),
-        ] + cloud_options.extra_ingress_paths
+        ]
         if airflow_options.in_celery_mode:
             ingress_paths.append(
                 AirflowIngressPath(
                     values.flower_service_name, values.flower_port_name, path="/flower"
                 )
             )
-        annotations = {"nginx.ingress.kubernetes.io/ssl-redirect": "false"}
-        annotations.update(cloud_options.ingress_annotations)
         super().__init__(
-            AirflowMeta("airflow-ingress", annotations=annotations),
+            AirflowMeta(
+                "airflow-ingress", annotations=cloud_options.ingress_annotations
+            ),
             IngressSpec(
                 backend=cloud_options.default_backend,
                 rules=[
