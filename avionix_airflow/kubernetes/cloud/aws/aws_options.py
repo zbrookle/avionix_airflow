@@ -113,33 +113,25 @@ class AwsOptions(CloudOptions):
         ]
 
     def _get_wildcard_path_pattern(self, path: str):
-        return (
-            dumps(
-                [
-                    {
-                        "Field": "path-pattern",
-                        "PathPatternConfig": {"Values": [f"{path}*"]},
-                    }
-                ]
-            )
+        return dumps(
+            [{"Field": "path-pattern", "PathPatternConfig": {"Values": [f"{path}*"]},}]
         )
 
     def _get_redirect(self, path: str, query: str = ""):
-        return (
-            dumps(
-                {
-                    "Type": "redirect",
-                    "RedirectConfig": {
-                        "Host": "#{host}",
-                        "Path": path,
-                        "Port": "#{port}",
-                        "Protocol": "HTTP",
-                        "Query": query,
-                        "StatusCode": "HTTP_302",
-                    },
-                }
-            )
-        )
+        redirect = {
+            "Type": "redirect",
+            "RedirectConfig": {
+                "Host": "#{host}",
+                "Path": path,
+                "Port": "#{port}",
+                "Protocol": "HTTP",
+                "Query": query,
+                "StatusCode": "HTTP_302",
+            },
+        }
+        if self.__use_ssl:
+            redirect["RedirectConfig"]["Protocol"] = "HTTPS"
+        return dumps(redirect)
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
