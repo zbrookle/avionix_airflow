@@ -21,6 +21,7 @@ from json import dumps
 class AwsOptions(CloudOptions):
     _use_annotation = "use-annotation"
     _grafana_redirect = "grafana-redirect"
+    _airflow_redirect = "airflow-redirect"
 
     def __init__(
         self,
@@ -125,6 +126,14 @@ class AwsOptions(CloudOptions):
                     }
                 ]
             ),
+            f"{ingress_prefix}/conditions.{self.__values.webserver_service_name}": dumps(
+                [
+                    {
+                        "Field": "path-pattern",
+                        "PathPatternConfig": {"Values": ["/airflow*"]},
+                    }
+                ]
+            ),
             f"{ingress_prefix}/actions.{self._grafana_redirect}": dumps(
                 {
                     "Type": "redirect",
@@ -138,6 +147,18 @@ class AwsOptions(CloudOptions):
                     },
                 }
             ),
+            f"{ingress_prefix}/actions.{self._airflow_redirect}": dumps(
+                {
+                    "Type": "redirect",
+                    "RedirectConfig": {
+                        "Host": "#{host}",
+                        "Path": "/airflow/admin",
+                        "Port": "#{port}",
+                        "Protocol": "HTTP",
+                        "StatusCode": "HTTP_302",
+                    },
+                }
+            ),
         }
 
     @property
@@ -145,6 +166,9 @@ class AwsOptions(CloudOptions):
         return [
             AirflowIngressPath(
                 self._grafana_redirect, self._use_annotation, path="/grafana"
+            ),
+            AirflowIngressPath(
+                self._airflow_redirect, self._use_annotation, path="/airflow"
             )
         ]
 
