@@ -51,3 +51,7 @@ class LocalOptions(CloudOptions):
         self, elastic_search_uri: str
     ) -> List[KubernetesBaseObject]:
         return []
+
+    @property
+    def webserver_service_annotations(self) -> Dict[str, str]:
+        return {}

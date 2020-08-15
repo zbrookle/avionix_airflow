@@ -52,3 +52,9 @@ class CloudOptions(ABC):
         self, elastic_search_uri: str
     ) -> List[KubernetesBaseObject]:
         pass
+
+    @property
+    @abstractmethod
+    def webserver_service_annotations(self) -> Dict[str, str]:
+        return {}
+

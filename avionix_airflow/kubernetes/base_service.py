@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from avionix.kubernetes_objects.core import Service, ServicePort, ServiceSpec
 
@@ -18,9 +18,10 @@ class AirflowService(Service):
         protocol: Optional[str] = None,
         node_ports_open: bool = False,
         service_type: str = "ClusterIP",
+        annotations: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
-            AirflowMeta(name),
+            AirflowMeta(name, annotations=annotations),
             ServiceSpec(
                 [
                     ServicePort(

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from avionix import ChartDependency, ObjectMeta
 from avionix.kubernetes_objects.base_objects import KubernetesBaseObject
@@ -22,11 +22,19 @@ class AwsOptions(CloudOptions):
         cluster_name: str,
         elastic_search_access_role_arn: str,
         default_role_arn: str,
+        alb_role_arn: str,
+        external_dns_role_arn: str,
+        domain: str,
+        domain_filters: Optional[List[str]] = None,
     ):
         self.__efs_id = efs_id
         self.__cluster_name = cluster_name
         self.__elastic_search_access_role = elastic_search_access_role_arn
         self.__default_role = default_role_arn
+        self.__alb_role_arn = alb_role_arn
+        self.__domain = domain
+        self.__domain_filters = domain_filters
+        self.__external_dns_role_arn = external_dns_role_arn
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -63,6 +71,8 @@ class AwsOptions(CloudOptions):
                     "clusterName": self.__cluster_name,
                     "autoDiscoverAwsRegion": True,
                     "autoDiscoverAwsVpcID": True,
+                    "rbac": {"create": True},
+                    "podAnnotations": {"iam.amazonaws.com/role": self.__alb_role_arn},
                 },
             ),
             ChartDependency(
@@ -76,11 +86,31 @@ class AwsOptions(CloudOptions):
                     "host": {"iptables": True, "interface": "eni+"},
                 },
             ),
+            ChartDependency(
+                "external-dns",
+                "3.3.0",
+                "https://charts.bitnami.com/bitnami",
+                "bitnami",
+                values={
+                    # "aws": {"zoneType": "private"},
+                    "domainFilters": []
+                    if self.__domain_filters is None
+                    else self.__domain_filters,
+                    "podAnnotations": {
+                        "iam.amazonaws.com/role": self.__external_dns_role_arn
+                    },
+                },
+            ),
         ]
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
-        return {"kubernetes.io/ingress.class": "alb"}
+        return {
+            "kubernetes.io/ingress.class": "alb",
+            "external-dns.alpha.kubernetes.io/hostname": self.__domain,
+            "alb.ingress.kubernetes.io/target-type": "ip",
+            "alb.ingress.kubernetes.io/scheme": "internal"
+        }
 
     @property
     def default_backend(self) -> IngressBackend:
@@ -97,3 +127,10 @@ class AwsOptions(CloudOptions):
             AwsElasticSearchProxyService(),
             AwsElasticSearchProxyDeployment(self, elastic_search_uri),
         ]
+
+    @property
+    def webserver_service_annotations(self) -> Dict[str, str]:
+        return {
+            "alb.ingress.kubernetes.io/healthcheck-path": "/airflow",
+            "alb.ingress.kubernetes.io/successCodes": "200,308",
+        }
