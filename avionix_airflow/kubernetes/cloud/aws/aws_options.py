@@ -110,54 +110,57 @@ class AwsOptions(CloudOptions):
             ),
         ]
 
+    def _get_wildcard_path_pattern(self, path: str):
+        return (
+            dumps(
+                [
+                    {
+                        "Field": "path-pattern",
+                        "PathPatternConfig": {"Values": [f"{path}*"]},
+                    }
+                ]
+            ),
+        )
+
+    def _get_redirect(self, path: str, query: str = ""):
+        return (
+            dumps(
+                {
+                    "Type": "redirect",
+                    "RedirectConfig": {
+                        "Host": "#{host}",
+                        "Path": path,
+                        "Port": "#{port}",
+                        "Protocol": "HTTP",
+                        "Query": query,
+                        "StatusCode": "HTTP_302",
+                    },
+                }
+            ),
+        )
+
     @property
     def ingress_annotations(self) -> Dict[str, str]:
         ingress_prefix = "alb.ingress.kubernetes.io"
+        webserver_name = self.__values.webserver_service_name
+        grafana_name = self.__values.grafana_service_name
+        conditions_prefix = f"{ingress_prefix}/conditions/"
         return {
             "kubernetes.io/ingress.class": "alb",
             "external-dns.alpha.kubernetes.io/hostname": self.__domain,
             f"{ingress_prefix}/target-type": "ip",
             f"{ingress_prefix}/scheme": "internal",
-            f"{ingress_prefix}/conditions.{self.__values.grafana_service_name}": dumps(
-                [
-                    {
-                        "Field": "path-pattern",
-                        "PathPatternConfig": {"Values": ["/grafana*"]},
-                    }
-                ]
+            f"{conditions_prefix}.{webserver_name}": self._get_wildcard_path_pattern(
+                "/grafana"
             ),
-            f"{ingress_prefix}/conditions.{self.__values.webserver_service_name}": dumps(
-                [
-                    {
-                        "Field": "path-pattern",
-                        "PathPatternConfig": {"Values": ["/airflow*"]},
-                    }
-                ]
+            f"{conditions_prefix}.{grafana_name}": self._get_wildcard_path_pattern(
+                "/airflow"
             ),
-            f"{ingress_prefix}/actions.{self._grafana_redirect}": dumps(
-                {
-                    "Type": "redirect",
-                    "RedirectConfig": {
-                        "Host": "#{host}",
-                        "Path": "/grafana/",
-                        "Port": "#{port}",
-                        "Protocol": "HTTP",
-                        "Query": "orgid=1",
-                        "StatusCode": "HTTP_302",
-                    },
-                }
+            f"{ingress_prefix}/actions.{self._grafana_redirect}": self._get_redirect(
+                "/grafana/", "orgid=1"
             ),
-            f"{ingress_prefix}/actions.{self._airflow_redirect}": dumps(
-                {
-                    "Type": "redirect",
-                    "RedirectConfig": {
-                        "Host": "#{host}",
-                        "Path": "/airflow/admin",
-                        "Port": "#{port}",
-                        "Protocol": "HTTP",
-                        "StatusCode": "HTTP_302",
-                    },
-                }
+            f"{ingress_prefix}/actions.{self._airflow_redirect}": self._get_redirect(
+                "/airflow/admin"
             ),
         }
 
@@ -169,7 +172,7 @@ class AwsOptions(CloudOptions):
             ),
             AirflowIngressPath(
                 self._airflow_redirect, self._use_annotation, path="/airflow"
-            )
+            ),
         ]
 
     @property
