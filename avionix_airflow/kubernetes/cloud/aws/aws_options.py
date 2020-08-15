@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from avionix import ChartDependency, ObjectMeta
 from avionix.kubernetes_objects.base_objects import KubernetesBaseObject
 from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
-from avionix.kubernetes_objects.extensions import IngressBackend
+from avionix.kubernetes_objects.extensions import IngressBackend, HTTPIngressPath
 from avionix.kubernetes_objects.storage import StorageClass
 
 from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_deployment import (
@@ -13,9 +13,15 @@ from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service imp
     AwsElasticSearchProxyService,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
+from json import dumps
 
 
 class AwsOptions(CloudOptions):
+    _use_annotation = "use-annotation"
+    _grafana_redirect = "grafana-redirect"
+
     def __init__(
         self,
         efs_id: str,
@@ -35,6 +41,7 @@ class AwsOptions(CloudOptions):
         self.__domain = domain
         self.__domain_filters = domain_filters
         self.__external_dns_role_arn = external_dns_role_arn
+        self.__values = ValueOrchestrator()
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -92,7 +99,6 @@ class AwsOptions(CloudOptions):
                 "https://charts.bitnami.com/bitnami",
                 "bitnami",
                 values={
-                    # "aws": {"zoneType": "private"},
                     "domainFilters": []
                     if self.__domain_filters is None
                     else self.__domain_filters,
@@ -105,12 +111,42 @@ class AwsOptions(CloudOptions):
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
+        ingress_prefix = "alb.ingress.kubernetes.io"
         return {
             "kubernetes.io/ingress.class": "alb",
             "external-dns.alpha.kubernetes.io/hostname": self.__domain,
-            "alb.ingress.kubernetes.io/target-type": "ip",
-            "alb.ingress.kubernetes.io/scheme": "internal"
+            f"{ingress_prefix}/target-type": "ip",
+            f"{ingress_prefix}/scheme": "internal",
+            f"{ingress_prefix}/conditions.{self.__values.grafana_service_name}": dumps(
+                [
+                    {
+                        "Field": "path-pattern",
+                        "PathPatternConfig": {"Values": ["/grafana*"]},
+                    }
+                ]
+            ),
+            f"{ingress_prefix}/actions.{self._grafana_redirect}": dumps(
+                {
+                    "Type": "redirect",
+                    "RedirectConfig": {
+                        "Host": "#{host}",
+                        "Path": "/grafana/",
+                        "Port": "#{port}",
+                        "Protocol": "HTTP",
+                        "Query": "orgid=1",
+                        "StatusCode": "HTTP_302",
+                    },
+                }
+            ),
         }
+
+    @property
+    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+        return [
+            AirflowIngressPath(
+                self._grafana_redirect, self._use_annotation, path="/grafana"
+            )
+        ]
 
     @property
     def default_backend(self) -> IngressBackend:

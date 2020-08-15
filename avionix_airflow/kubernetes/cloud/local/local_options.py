@@ -10,6 +10,7 @@ from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 
 
 class LocalOptions(CloudOptions):
@@ -55,3 +56,7 @@ class LocalOptions(CloudOptions):
     @property
     def webserver_service_annotations(self) -> Dict[str, str]:
         return {}
+
+    @property
+    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+        return []

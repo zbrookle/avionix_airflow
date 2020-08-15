@@ -1,8 +1,6 @@
 from avionix.kubernetes_objects.extensions import (
-    HTTPIngressPath,
     HTTPIngressRuleValue,
     Ingress,
-    IngressBackend,
     IngressRule,
     IngressSpec,
 )
@@ -11,29 +9,28 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 
 
 class AirflowIngress(Ingress):
     def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         values = ValueOrchestrator()
         ingress_paths = [
-            HTTPIngressPath(
-                IngressBackend(
-                    values.webserver_service_name, values.webserver_port_name,
-                ),
+            AirflowIngressPath(
+                values.webserver_service_name,
+                values.webserver_port_name,
                 path="/airflow",
             ),
-            HTTPIngressPath(
-                IngressBackend("airflow-grafana", "service"), path="/grafana"
+            AirflowIngressPath(
+                values.grafana_service_name,
+                values.grafana_service_port,
+                path="/grafana",
             ),
-        ]
+        ] + cloud_options.extra_ingress_paths
         if airflow_options.in_celery_mode:
             ingress_paths.append(
-                HTTPIngressPath(
-                    IngressBackend(
-                        values.flower_service_name, values.flower_port_name,
-                    ),
-                    path="/flower",
+                AirflowIngressPath(
+                    values.flower_service_name, values.flower_port_name, path="/flower"
                 )
             )
         annotations = {"nginx.ingress.kubernetes.io/ssl-redirect": "false"}

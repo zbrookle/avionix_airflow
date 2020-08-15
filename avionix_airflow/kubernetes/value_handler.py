@@ -7,6 +7,8 @@ class ValueOrchestrator:
         self.statsd_port_name = "statsd"
         self.elasticsearch_proxy_port = 9200
         self.elasticsearch_proxy_service_name = "elasticsearch-master"
+        self.grafana_service_name = "airflow-grafana"
+        self.grafana_service_port = "service"
 
     @property
     def master_node_labels(self):

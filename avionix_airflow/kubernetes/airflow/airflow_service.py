@@ -28,7 +28,7 @@ class MasterNodeService(AirflowService):
             protocol=protocol,
             node_ports_open=node_ports_open,
             service_type=service_type,
-            annotations=annotations
+            annotations=annotations,
         )
 
 
@@ -49,7 +49,7 @@ class WebserverService(MasterNodeService):
             node_ports_open,
             values.webserver_port_name,
             service_type=cloud_options.service_type,
-            annotations=cloud_options.webserver_service_annotations
+            annotations=cloud_options.webserver_service_annotations,
         )
 
 
