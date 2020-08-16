@@ -62,6 +62,8 @@ class GrafanaDependency(ChartDependency):
 
     @property
     def __values_yaml(self):
+        dashboard_dir_path = "/var/lib/grafana/dashboards/default"
+        dashboard_name = "airflow-dashboard"
         return {
             "datasources": {
                 "datasources.yaml": {
@@ -86,9 +88,7 @@ class GrafanaDependency(ChartDependency):
                 },
                 "auth.basic": {"enabled": False},
             },
-            "dashboards": {
-                "default": {"airflow-dashboard": {"json": self.dashboard_json}}
-            },
+            "dashboards": {"default": {dashboard_name: {"json": self.dashboard_json}}},
             "dashboardProviders": {
                 "dashboardproviders.yaml": {
                     "apiVersion": 1,
@@ -100,13 +100,17 @@ class GrafanaDependency(ChartDependency):
                             "type": "file",
                             "disableDeletion": False,
                             "editable": True,
-                            "options": {"path": "/var/lib/grafana/dashboards/default"},
+                            "options": {"path": dashboard_dir_path},
                         }
                     ],
                 }
             },
             "service": {"type": self.__cloud_options.service_type},
             "podAnnotations": self.__cloud_options.elasticsearch_connection_annotations,
+            "env": {
+                "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": dashboard_dir_path
+                + f"/{dashboard_name}.json"
+            },
         }
 
     @property

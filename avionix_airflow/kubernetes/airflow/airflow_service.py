@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from avionix_airflow.kubernetes.base_service import AirflowService
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -16,6 +16,7 @@ class MasterNodeService(AirflowService):
         port_name: str = "http",
         protocol: Optional[str] = None,
         service_type: str = "ClusterIP",
+        annotations: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
             name,
@@ -27,6 +28,7 @@ class MasterNodeService(AirflowService):
             protocol=protocol,
             node_ports_open=node_ports_open,
             service_type=service_type,
+            annotations=annotations,
         )
 
 
@@ -47,6 +49,7 @@ class WebserverService(MasterNodeService):
             node_ports_open,
             values.webserver_port_name,
             service_type=cloud_options.service_type,
+            annotations=cloud_options.webserver_service_annotations,
         )
 
 

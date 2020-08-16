@@ -7,10 +7,13 @@ from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
 from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
+
 
 class CloudOptions(ABC):
     service_type = "LoadBalancer"
     preinstall_namepsace = "kube-system"
+    ingress_path_service_suffix = ""
 
     def __init__(self, storage_class: StorageClass, volume_mode: str):
         self.storage_class = storage_class
@@ -39,6 +42,11 @@ class CloudOptions(ABC):
 
     @property
     @abstractmethod
+    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+        pass
+
+    @property
+    @abstractmethod
     def default_backend(self) -> IngressBackend:
         pass
 
@@ -52,3 +60,8 @@ class CloudOptions(ABC):
         self, elastic_search_uri: str
     ) -> List[KubernetesBaseObject]:
         pass
+
+    @property
+    @abstractmethod
+    def webserver_service_annotations(self) -> Dict[str, str]:
+        return {}

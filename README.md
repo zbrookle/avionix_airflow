@@ -47,8 +47,7 @@ These options are then passed into the function *get_chart_builder*, which can b
 ## Minikube
 
 ```python
-from avionix_airflow import add_host, build_airflow_image, get_chart_builder
-from avionix_airflow.kubernetes.airflow import AirflowOptions
+from avionix_airflow import add_host, build_airflow_image, get_chart_builder, AirflowOptions
 from avionix_airflow.tests.utils import dag_copy_loc, parse_shell_script
 
 TEST_AIRFLOW_OPTIONS = AirflowOptions(
@@ -68,6 +67,13 @@ def main():
     )
     builder.install_chart(options={"create-namespace": None, "dependency-update": None})
 ```
+
+## AWS EKS Managed Node
+
+```python
+
+```
+
 
 ## FAQ
 

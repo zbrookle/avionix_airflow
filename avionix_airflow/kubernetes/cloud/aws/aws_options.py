@@ -1,4 +1,5 @@
-from typing import Dict, List
+from json import dumps
+from typing import Dict, List, Optional
 
 from avionix import ChartDependency, ObjectMeta
 from avionix.kubernetes_objects.base_objects import KubernetesBaseObject
@@ -6,6 +7,7 @@ from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
 from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_deployment import (
     AwsElasticSearchProxyDeployment,
 )
@@ -13,20 +15,37 @@ from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service imp
     AwsElasticSearchProxyService,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AwsOptions(CloudOptions):
+    _use_annotation = "use-annotation"
+    _grafana_redirect = "grafana-redirect"
+    _airflow_redirect = "airflow-redirect"
+    ingress_path_service_suffix = "*"
+
     def __init__(
         self,
         efs_id: str,
         cluster_name: str,
         elastic_search_access_role_arn: str,
         default_role_arn: str,
+        alb_role_arn: str,
+        external_dns_role_arn: str,
+        domain: str,
+        domain_filters: Optional[List[str]] = None,
+        use_ssl: bool = False,
     ):
         self.__efs_id = efs_id
         self.__cluster_name = cluster_name
         self.__elastic_search_access_role = elastic_search_access_role_arn
         self.__default_role = default_role_arn
+        self.__alb_role_arn = alb_role_arn
+        self.__domain = domain
+        self.__domain_filters = domain_filters
+        self.__external_dns_role_arn = external_dns_role_arn
+        self.__values = ValueOrchestrator()
+        self.__use_ssl = use_ssl
         super().__init__(
             StorageClass(
                 ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
@@ -36,7 +55,7 @@ class AwsOptions(CloudOptions):
 
     def get_csi_persistent_volume_source(self, name: str):
         return CSIPersistentVolumeSource(
-            driver="efs.csi.aws.com", volume_handle=f"{self.__efs_id}:/{name}",
+            driver="efs.csi.aws.com", volume_handle=f"{self.__efs_id}:/{name}"
         )
 
     def get_host_path_volume_source(self, host_path: str):
@@ -63,6 +82,8 @@ class AwsOptions(CloudOptions):
                     "clusterName": self.__cluster_name,
                     "autoDiscoverAwsRegion": True,
                     "autoDiscoverAwsVpcID": True,
+                    "rbac": {"create": True},
+                    "podAnnotations": {"iam.amazonaws.com/role": self.__alb_role_arn},
                 },
             ),
             ChartDependency(
@@ -76,11 +97,94 @@ class AwsOptions(CloudOptions):
                     "host": {"iptables": True, "interface": "eni+"},
                 },
             ),
+            ChartDependency(
+                "external-dns",
+                "3.3.0",
+                "https://charts.bitnami.com/bitnami",
+                "bitnami",
+                values={
+                    "domainFilters": []
+                    if self.__domain_filters is None
+                    else self.__domain_filters,
+                    "podAnnotations": {
+                        "iam.amazonaws.com/role": self.__external_dns_role_arn
+                    },
+                },
+            ),
         ]
+
+    @staticmethod
+    def _get_wildcard_path_pattern(path: str):
+        return dumps(
+            [{"Field": "path-pattern", "PathPatternConfig": {"Values": [f"{path}*"]}}]
+        )
+
+    def _get_redirect(self, path: str, query: str = ""):
+        redirect_config = {
+            "Host": "#{host}",
+            "Path": path,
+            "Port": "80",
+            "Protocol": "HTTP",
+            "Query": query,
+            "StatusCode": "HTTP_302",
+        }
+        if self.__use_ssl:
+            redirect_config["Protocol"] = "HTTPS"
+            redirect_config["Port"] = "443"
+        redirect = {
+            "Type": "redirect",
+            "RedirectConfig": redirect_config,
+        }
+
+        return dumps(redirect)
 
     @property
     def ingress_annotations(self) -> Dict[str, str]:
-        return {"kubernetes.io/ingress.class": "alb"}
+        ingress_prefix = "alb.ingress.kubernetes.io"
+        annotations = {
+            "kubernetes.io/ingress.class": "alb",
+            "external-dns.alpha.kubernetes.io/hostname": self.__domain,
+            f"{ingress_prefix}/target-type": "ip",
+            f"{ingress_prefix}/scheme": "internal",
+            f"{ingress_prefix}/actions.{self._grafana_redirect}": self._get_redirect(
+                "/grafana/", "orgid=1"
+            ),
+            f"{ingress_prefix}/actions.{self._airflow_redirect}": self._get_redirect(
+                "/airflow/admin"
+            ),
+        }
+        if self.__use_ssl:
+            annotations[
+                "alb.ingress.kubernetes.io/listen-ports"
+            ] = '[{"HTTPS":443, "HTTP":80 }]'
+            annotations["alb.ingress.kubernetes.io/actions.ssl-redirect"] = dumps(
+                {
+                    "Type": "redirect",
+                    "RedirectConfig": {
+                        "Protocol": "HTTPS",
+                        "Port": "443",
+                        "StatusCode": "HTTP_301",
+                    },
+                }
+            )
+
+        return annotations
+
+    @property
+    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+        ingress_paths = [
+            AirflowIngressPath(
+                self._grafana_redirect, self._use_annotation, path="/grafana"
+            ),
+            AirflowIngressPath(
+                self._airflow_redirect, self._use_annotation, path="/airflow"
+            ),
+        ]
+        if self.__use_ssl:
+            return [
+                AirflowIngressPath("ssl-redirect", self._use_annotation, path="/*"),
+            ] + ingress_paths
+        return ingress_paths
 
     @property
     def default_backend(self) -> IngressBackend:
@@ -97,3 +201,10 @@ class AwsOptions(CloudOptions):
             AwsElasticSearchProxyService(),
             AwsElasticSearchProxyDeployment(self, elastic_search_uri),
         ]
+
+    @property
+    def webserver_service_annotations(self) -> Dict[str, str]:
+        return {
+            "alb.ingress.kubernetes.io/healthcheck-path": "/airflow",
+            "alb.ingress.kubernetes.io/successCodes": "200,308",
+        }

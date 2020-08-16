@@ -10,7 +10,7 @@ class MonitoringOptions:
         enabled: bool = True,
         elastic_search_uri: str = DEFAULT_ELASTIC_SEARCH_URI,
         grafana_role: str = "Viewer",
-        elastic_search_proxy_uri: str = ValueOrchestrator().elasticsearch_proxy_service_name,
+        elastic_search_proxy_uri: str = ValueOrchestrator().es_proxy_service_name,
     ):
         if grafana_role not in self.view_modes:
             raise Exception(
