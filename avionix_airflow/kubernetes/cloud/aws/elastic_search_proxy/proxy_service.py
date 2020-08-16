@@ -6,7 +6,7 @@ class AwsElasticSearchProxyService(AirflowService):
     def __init__(self):
         values = ValueOrchestrator()
         super().__init__(
-            values.elasticsearch_proxy_service_name,
+            values.es_proxy_service_name,
             values.elasticsearch_proxy_port,
             values.elasticsearch_proxy_port,
             33000,

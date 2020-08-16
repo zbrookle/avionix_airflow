@@ -1,11 +1,13 @@
+from json import dumps
 from typing import Dict, List, Optional
 
 from avionix import ChartDependency, ObjectMeta
 from avionix.kubernetes_objects.base_objects import KubernetesBaseObject
 from avionix.kubernetes_objects.core import CSIPersistentVolumeSource
-from avionix.kubernetes_objects.extensions import IngressBackend, HTTPIngressPath
+from avionix.kubernetes_objects.extensions import IngressBackend
 from avionix.kubernetes_objects.storage import StorageClass
 
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_deployment import (
     AwsElasticSearchProxyDeployment,
 )
@@ -14,8 +16,6 @@ from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service imp
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
-from json import dumps
 
 
 class AwsOptions(CloudOptions):
@@ -55,7 +55,7 @@ class AwsOptions(CloudOptions):
 
     def get_csi_persistent_volume_source(self, name: str):
         return CSIPersistentVolumeSource(
-            driver="efs.csi.aws.com", volume_handle=f"{self.__efs_id}:/{name}",
+            driver="efs.csi.aws.com", volume_handle=f"{self.__efs_id}:/{name}"
         )
 
     def get_host_path_volume_source(self, host_path: str):
@@ -113,26 +113,29 @@ class AwsOptions(CloudOptions):
             ),
         ]
 
-    def _get_wildcard_path_pattern(self, path: str):
+    @staticmethod
+    def _get_wildcard_path_pattern(path: str):
         return dumps(
-            [{"Field": "path-pattern", "PathPatternConfig": {"Values": [f"{path}*"]},}]
+            [{"Field": "path-pattern", "PathPatternConfig": {"Values": [f"{path}*"]}}]
         )
 
     def _get_redirect(self, path: str, query: str = ""):
-        redirect = {
-            "Type": "redirect",
-            "RedirectConfig": {
-                "Host": "#{host}",
-                "Path": path,
-                "Port": "80",
-                "Protocol": "HTTP",
-                "Query": query,
-                "StatusCode": "HTTP_302",
-            },
+        redirect_config = {
+            "Host": "#{host}",
+            "Path": path,
+            "Port": "80",
+            "Protocol": "HTTP",
+            "Query": query,
+            "StatusCode": "HTTP_302",
         }
         if self.__use_ssl:
-            redirect["RedirectConfig"]["Protocol"] = "HTTPS"
-            redirect["RedirectConfig"]["Port"] = "443"
+            redirect_config["Protocol"] = "HTTPS"
+            redirect_config["Port"] = "443"
+        redirect = {
+            "Type": "redirect",
+            "RedirectConfig": redirect_config,
+        }
+
         return dumps(redirect)
 
     @property

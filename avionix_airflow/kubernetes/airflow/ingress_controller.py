@@ -6,10 +6,10 @@ from avionix.kubernetes_objects.extensions import (
 )
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 
 
 class AirflowIngress(Ingress):

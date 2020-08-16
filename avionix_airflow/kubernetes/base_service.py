@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from avionix.kubernetes_objects.core import Service, ServicePort, ServiceSpec
 

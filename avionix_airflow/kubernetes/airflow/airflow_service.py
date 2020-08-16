@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from avionix_airflow.kubernetes.base_service import AirflowService
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
