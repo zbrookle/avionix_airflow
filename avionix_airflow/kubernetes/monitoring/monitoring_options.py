@@ -1,9 +1,20 @@
-DEFAULT_ELASTIC_SEARCH_URI = "http://elasticsearch-master:9200"
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+
+VIEW_MODES = ["Viewer", "Editor", "Admin"]
+DEFAULT_ELASTIC_SEARCH_URI = "http://elasticsearch-master:9200"
 
 
 class MonitoringOptions:
-    view_modes = ["Viewer", "Editor", "Admin"]
+    """
+    :param enabled: Whether or not monitoring should be enabled
+    :param elastic_search_uri: The uri to use for elastic search
+    :param grafana_role: The role to use for grafana can be one of \
+        ["Viewer", "Editor", "Admin"]
+    :param elastic_search_proxy_uri: The uri to use as the elastic search proxy, \
+       this shouldn't be changed unless using an external elastic search provider
+    """
+
+    view_modes = VIEW_MODES
 
     def __init__(
         self,

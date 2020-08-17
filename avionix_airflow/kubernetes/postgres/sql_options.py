@@ -18,6 +18,7 @@ class SqlOptions:
     :param extras: Any extra params to be appended to the end of the db connection \
         string
     """
+
     def __init__(
         self,
         user: str = "airflow",
