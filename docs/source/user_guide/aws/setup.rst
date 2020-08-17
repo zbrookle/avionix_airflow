@@ -18,7 +18,7 @@ Requirements
 #. An IAM role that can set up an record dns in route53. You can find information about the required policy `here <https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions>`__
 #. An IAM role that can control the autoscaling group. The required policy can be found `here <https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html>`__
 
-Additional Requirements (Reccommended)
+Additional Requirements (Recommended)
 --------------------------------------
 
 #. AWS ElasticSearch Cluster
