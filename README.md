@@ -80,4 +80,4 @@ def main():
 ## FAQ
 
 - How do I change the grafana dashboard?
-You can change the dashboard by setting the MonitoringOptions role to "Admin"
+    - You can change the dashboard by setting the MonitoringOptions role to "Admin"
