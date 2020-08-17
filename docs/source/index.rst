@@ -5,8 +5,8 @@ Avionix Airflow
 
 
 **Useful links**
-`Source Repository <https://github.com/zbrookle/avionix>`__ |
-`Issues & Ideas <https://github.com/zbrookle/avionix/issues>`__
+`Source Repository <https://github.com/zbrookle/avionix_airflow>`__ |
+`Issues & Ideas <https://github.com/zbrookle/avionix_airflow/issues>`__
 
 Why are there so many guides on how to set up airflow when the code could just be given to you?!
 
