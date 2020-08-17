@@ -3,10 +3,10 @@ import re
 from typing import Dict
 
 from avionix.testing import kubectl_get
+from pandas import DataFrame
 import pytest
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions
-from pandas import DataFrame
 
 
 def kubectl_get_airflow(resource: str):
