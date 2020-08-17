@@ -1,7 +1,7 @@
 from typing import List
 
-from avionix.kubernetes_objects.core import ServiceAccount
-from avionix.kubernetes_objects.rbac_authorization import (
+from avionix.kube.core import ServiceAccount
+from avionix.kube.rbac_authorization import (
     PolicyRule,
     Role,
     RoleBinding,

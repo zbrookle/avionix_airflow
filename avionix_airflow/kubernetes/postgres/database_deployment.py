@@ -1,11 +1,6 @@
-from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
-from avionix.kubernetes_objects.core import (
-    Container,
-    ContainerPort,
-    PodSpec,
-    PodTemplateSpec,
-)
-from avionix.kubernetes_objects.meta import LabelSelector
+from avionix.kube.apps import Deployment, DeploymentSpec
+from avionix.kube.core import Container, ContainerPort, PodSpec, PodTemplateSpec
+from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions

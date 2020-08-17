@@ -18,6 +18,9 @@ which can be used to assign roles to your kubernetes pods
  wrote above. You can find a minimal policy for this [here](https://github.com/kubernetes-sigs/aws-alb-ingress-controller/blob/0338ed144f584c7a7738b4bf1d8ca8c827e7abb0/docs/examples/iam-policy.json#L117-L126)
 6. An IAM role that can set up an record dns in route53. You can find information
  about the required policy [here](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions)
+7. An IAM role that can control the autoscaling group. The required policy can be
+ found [here](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html)
+
 ## Additional Requirements (Reccommended)
 
 1. AWS ElasticSearch Cluster

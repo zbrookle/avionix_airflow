@@ -1,5 +1,5 @@
-from avionix.kubernetes_objects.apps import Deployment, DeploymentSpec
-from avionix.kubernetes_objects.core import (
+from avionix.kube.apps import Deployment, DeploymentSpec
+from avionix.kube.core import (
     Container,
     ContainerPort,
     HTTPGetAction,
@@ -7,7 +7,7 @@ from avionix.kubernetes_objects.core import (
     PodTemplateSpec,
     Probe,
 )
-from avionix.kubernetes_objects.meta import LabelSelector
+from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta

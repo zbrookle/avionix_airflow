@@ -1,6 +1,6 @@
 from typing import Union
 
-from avionix.kubernetes_objects.extensions import HTTPIngressPath, IngressBackend
+from avionix.kube.extensions import HTTPIngressPath, IngressBackend
 
 
 class AirflowIngressPath(HTTPIngressPath):

@@ -1,10 +1,5 @@
-from avionix.kubernetes_objects.batch import (
-    CronJob,
-    CronJobSpec,
-    JobSpec,
-    JobTemplateSpec,
-)
-from avionix.kubernetes_objects.core import Container, PodSpec, PodTemplateSpec
+from avionix.kube.batch import CronJob, CronJobSpec, JobSpec, JobTemplateSpec
+from avionix.kube.core import Container, PodSpec, PodTemplateSpec
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import AirflowDagVolumeGroup

@@ -1,4 +1,4 @@
-from avionix.kubernetes_objects.core import EnvVar
+from avionix.kube.core import EnvVar
 
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 

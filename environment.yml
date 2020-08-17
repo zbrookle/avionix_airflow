@@ -14,6 +14,6 @@ dependencies:
   - pytest-rerunfailures
   - pip:
     # Main requirements
-    - git+https://github.com/zbrookle/avionix.git@add_chart_dependency_resolution
+    - avionix==0.3.1
     - python-hosts==1.0.0
     - cryptography==3.0
