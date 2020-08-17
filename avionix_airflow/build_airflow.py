@@ -69,7 +69,7 @@ def get_chart_builder(
     if sql_options.create_database_in_cluster:
         orchestrator += PostgresOrchestrator(sql_options)
     builder = ChartBuilder(
-        _AvionixChartInfo("airflow", dependencies),
+        AvionixChartInfo("airflow", dependencies),
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
     )
