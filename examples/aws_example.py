@@ -13,7 +13,7 @@ builder = get_chart_builder(
         dag_sync_schedule="* * * * *",
         default_timezone="est",
         core_executor="KubernetesExecutor",
-        domain_name=None,
+        domain_name="my.airflow.domain.com",
     ),
     monitoring_options=MonitoringOptions(
         elastic_search_uri="https://my-es-vpc.es.amazonaws.com",
@@ -31,6 +31,7 @@ builder = get_chart_builder(
         "arn:aws:iam::123456789012:role/default-role",
         "arn:aws:iam::123456789012:role/alb-role",
         "arn:aws:iam::123456789012:role/external-dns-role",
+        "arn:aws:iam::123456789012:role/autoscaling-role:",
         "my.airflow.domain.com",
         use_ssl=True,
     ),
