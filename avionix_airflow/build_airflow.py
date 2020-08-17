@@ -73,12 +73,12 @@ def get_chart_builder(
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
     )
-    builder.kube += cloud_options.get_platform_dependent_kube_objects()
+    builder.kubernetes_objects += cloud_options.get_platform_dependent_kube_objects()
     if (
         monitoring_options.enabled
         and not monitoring_options.enable_elasticsearch_dependency
     ):
-        builder.kube += cloud_options.get_elastic_search_proxy_elements(
+        builder.kubernetes_objects += cloud_options.get_elastic_search_proxy_elements(
             monitoring_options.elastic_search_uri
         )
     return builder
