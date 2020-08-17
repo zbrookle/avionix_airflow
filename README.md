@@ -20,7 +20,9 @@ Avionix airflow provides the following out of the box solutions for airflow
 
 # Installation
 
+```bash 
 pip install avionix_airflow
+```
 
 # Setup
 
