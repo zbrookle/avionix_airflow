@@ -2,6 +2,16 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class RedisOptions:
+    """
+    Configuration for redis if using "CeleryExecutor" option in AirflowOptions
+
+    :param port: The port to use for redis
+    :param host: Name of the redis host, defaults to the internal service name
+    :param proto: Redis protocol
+    :param password: Redis password
+    :param db_num: Redis db number
+    """
+
     def __init__(
         self,
         port: int = 6379,

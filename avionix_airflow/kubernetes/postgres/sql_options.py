@@ -4,6 +4,21 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class SqlOptions:
+    """
+    Provides configuration for the airflow backend database. Currently only postgres
+    is supported. Note that all connection related strings will be stored in
+    kubernetes secrets on the cluster.
+
+    :param user: The username for database
+    :param password: The pass for the database
+    :param host: The hostname for the database
+    :param port: The port to keep open for the database
+    :param db: The database name
+    :param create_database_in_cluster: Whether airflow should create the database
+    :param extras: Any extra params to be appended to the end of the db connection \
+        string
+    """
+
     def __init__(
         self,
         user: str = "airflow",

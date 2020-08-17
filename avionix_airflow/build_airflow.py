@@ -36,13 +36,13 @@ def get_chart_builder(
     redis_options: RedisOptions = RedisOptions(),
     monitoring_options: MonitoringOptions = MonitoringOptions(),
     cloud_options: CloudOptions = LocalOptions(),
-):
+) -> ChartBuilder:
     """
-    :param sql_options:
-    :param redis_options:
-    :param airflow_options:
-    :param monitoring_options:
-    :param cloud_options:
+    :param sql_options: An SqlOptions object
+    :param redis_options: A RedisOptions object
+    :param airflow_options: An AirflowOptions object
+    :param monitoring_options: A MonitoringOptions object
+    :param cloud_options: A CloudOptions object
     :return: Avionix ChartBuilder object that can be used to install airflow
     """
     orchestrator = AirflowOrchestrator(

@@ -24,10 +24,10 @@ Avionix airflow provides the following out of the box solutions for airflow
 pip install avionix_airflow
 ```
 
-# Setup
+# Requirements
 
-[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and [helm](https://helm.sh) are both required by the underlying package
- avionix, to interact with kubernetes
+ - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+ - [helm](https://helm.sh)
 
 # Configuration
 
@@ -38,44 +38,11 @@ Avionix airflow is configured by using Options objects, there are currently 4
 2. PostgresOptions
 3. MonitoringOptions
 4. CloudOptions (Specified using LocalOptions or AwsOptions)
-5. RedisOptions (Only for use with CeleryExecutor, ***not reccommended***)
+5. RedisOptions (Only for use with CeleryExecutor, ***not recommended***)
 
 These options are then passed into the function *get_chart_builder*, which can be
  used to retrieve an avionix, chart builder object. For instruction on how to use the
   builder object, see [avionix](https://github.com/zbrookle/avionix)
-
-# Usage Examples
-
-## Minikube
-
-```python
-from avionix_airflow import add_host, build_airflow_image, get_chart_builder, AirflowOptions
-from avionix_airflow.tests.utils import dag_copy_loc, parse_shell_script
-
-TEST_AIRFLOW_OPTIONS = AirflowOptions(
-    dag_sync_image="alpine/git",
-    dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
-    dag_sync_schedule="* * * * *",
-    default_timezone="est",
-    core_executor="KubernetesExecutor",
-    open_node_ports=True,
-)
-
-def main():
-    build_airflow_image()
-    add_host(TEST_AIRFLOW_OPTIONS)
-    builder = get_chart_builder(
-        airflow_options=TEST_AIRFLOW_OPTIONS
-    )
-    builder.install_chart(options={"create-namespace": None, "dependency-update": None})
-```
-
-## AWS EKS Managed Node
-
-```python
-
-```
-
 
 ## FAQ
 
