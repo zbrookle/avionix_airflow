@@ -36,7 +36,7 @@ def get_chart_builder(
     redis_options: RedisOptions = RedisOptions(),
     monitoring_options: MonitoringOptions = MonitoringOptions(),
     cloud_options: CloudOptions = LocalOptions(),
-):
+) -> ChartBuilder:
     """
     :param sql_options: An SqlOptions object
     :param redis_options: A RedisOptions object
@@ -69,7 +69,7 @@ def get_chart_builder(
     if sql_options.create_database_in_cluster:
         orchestrator += PostgresOrchestrator(sql_options)
     builder = ChartBuilder(
-        AvionixChartInfo("airflow", dependencies),
+        _AvionixChartInfo("airflow", dependencies),
         orchestrator.get_kube_parts(),
         namespace=airflow_options.namespace,
     )
