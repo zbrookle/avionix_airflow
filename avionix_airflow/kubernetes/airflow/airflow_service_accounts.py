@@ -1,4 +1,4 @@
-from avionix.kubernetes_objects.core import ServiceAccount
+from avionix.kube.core import ServiceAccount
 
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator

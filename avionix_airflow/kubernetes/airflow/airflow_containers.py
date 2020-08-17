@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from avionix.kubernetes_objects.core import (
+from avionix.kube.core import (
     Container,
     ContainerPort,
     EnvFromSource,

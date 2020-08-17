@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from avionix.kubernetes_objects.core import EnvVar
+from avionix.kube.core import EnvVar
 from cryptography.fernet import Fernet
 
 

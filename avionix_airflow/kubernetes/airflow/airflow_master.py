@@ -1,11 +1,11 @@
-from avionix.kubernetes_objects.apps import (
+from avionix.kube.apps import (
     Deployment,
     DeploymentSpec,
     DeploymentStrategy,
     RollingUpdateDeployment,
 )
-from avionix.kubernetes_objects.core import PodSpec, PodTemplateSpec
-from avionix.kubernetes_objects.meta import LabelSelector
+from avionix.kube.core import PodSpec, PodTemplateSpec
+from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.airflow.airflow_containers import (
     FlowerUI,

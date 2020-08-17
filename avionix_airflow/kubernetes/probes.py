@@ -1,6 +1,6 @@
 from typing import Optional
 
-from avionix.kubernetes_objects.core import HTTPGetAction, Probe
+from avionix.kube.core import HTTPGetAction, Probe
 
 
 class AvionixAirflowProbe(Probe):

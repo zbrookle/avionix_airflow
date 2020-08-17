@@ -1,4 +1,4 @@
-from avionix.kubernetes_objects.extensions import (
+from avionix.kube.extensions import (
     HTTPIngressRuleValue,
     Ingress,
     IngressRule,

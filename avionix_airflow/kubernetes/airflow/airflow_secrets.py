@@ -1,4 +1,4 @@
-from avionix.kubernetes_objects.core import Secret
+from avionix.kube.core import Secret
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
