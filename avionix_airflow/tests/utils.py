@@ -6,6 +6,7 @@ from avionix.testing import kubectl_get
 import pytest
 
 from avionix_airflow.kubernetes.airflow import AirflowOptions
+from pandas import DataFrame
 
 
 def kubectl_get_airflow(resource: str):
@@ -13,7 +14,7 @@ def kubectl_get_airflow(resource: str):
 
 
 def kubectl_name_dict(resource: str):
-    info = kubectl_get_airflow(resource)
+    info = DataFrame(kubectl_get_airflow(resource))
     info_dict: Dict[str, Dict[str, str]] = {}
     if "NAME" not in info.columns:
         return info_dict
