@@ -6,6 +6,8 @@ DEFAULT_ELASTIC_SEARCH_URI = "http://elasticsearch-master:9200"
 
 class MonitoringOptions:
     """
+    Configurations for monitoring airflow
+
     :param enabled: Whether or not monitoring should be enabled
     :param elastic_search_uri: The uri to use for elastic search
     :param grafana_role: The role to use for grafana can be one of \
