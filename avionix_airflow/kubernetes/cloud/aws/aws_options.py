@@ -19,6 +19,21 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AwsOptions(CloudOptions):
+    """
+    Settings for the AWS Managed Node Group setup
+
+    :param efs_id: The id of the EFS file system to use as the storage provider
+    :param cluster_name: The name of the EKS cluster
+    :param elastic_search_access_role_arn: The IAM role arn for accessing elastic search
+    :param default_role_arn: The default IAM role arn for pods in the cluster
+    :param alb_role_arn: The IAM role setting up application load balancing
+    :param external_dns_role_arn: The IAM role for setting the domain name
+    :param autoscaling_role_arn: The IAM role for controlling the cluster scaling
+    :param domain: The AWS domain name to use
+    :param domain_filters: A list used to filter out route53 domain names
+    :param use_ssl: Whether or not to use SSL encryption, (Recommended to be True)
+    """
+
     _use_annotation = "use-annotation"
     _grafana_redirect = "grafana-redirect"
     _airflow_redirect = "airflow-redirect"
