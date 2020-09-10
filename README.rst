@@ -41,8 +41,8 @@ Installation
 Requirements
 ------------
 
- - kubectl_
- - helm_
+- kubectl_
+- helm_
 
 .. _helm: https://helm.sh
 .. _kubectl: https://kubernetes.io/docs/tasks/tools/install-kubectl/
@@ -74,4 +74,4 @@ FAQ
 Documentation
 -------------
 
-Additional documentation can be found [here](https://avionix-airflow.readthedocs.io/en/latest/)
+Additional documentation can be found `here <https://avionix-airflow.readthedocs.io/en/latest/>`__
