@@ -49,8 +49,8 @@ class AwsOptions(CloudOptions):
         alb_role_arn: str,
         external_dns_role_arn: str,
         autoscaling_role_arn: str,
+        dag_sync_role_arn: str,
         domain: str,
-        dag_sync_role_arn: Optional[str] = None,
         domain_filters: Optional[List[str]] = None,
         use_ssl: bool = False,
     ):
