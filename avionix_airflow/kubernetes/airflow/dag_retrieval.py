@@ -11,14 +11,15 @@ class DagRetrievalJob(CronJob):
     def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         dag_volume_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
         super().__init__(
-            AirflowMeta(
-                "dag-sync-job", annotations=cloud_options.dag_retrieval_annotations
-            ),
+            AirflowMeta("dag-sync-job"),
             spec=CronJobSpec(
                 JobTemplateSpec(
                     JobSpec(
                         PodTemplateSpec(
-                            AirflowMeta("sync-dags-pod",),
+                            AirflowMeta(
+                                "sync-dags-pod",
+                                annotations=cloud_options.dag_retrieval_annotations,
+                            ),
                             PodSpec(
                                 [
                                     Container(
