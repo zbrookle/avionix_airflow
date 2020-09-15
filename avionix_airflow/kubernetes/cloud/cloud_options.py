@@ -65,3 +65,8 @@ class CloudOptions(ABC):
     @abstractmethod
     def webserver_service_annotations(self) -> Dict[str, str]:
         return {}
+
+    @property
+    @abstractmethod
+    def dag_retrieval_annotations(self) -> Dict[str, str]:
+        return {}

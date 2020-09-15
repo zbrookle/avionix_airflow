@@ -57,3 +57,7 @@ class LocalOptions(CloudOptions):
     @property
     def extra_ingress_paths(self) -> List[AirflowIngressPath]:
         return []
+
+    @property
+    def dag_retrieval_annotations(self) -> Dict[str, str]:
+        return {}
