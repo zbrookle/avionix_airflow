@@ -65,7 +65,7 @@ class AwsOptions(CloudOptions):
         self.__autoscaling_role_arn = autoscaling_role_arn
         super().__init__(
             StorageClass(
-                ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
+                ObjectMeta(name="efs-sc"), "efs.csi.aws.com"
             ),
             "Filesystem",
         )
