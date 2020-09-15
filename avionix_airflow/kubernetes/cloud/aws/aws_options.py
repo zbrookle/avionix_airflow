@@ -241,4 +241,4 @@ class AwsOptions(CloudOptions):
 
     @property
     def dag_retrieval_annotations(self) -> Dict[str, str]:
-        return {"iam.amazonaws.com/role": self.__elastic_search_access_role}
+        return {"iam.amazonaws.com/role": self.__dag_sync_role_arn}
