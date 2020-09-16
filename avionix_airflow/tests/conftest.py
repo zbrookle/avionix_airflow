@@ -1,3 +1,5 @@
+from subprocess import check_call
+
 from avionix.testing.installation_context import ChartInstallationContext
 import pytest
 
@@ -81,6 +83,10 @@ def build_chart(airflow_options, sql_options, redis_options, monitoring_options)
     builder = get_chart_builder(
         airflow_options, sql_options, redis_options, monitoring_options
     )
+    if kubectl_name_dict("persistentvolume"):
+        # Stateful Sets do not automatically clean up their pvc templates so this
+        # must be done manually
+        check_call("kubectl delete pvc -n airflow --all".split(" "))
     while True:
         if not filter_out_pvc(kubectl_name_dict("persistentvolume")):
             break

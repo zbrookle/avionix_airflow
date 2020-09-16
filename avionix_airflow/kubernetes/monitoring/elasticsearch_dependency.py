@@ -1,7 +1,13 @@
 from avionix import ChartDependency
+from avionix.kube.core import PersistentVolumeClaimSpec, ResourceRequirements
 
 
 class ElasticSearchDependency(ChartDependency):
+
+    _labels = {"storage-type": "elasticsearch"}
+    _storage = {"storage": "100Mi"}
+    _access_modes = ["ReadWriteOnce"]
+
     def __init__(self):
         super().__init__(
             "elasticsearch",
@@ -17,11 +23,11 @@ class ElasticSearchDependency(ChartDependency):
                     "requests": {"cpu": "100m", "memory": "512M"},
                     "limits": {"cpu": "1000m", "memory": "512M"},
                 },
-                "volumeClaimTemplate": {
-                    "accessModes": ["ReadWriteOnce"],
-                    "storageClassName": "standard",
-                    "resources": {"requests": {"storage": "100M"}},
-                },
+                "volumeClaimTemplate": PersistentVolumeClaimSpec(
+                    access_modes=self._access_modes,
+                    resources=ResourceRequirements(requests=self._storage),
+                    storage_class_name="standard",
+                ).to_dict(),
                 "service": {"type": "NodePort", "nodePort": 30012},
             },
         )
