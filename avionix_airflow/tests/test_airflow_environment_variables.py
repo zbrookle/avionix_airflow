@@ -45,7 +45,7 @@ def test_environment_variable_values(
     )
 
     assert (
-        airflow_options.default_time_zone
+        airflow_options.default_timezone
         == airflow_environment["AIRFLOW__CORE__DEFAULT_TIMEZONE"]
     )
 

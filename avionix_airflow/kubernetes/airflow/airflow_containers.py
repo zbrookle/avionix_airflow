@@ -27,6 +27,9 @@ class AirflowEnvVar(EnvVar):
     def __init__(self, name: str, value):
         super().__init__("AIRFLOW__" + name, value)
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.name} -> {self.value})"
+
 
 class CoreEnvVar(AirflowEnvVar):
     def __init__(self, name: str, value):
@@ -110,7 +113,7 @@ class AirflowContainer(Container):
     def _airflow_env(self):
         return [
             CoreEnvVar("EXECUTOR", self._airflow_options.core_executor),
-            CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_time_zone,),
+            CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_timezone,),
             CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False"),
             CoreEnvVar("LOAD_EXAMPLES", "False"),
             CoreEnvVar(
@@ -157,12 +160,20 @@ class AirflowContainer(Container):
                     ).persistent_volume_claim.metadata.name,
                 )
             )
+        if self._airflow_options.git_ssh_key:
+            kube_settings.append(
+                KubernetesEnvVar("GIT_SSH_KEY_SECRET_NAME", "airflow-secrets")
+            )
         return kube_settings
 
     @property
     def _worker_pod_settings(self):
         airflow_env = [var for var in self._airflow_env if "EXECUTOR" not in var.name]
         worker_env: List[AirflowEnvVar] = airflow_env + self._elastic_search_env
+        if self._airflow_options.git_ssh_key:
+            worker_env += [
+                KubernetesEnvVar("GIT_SSH_KEY_SECRET_NAME", "airflow-secrets")
+            ]
         return [KubernetesWorkerPodEnvVar(var.name, var.value) for var in worker_env]
 
 

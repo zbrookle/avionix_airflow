@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import ClassVar, Dict, List, Optional
 
 from avionix.kube.core import EnvVar
@@ -45,6 +45,7 @@ class SmtpNotificationOptions:
         return added_env_vars
 
 
+@dataclass
 class AirflowOptions:
     """
     Class for storing airflow options. Note that for storage specification the
@@ -81,49 +82,39 @@ class AirflowOptions:
     :param local_mode: Whether or not to run in local mode
     """
 
-    def __init__(
+    dag_sync_image: str
+    dag_sync_command: List[str]
+    dag_sync_schedule: str
+    dag_storage: str = "50Mi"
+    log_storage: str = "50Mi"
+    external_storage: str = "50Mi"
+    default_executor_cpu: int = 5
+    default_executor_memory: int = 2
+    access_modes: InitVar[Optional[List[str]]] = None
+    default_timezone: str = "utc"
+    core_executor: str = "CeleryExecutor"
+    namespace: str = "airflow"
+    domain_name: Optional[str] = "www.avionix-airflow.com"
+    additional_vars: InitVar[Optional[Dict[str, str]]] = None
+    fernet_key: InitVar[str] = ""
+    dags_paused_at_creation: bool = True
+    worker_image: InitVar[str] = "airflow-image"
+    worker_image_tag: str = "latest"
+    open_node_ports: bool = False
+    local_mode: bool = False
+    smtp_notification_options: InitVar[Optional[SmtpNotificationOptions]] = None
+    git_ssh_key: Optional[str] = None
+
+    def __post_init__(
         self,
-        dag_sync_image: str,
-        dag_sync_command: List[str],
-        dag_sync_schedule: str,
-        dag_storage: str = "50Mi",
-        logs_storage: str = "50Mi",
-        external_storage: str = "50Mi",
-        default_executor_cpu: int = 5,
-        default_executor_memory: int = 2,
-        access_modes: Optional[List[str]] = None,
-        default_timezone: str = "utc",
-        core_executor: str = "CeleryExecutor",
-        namespace: str = "airflow",
-        domain_name: Optional[str] = "www.avionix-airflow.com",
-        additional_vars: Optional[Dict[str, str]] = None,
-        fernet_key: str = "",
-        dags_paused_at_creation: bool = True,
-        worker_image: str = "airflow-image",
-        worker_image_tag: str = "latest",
-        open_node_ports: bool = False,
-        local_mode: bool = False,
-        smtp_notification_options: Optional[SmtpNotificationOptions] = None,
+        access_modes,
+        additional_vars,
+        fernet_key: str,
+        worker_image,
+        smtp_notification_options,
     ):
-        self.dag_storage = dag_storage
-        self.log_storage = logs_storage
-        self.external_storage = external_storage
-        self.default_executor_cpu = default_executor_cpu
-        self.default_executor_memory = default_executor_memory
         self.access_modes = self.__get_access_modes(access_modes)
-        self.dag_sync_image = dag_sync_image
-        self.dag_sync_command = dag_sync_command
-        self.dag_sync_schedule = dag_sync_schedule
-        self.domain_name = domain_name
-        self.default_time_zone = default_timezone
-        self.core_executor = core_executor
-        self.namespace = namespace
         self.fernet_key = fernet_key if fernet_key else _create_fernet_key()
-        self.dags_paused_at_creation = dags_paused_at_creation
-        self.worker_image = worker_image
-        self.worker_image_tag = worker_image_tag
-        self.open_node_ports = open_node_ports
-        self.local_mode = local_mode
         if worker_image == "airflow-image" and not self.local_mode:
             self.worker_image = "zachb1996/avionix_airflow"
 
