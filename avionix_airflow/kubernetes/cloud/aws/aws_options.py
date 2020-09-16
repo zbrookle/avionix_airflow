@@ -30,6 +30,7 @@ class AwsOptions(CloudOptions):
     :param external_dns_role_arn: The IAM role for setting the domain name
     :param autoscaling_role_arn: The IAM role for controlling the cluster scaling
     :param domain: The AWS domain name to use
+    :param dag_sync_role_arn: The IAM role use for controlling retrieval of dags
     :param domain_filters: A list used to filter out route53 domain names
     :param use_ssl: Whether or not to use SSL encryption, (Recommended to be True)
     """
@@ -48,6 +49,7 @@ class AwsOptions(CloudOptions):
         alb_role_arn: str,
         external_dns_role_arn: str,
         autoscaling_role_arn: str,
+        dag_sync_role_arn: str,
         domain: str,
         domain_filters: Optional[List[str]] = None,
         use_ssl: bool = False,
@@ -63,11 +65,9 @@ class AwsOptions(CloudOptions):
         self.__values = ValueOrchestrator()
         self.__use_ssl = use_ssl
         self.__autoscaling_role_arn = autoscaling_role_arn
+        self.__dag_sync_role_arn = dag_sync_role_arn
         super().__init__(
-            StorageClass(
-                ObjectMeta(name="efs-sc"), None, None, None, "efs.csi.aws.com", None
-            ),
-            "Filesystem",
+            StorageClass(ObjectMeta(name="efs-sc"), "efs.csi.aws.com"), "Filesystem",
         )
 
     def get_csi_persistent_volume_source(self, name: str):
@@ -238,3 +238,7 @@ class AwsOptions(CloudOptions):
             "alb.ingress.kubernetes.io/healthcheck-path": "/airflow",
             "alb.ingress.kubernetes.io/successCodes": "200,308",
         }
+
+    @property
+    def dag_retrieval_annotations(self) -> Dict[str, str]:
+        return {"iam.amazonaws.com/role": self.__dag_sync_role_arn}

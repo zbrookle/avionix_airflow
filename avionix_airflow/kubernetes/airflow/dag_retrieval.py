@@ -16,7 +16,10 @@ class DagRetrievalJob(CronJob):
                 JobTemplateSpec(
                     JobSpec(
                         PodTemplateSpec(
-                            AirflowMeta("sync-dags-pod",),
+                            AirflowMeta(
+                                "sync-dags-pod",
+                                annotations=cloud_options.dag_retrieval_annotations,
+                            ),
                             PodSpec(
                                 [
                                     Container(
