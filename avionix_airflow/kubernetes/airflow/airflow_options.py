@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from typing import ClassVar, Dict, List, Optional
 
 from avionix.kube.core import EnvVar
 from cryptography.fernet import Fernet
@@ -6,6 +7,42 @@ from cryptography.fernet import Fernet
 
 def _create_fernet_key():
     return Fernet.generate_key().decode("utf-8")
+
+
+@dataclass
+class SmtpNotificationOptions:
+    """
+    Class for setting airflow email options. These options will be set in the
+    environment and also in the kubernetes pod environment to ensure the email
+    configuration is available on all pods.
+
+    :param smtp_host: Host name for the smtp server
+    :param smtp_starttls: Use tls if true
+    :param smtp_ssl: Use ssl if true
+    :param smtp_user: Email user name
+    :param smtp_password: Email password
+    :param smtp_port: Port to use
+    :param smtp_mail_from: Email to send email notification from
+    """
+
+    smtp_host: str
+    smtp_starttls: bool
+    smtp_ssl: bool
+    smtp_user: str
+    smtp_password: str
+    smtp_port: int
+    smtp_mail_from: str
+    _prefixes: ClassVar[List[str]] = [
+        "AIRFLOW__SMTP__",
+        "AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__SMTP__",
+    ]
+
+    def to_dict(self):
+        added_env_vars = {}
+        for prefix in self._prefixes:
+            for key in self.__dict__:
+                added_env_vars[f"{prefix}{key.upper()}"] = str(self.__dict__[key])
+        return added_env_vars
 
 
 class AirflowOptions:
@@ -66,6 +103,7 @@ class AirflowOptions:
         worker_image_tag: str = "latest",
         open_node_ports: bool = False,
         local_mode: bool = False,
+        smtp_notification_options: Optional[SmtpNotificationOptions] = None,
     ):
         self.dag_storage = dag_storage
         self.log_storage = logs_storage
@@ -80,7 +118,6 @@ class AirflowOptions:
         self.default_time_zone = default_timezone
         self.core_executor = core_executor
         self.namespace = namespace
-        self.__additional_vars = additional_vars if additional_vars is not None else {}
         self.fernet_key = fernet_key if fernet_key else _create_fernet_key()
         self.dags_paused_at_creation = dags_paused_at_creation
         self.worker_image = worker_image
@@ -89,6 +126,10 @@ class AirflowOptions:
         self.local_mode = local_mode
         if worker_image == "airflow-image" and not self.local_mode:
             self.worker_image = "zachb1996/avionix_airflow"
+
+        self.__additional_vars = additional_vars if additional_vars is not None else {}
+        if smtp_notification_options:
+            self.__additional_vars.update(smtp_notification_options.to_dict())
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
