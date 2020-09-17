@@ -52,6 +52,8 @@ class KubernetesWorkerPodEnvVar(AirflowEnvVar):
 
 
 class AirflowContainer(Container):
+    _command_entry_point: Optional[List[str]] = ["/entrypoint.sh"]
+
     def __init__(
         self,
         name: str,
@@ -85,7 +87,7 @@ class AirflowContainer(Container):
             ports=ports,
             volume_mounts=self._get_volume_mounts(),
             readiness_probe=readiness_probe,
-            command=["/entrypoint.sh"],
+            command=self._command_entry_point,
         )
 
     def _get_volume_mounts(self):
@@ -170,7 +172,7 @@ class AirflowContainer(Container):
 
 
 class AirflowWorker(AirflowContainer):
-    pass
+    _command_entry_point = None
 
 
 class WebserverUI(AirflowContainer):
