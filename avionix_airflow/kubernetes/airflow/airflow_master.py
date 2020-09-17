@@ -1,3 +1,6 @@
+from abc import ABC, abstractmethod
+from typing import List
+
 from avionix.kube.apps import (
     Deployment,
     DeploymentSpec,
@@ -8,17 +11,17 @@ from avionix.kube.core import PodSpec, PodTemplateSpec
 from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.airflow.airflow_containers import (
+    AirflowContainer,
     FlowerUI,
     Scheduler,
     WebserverUI,
-    AirflowContainer,
 )
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
-    ExternalStorageVolumeGroup,
     AirflowSSHSecretsVolumeGroup,
+    ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
@@ -26,8 +29,6 @@ from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-from abc import ABC, abstractmethod
-from typing import List
 
 
 class AirflowPodTemplate(PodTemplateSpec, ABC):

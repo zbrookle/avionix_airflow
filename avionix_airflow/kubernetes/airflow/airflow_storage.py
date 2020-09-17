@@ -2,17 +2,17 @@ from typing import List
 
 from avionix.kube.core import (
     Container,
+    KeyToPath,
     LabelSelector,
     PersistentVolume,
     PersistentVolumeClaim,
     PersistentVolumeClaimSpec,
     PersistentVolumeClaimVolumeSource,
     PersistentVolumeSpec,
-    SecretVolumeSource,
     ResourceRequirements,
+    SecretVolumeSource,
     Volume,
     VolumeMount,
-    KeyToPath,
 )
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
@@ -192,4 +192,4 @@ class AirflowSSHSecretsVolumeGroup:
 
     @property
     def volume_mount(self):
-        return VolumeMount(self.volume_name, "/usr/local/airflow/.ssh/")
+        return VolumeMount(self.volume_name, "/.ssh/")

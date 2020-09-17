@@ -13,8 +13,8 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
-    ExternalStorageVolumeGroup,
     AirflowSSHSecretsVolumeGroup,
+    ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
