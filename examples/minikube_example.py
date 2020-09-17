@@ -14,11 +14,12 @@ def install_chart():
     build_airflow_image()
     airflow_options = AirflowOptions(
         dag_sync_image="alpine/git",
-        dag_sync_command=["/bin/sh", "-c", parse_shell_script(dag_copy_loc)],
+        dag_sync_command=["/bin/sh", "-c", parse_shell_script(str(dag_copy_loc))],
         dag_sync_schedule="* * * * *",
         default_timezone="est",
         core_executor="KubernetesExecutor",
         open_node_ports=True,
+        image_pull_policy="Never",
     )
     add_host(airflow_options)
     builder = get_chart_builder(

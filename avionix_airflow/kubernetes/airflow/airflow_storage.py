@@ -2,6 +2,7 @@ from typing import List
 
 from avionix.kube.core import (
     Container,
+    KeyToPath,
     LabelSelector,
     PersistentVolume,
     PersistentVolumeClaim,
@@ -9,6 +10,7 @@ from avionix.kube.core import (
     PersistentVolumeClaimVolumeSource,
     PersistentVolumeSpec,
     ResourceRequirements,
+    SecretVolumeSource,
     Volume,
     VolumeMount,
 )
@@ -16,6 +18,7 @@ from avionix.kube.core import (
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
+from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowPersistentVolume(PersistentVolume):
@@ -171,3 +174,22 @@ class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
             folder="tmp",
             cloud_options=cloud_options,
         )
+
+
+class AirflowSSHSecretsVolumeGroup:
+    volume_name = "ssh-key-volume"
+
+    @property
+    def volume(self):
+        return Volume(
+            self.volume_name,
+            secret=SecretVolumeSource(
+                False,
+                ValueOrchestrator().secret_name,
+                items=[KeyToPath("gitSshKey", "id_rsa", mode=400)],
+            ),
+        )
+
+    @property
+    def volume_mount(self):
+        return VolumeMount(self.volume_name, "/.ssh/")

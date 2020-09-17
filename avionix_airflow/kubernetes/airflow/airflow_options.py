@@ -80,6 +80,8 @@ class AirflowOptions:
     :param worker_image_tag: The docker tag of the airflow worker image
     :param open_node_ports: Whether to expose the node ports
     :param local_mode: Whether or not to run in local mode
+    :param image_pull_policy: Policy for pulling docker image. Can be one of "Never",
+        "Always", "IfNotPresent"
     """
 
     dag_sync_image: str
@@ -104,6 +106,7 @@ class AirflowOptions:
     local_mode: bool = False
     smtp_notification_options: InitVar[Optional[SmtpNotificationOptions]] = None
     git_ssh_key: Optional[str] = None
+    image_pull_policy: str = "IfNotPresent"
 
     def __post_init__(
         self,

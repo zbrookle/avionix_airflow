@@ -1,7 +1,4 @@
-# VERSION 1.10.9
-# DESCRIPTION: Basic Airflow container
-# BUILD: docker build --rm -t puckel/docker-airflow .
-# SOURCE: https://github.com/puckel/docker-airflow
+# DESCRIPTION: Airflow container for production use with Avionix Airflow
 
 FROM python:3.7-slim-buster
 LABEL maintainer="Zach Brookler"
@@ -49,6 +46,7 @@ RUN set -ex \
         netcat \
         locales \
         git \
+        openssh-server \
     && sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \

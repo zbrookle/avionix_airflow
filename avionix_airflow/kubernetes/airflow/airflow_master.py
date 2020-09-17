@@ -1,3 +1,6 @@
+from abc import ABC, abstractmethod
+from typing import List
+
 from avionix.kube.apps import (
     Deployment,
     DeploymentSpec,
@@ -8,6 +11,7 @@ from avionix.kube.core import PodSpec, PodTemplateSpec
 from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.airflow.airflow_containers import (
+    AirflowContainer,
     FlowerUI,
     Scheduler,
     WebserverUI,
@@ -16,6 +20,7 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
+    AirflowSSHSecretsVolumeGroup,
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -26,7 +31,55 @@ from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
-class AirflowPodTemplate(PodTemplateSpec):
+class AirflowPodTemplate(PodTemplateSpec, ABC):
+    def __init__(
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+        monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
+        name: str,
+        service_account: str = "default",
+    ):
+        values = ValueOrchestrator()
+        self._sql_options = sql_options
+        self._redis_options = redis_options
+        self._airflow_options = airflow_options
+        self._monitoring_options = monitoring_options
+        self._cloud_options = cloud_options
+        super().__init__(
+            AirflowMeta(
+                name=name,
+                labels=values.master_node_labels,
+                annotations=cloud_options.elasticsearch_connection_annotations,
+            ),
+            spec=PodSpec(
+                self._get_containers(),
+                volumes=self._volumes,
+                service_account_name=service_account,
+            ),
+        )
+
+    @property
+    def _volumes(self):
+        volumes = [
+            AirflowLogVolumeGroup(self._airflow_options, self._cloud_options).volume,
+            AirflowDagVolumeGroup(self._airflow_options, self._cloud_options).volume,
+            ExternalStorageVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume,
+        ]
+        if self._airflow_options.git_ssh_key:
+            volumes.append(AirflowSSHSecretsVolumeGroup().volume)
+        return volumes
+
+    @abstractmethod
+    def _get_containers(self) -> List[AirflowContainer]:
+        pass
+
+
+class AirflowMasterPodTemplate(AirflowPodTemplate):
     def __init__(
         self,
         sql_options: SqlOptions,
@@ -35,63 +88,53 @@ class AirflowPodTemplate(PodTemplateSpec):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
     ):
-        log_volume_group = AirflowLogVolumeGroup(airflow_options, cloud_options)
-        dag_volume_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
-        external_storage = ExternalStorageVolumeGroup(airflow_options, cloud_options)
-        values = ValueOrchestrator()
-        self.__sql_options = sql_options
-        self.__redis_options = redis_options
-        self.__airflow_options = airflow_options
-        self.__monitoring_options = monitoring_options
-        self.__cloud_options = cloud_options
         service_account = (
-            values.airflow_pod_service_account if airflow_options.in_kube_mode else None
+            ValueOrchestrator().airflow_pod_service_account
+            if airflow_options.in_kube_mode
+            else None
         )
         super().__init__(
-            AirflowMeta(
-                name="airflow-master-pod",
-                labels=values.master_node_labels,
-                annotations=cloud_options.elasticsearch_connection_annotations,
-            ),
-            spec=PodSpec(
-                self.__get_containers(),
-                volumes=[
-                    log_volume_group.volume,
-                    dag_volume_group.volume,
-                    external_storage.volume,
-                ],
-                service_account_name=service_account,
-            ),
+            sql_options,
+            redis_options,
+            airflow_options,
+            monitoring_options,
+            cloud_options,
+            "airflow-master-pod",
+            service_account,
         )
 
-    def __get_containers(self):
+    def _get_containers(self):
         pods = [
             WebserverUI(
-                self.__sql_options,
-                self.__redis_options,
-                self.__airflow_options,
-                self.__monitoring_options,
-                self.__cloud_options,
+                self._sql_options,
+                self._redis_options,
+                self._airflow_options,
+                self._monitoring_options,
+                self._cloud_options,
             ),
             Scheduler(
-                self.__sql_options,
-                self.__redis_options,
-                self.__airflow_options,
-                self.__monitoring_options,
-                self.__cloud_options,
+                self._sql_options,
+                self._redis_options,
+                self._airflow_options,
+                self._monitoring_options,
+                self._cloud_options,
             ),
         ]
-        if self.__airflow_options.in_celery_mode:
+        if self._airflow_options.in_celery_mode:
             pods.append(
                 FlowerUI(
-                    self.__sql_options,
-                    self.__redis_options,
-                    self.__airflow_options,
-                    self.__monitoring_options,
-                    self.__cloud_options,
+                    self._sql_options,
+                    self._redis_options,
+                    self._airflow_options,
+                    self._monitoring_options,
+                    self._cloud_options,
                 )
             )
         return pods
+
+
+class AirflowWorkerPodTemplate(AirflowPodTemplate):
+    pass
 
 
 class AirflowDeployment(Deployment):
@@ -106,7 +149,7 @@ class AirflowDeployment(Deployment):
         super().__init__(
             AirflowMeta(name="airflow-master-deployment"),
             DeploymentSpec(
-                AirflowPodTemplate(
+                AirflowMasterPodTemplate(
                     sql_options,
                     redis_options,
                     airflow_options,

@@ -13,6 +13,7 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
+    AirflowSSHSecretsVolumeGroup,
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -52,6 +53,8 @@ class KubernetesWorkerPodEnvVar(AirflowEnvVar):
 
 
 class AirflowContainer(Container):
+    _command_entry_point: Optional[List[str]] = ["/entrypoint.sh"]
+
     def __init__(
         self,
         name: str,
@@ -75,21 +78,21 @@ class AirflowContainer(Container):
             image="airflow-image"
             if airflow_options.local_mode
             else "zachb1996/avionix_airflow:latest",
-            image_pull_policy="Never" if airflow_options.local_mode else "IfNotPresent",
+            image_pull_policy=airflow_options.image_pull_policy,
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
-                    None, None, SecretEnvSource(values.secret_name, optional=False)
-                )
+                    secret_ref=SecretEnvSource(values.secret_name, optional=False)
+                ),
             ],
             ports=ports,
             volume_mounts=self._get_volume_mounts(),
             readiness_probe=readiness_probe,
-            command=["/entrypoint.sh"],
+            command=self._command_entry_point,
         )
 
     def _get_volume_mounts(self):
-        return [
+        mounts = [
             AirflowLogVolumeGroup(
                 self._airflow_options, self._cloud_options
             ).volume_mount,
@@ -100,6 +103,9 @@ class AirflowContainer(Container):
                 self._airflow_options, self._cloud_options
             ).volume_mount,
         ]
+        if self._airflow_options.git_ssh_key:
+            mounts.append(AirflowSSHSecretsVolumeGroup().volume_mount)
+        return mounts
 
     def _get_environment(self):
         env = self._airflow_env + self._airflow_options.extra_env_vars
@@ -160,21 +166,17 @@ class AirflowContainer(Container):
                     ).persistent_volume_claim.metadata.name,
                 )
             )
-        if self._airflow_options.git_ssh_key:
-            kube_settings.append(
-                KubernetesEnvVar("GIT_SSH_KEY_SECRET_NAME", "airflow-secrets")
-            )
         return kube_settings
 
     @property
     def _worker_pod_settings(self):
         airflow_env = [var for var in self._airflow_env if "EXECUTOR" not in var.name]
         worker_env: List[AirflowEnvVar] = airflow_env + self._elastic_search_env
-        if self._airflow_options.git_ssh_key:
-            worker_env += [
-                KubernetesEnvVar("GIT_SSH_KEY_SECRET_NAME", "airflow-secrets")
-            ]
         return [KubernetesWorkerPodEnvVar(var.name, var.value) for var in worker_env]
+
+
+class AirflowWorker(AirflowContainer):
+    _command_entry_point = None
 
 
 class WebserverUI(AirflowContainer):
