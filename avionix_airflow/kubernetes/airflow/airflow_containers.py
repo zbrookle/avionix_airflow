@@ -14,6 +14,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     ExternalStorageVolumeGroup,
+    AirflowSSHSecretsVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
@@ -81,8 +82,8 @@ class AirflowContainer(Container):
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
-                    None, None, SecretEnvSource(values.secret_name, optional=False)
-                )
+                    secret_ref=SecretEnvSource(values.secret_name, optional=False)
+                ),
             ],
             ports=ports,
             volume_mounts=self._get_volume_mounts(),
@@ -91,7 +92,7 @@ class AirflowContainer(Container):
         )
 
     def _get_volume_mounts(self):
-        return [
+        mounts = [
             AirflowLogVolumeGroup(
                 self._airflow_options, self._cloud_options
             ).volume_mount,
@@ -102,6 +103,9 @@ class AirflowContainer(Container):
                 self._airflow_options, self._cloud_options
             ).volume_mount,
         ]
+        if self._airflow_options.git_ssh_key:
+            mounts.append(AirflowSSHSecretsVolumeGroup().volume_mount)
+        return mounts
 
     def _get_environment(self):
         env = self._airflow_env + self._airflow_options.extra_env_vars

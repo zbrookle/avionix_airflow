@@ -18,6 +18,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     ExternalStorageVolumeGroup,
+    AirflowSSHSecretsVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
@@ -40,9 +41,6 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         name: str,
         service_account: str = "default",
     ):
-        log_volume_group = AirflowLogVolumeGroup(airflow_options, cloud_options)
-        dag_volume_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
-        external_storage = ExternalStorageVolumeGroup(airflow_options, cloud_options)
         values = ValueOrchestrator()
         self._sql_options = sql_options
         self._redis_options = redis_options
@@ -57,14 +55,23 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
             ),
             spec=PodSpec(
                 self._get_containers(),
-                volumes=[
-                    log_volume_group.volume,
-                    dag_volume_group.volume,
-                    external_storage.volume,
-                ],
+                volumes=self._volumes,
                 service_account_name=service_account,
             ),
         )
+
+    @property
+    def _volumes(self):
+        volumes = [
+            AirflowLogVolumeGroup(self._airflow_options, self._cloud_options).volume,
+            AirflowDagVolumeGroup(self._airflow_options, self._cloud_options).volume,
+            ExternalStorageVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume,
+        ]
+        if self._airflow_options.git_ssh_key:
+            volumes.append(AirflowSSHSecretsVolumeGroup().volume)
+        return volumes
 
     @abstractmethod
     def _get_containers(self) -> List[AirflowContainer]:
