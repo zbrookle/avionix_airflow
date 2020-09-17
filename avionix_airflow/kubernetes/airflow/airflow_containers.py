@@ -14,6 +14,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     AirflowSSHSecretsVolumeGroup,
+    AirflowWorkerPodTemplateStorageGroup,
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -179,7 +180,14 @@ class AirflowWorker(AirflowContainer):
     _command_entry_point = None
 
 
-class WebserverUI(AirflowContainer):
+class AirflowMasterContainer(AirflowContainer):
+    def _get_volume_mounts(self):
+        mounts = super()._get_volume_mounts()
+        mounts.append(AirflowWorkerPodTemplateStorageGroup().volume_mount)
+        return mounts
+
+
+class WebserverUI(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,
@@ -200,7 +208,7 @@ class WebserverUI(AirflowContainer):
         )
 
 
-class Scheduler(AirflowContainer):
+class Scheduler(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,
@@ -220,7 +228,7 @@ class Scheduler(AirflowContainer):
         )
 
 
-class FlowerUI(AirflowContainer):
+class FlowerUI(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,

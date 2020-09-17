@@ -1,5 +1,5 @@
-from avionix_airflow.kubernetes.airflow.airflow_master import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
+from avionix_airflow.kubernetes.airflow.airflow_pods import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
@@ -14,6 +14,9 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     ExternalStorageVolumeGroup,
+)
+from avionix_airflow.kubernetes.airflow.airflow_worker_pod_template import (
+    PodTemplateWorkerConfig,
 )
 from avionix_airflow.kubernetes.airflow.dag_retrieval import DagRetrievalJob
 from avionix_airflow.kubernetes.airflow.ingress_controller import AirflowIngress
@@ -58,6 +61,13 @@ class AirflowOrchestrator(Orchestrator):
             DagRetrievalJob(airflow_options, cloud_options),
             AirflowIngress(airflow_options, cloud_options),
             AirflowSecret(sql_options, airflow_options, redis_options),
+            PodTemplateWorkerConfig(
+                sql_options,
+                redis_options,
+                airflow_options,
+                monitoring_options,
+                cloud_options,
+            ),
         ]
         if monitoring_options.enabled:
             components.append(StatsDService(values, airflow_options.open_node_ports))

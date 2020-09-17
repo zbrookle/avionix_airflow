@@ -1,6 +1,8 @@
-from typing import List
+from abc import ABC, abstractmethod
+from typing import List, Optional
 
 from avionix.kube.core import (
+    ConfigMapVolumeSource,
     Container,
     KeyToPath,
     LabelSelector,
@@ -88,11 +90,18 @@ class AirflowVolumeMount(VolumeMount):
 
 
 class PermissionSettingContainer(Container):
-    def __init__(self, name: str, volume_mount: VolumeMount):
+    def __init__(
+        self,
+        name: str,
+        volume_mount: VolumeMount,
+        permission_bits: int = 777,
+        path_to_file: Optional[str] = None,
+    ):
+        permission_path = volume_mount.mountPath if not path_to_file else path_to_file
         super().__init__(
-            f"{name}-set-owner",
+            f"{name}-permission-container-set-owner",
             image="busybox",
-            command=["/bin/chmod", "777", volume_mount.mountPath],
+            command=["/bin/chmod", str(permission_bits), permission_path],
             volume_mounts=[volume_mount],
         )
 
@@ -119,7 +128,7 @@ class AirflowPersistentVolumeGroup:
         )
         self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
-            f"{name}-permission-container", self.__volume_mount
+            name, self.__volume_mount
         )
 
     @property
@@ -176,8 +185,23 @@ class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
         )
 
 
-class AirflowSSHSecretsVolumeGroup:
+class AirflowVolumeGroup(ABC):
+    volume_name = "a_name"
+    folder_path = "/path/to/folder"
+
+    @property
+    @abstractmethod
+    def volume(self) -> Volume:
+        pass
+
+    @property
+    def volume_mount(self) -> VolumeMount:
+        return VolumeMount(self.volume_name, self.folder_path)
+
+
+class AirflowSSHSecretsVolumeGroup(AirflowVolumeGroup):
     volume_name = "ssh-key-volume"
+    folder_path = "/root/.ssh/"
 
     @property
     def volume(self):
@@ -186,10 +210,27 @@ class AirflowSSHSecretsVolumeGroup:
             secret=SecretVolumeSource(
                 False,
                 ValueOrchestrator().secret_name,
-                items=[KeyToPath("gitSshKey", "id_rsa", mode=400)],
+                items=[KeyToPath("gitSshKey", "id_rsa", 256)],
             ),
         )
 
+
+class AirflowWorkerPodTemplateStorageGroup(AirflowVolumeGroup):
+    volume_name = "worker-pod-template"
+    folder_path = "/usr/local/airflow/worker_pod_template"
+
     @property
-    def volume_mount(self):
-        return VolumeMount(self.volume_name, "/.ssh/")
+    def volume(self):
+        return Volume(
+            self.volume_name,
+            config_map=ConfigMapVolumeSource(
+                ValueOrchestrator().airflow_worker_pod_template_config_file,
+                optional=False,
+                items=[
+                    KeyToPath(
+                        ValueOrchestrator().airflow_worker_pod_template_config_file,
+                        "pod_template.yaml",
+                    )
+                ],
+            ),
+        )
