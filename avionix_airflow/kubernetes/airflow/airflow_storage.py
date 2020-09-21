@@ -188,6 +188,8 @@ class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
 class AirflowVolumeGroup(ABC):
     volume_name = "a_name"
     folder_path = "/path/to/folder"
+    read_only: Optional[bool] = None
+    sub_path: Optional[str] = None
 
     @property
     @abstractmethod
@@ -196,12 +198,19 @@ class AirflowVolumeGroup(ABC):
 
     @property
     def volume_mount(self) -> VolumeMount:
-        return VolumeMount(self.volume_name, self.folder_path)
+        return VolumeMount(
+            self.volume_name,
+            self.folder_path,
+            read_only=self.read_only,
+            sub_path=self.sub_path,
+        )
 
 
 class AirflowSSHSecretsVolumeGroup(AirflowVolumeGroup):
     volume_name = "ssh-key-volume"
-    folder_path = "/root/.ssh/"
+    folder_path = "/root/.ssh/id_rsa"
+    read_only = False
+    sub_path = "id_rsa"
 
     @property
     def volume(self):

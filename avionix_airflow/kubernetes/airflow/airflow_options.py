@@ -34,14 +34,14 @@ class SmtpNotificationOptions:
     smtp_mail_from: str
     _prefixes: ClassVar[List[str]] = [
         "AIRFLOW__SMTP__",
-        "AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__SMTP__",
     ]
 
     def to_dict(self):
         added_env_vars = {}
         for prefix in self._prefixes:
             for key in self.__dict__:
-                added_env_vars[f"{prefix}{key.upper()}"] = str(self.__dict__[key])
+                if "password" not in key:
+                    added_env_vars[f"{prefix}{key.upper()}"] = str(self.__dict__[key])
         return added_env_vars
 
 
@@ -82,6 +82,9 @@ class AirflowOptions:
     :param local_mode: Whether or not to run in local mode
     :param image_pull_policy: Policy for pulling docker image. Can be one of "Never",
         "Always", "IfNotPresent"
+    :param master_image_tag: The docker tag to use for the master image
+    :param delete_pods_on_failure: Whether or not to terminate pods if
+        KubernetesExecutor task fails
     """
 
     dag_sync_image: str
@@ -104,17 +107,14 @@ class AirflowOptions:
     worker_image_tag: str = "latest"
     open_node_ports: bool = False
     local_mode: bool = False
-    smtp_notification_options: InitVar[Optional[SmtpNotificationOptions]] = None
+    smtp_notification_options: Optional[SmtpNotificationOptions] = None
     git_ssh_key: Optional[str] = None
     image_pull_policy: str = "IfNotPresent"
+    master_image_tag: str = "latest"
+    delete_pods_on_failure: bool = False
 
     def __post_init__(
-        self,
-        access_modes,
-        additional_vars,
-        fernet_key: str,
-        worker_image,
-        smtp_notification_options,
+        self, access_modes, additional_vars, fernet_key: str, worker_image,
     ):
         self.access_modes = self.__get_access_modes(access_modes)
         self.fernet_key = fernet_key if fernet_key else _create_fernet_key()
@@ -122,8 +122,8 @@ class AirflowOptions:
             self.worker_image = "zachb1996/avionix_airflow"
 
         self.__additional_vars = additional_vars if additional_vars is not None else {}
-        if smtp_notification_options:
-            self.__additional_vars.update(smtp_notification_options.to_dict())
+        if self.smtp_notification_options:
+            self.__additional_vars.update(self.smtp_notification_options.to_dict())
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
