@@ -9,6 +9,7 @@ class ValueOrchestrator:
         self.es_proxy_service_name = "elasticsearch-master"
         self.grafana_service_name = "airflow-grafana"
         self.grafana_service_port = "service"
+        self.airflow_worker_pod_template_config_file = "pod-template-config"
 
     @property
     def master_node_labels(self):

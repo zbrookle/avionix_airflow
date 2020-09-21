@@ -14,6 +14,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     AirflowSSHSecretsVolumeGroup,
+    AirflowWorkerPodTemplateStorageGroup,
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -72,12 +73,13 @@ class AirflowContainer(Container):
         self._airflow_options = airflow_options
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
+        self._name = name
         super().__init__(
             name=name,
-            args=[name],
+            args=self._args,
             image="airflow-image"
             if airflow_options.local_mode
-            else "zachb1996/avionix_airflow:latest",
+            else f"zachb1996/avionix_airflow:{self._airflow_options.master_image_tag}",
             image_pull_policy=airflow_options.image_pull_policy,
             env=self._get_environment(),
             env_from=[
@@ -116,9 +118,17 @@ class AirflowContainer(Container):
         return env
 
     @property
+    def _args(self) -> List[str]:
+        return [self._name]
+
+    @property
+    def _executor(self):
+        return self._airflow_options.core_executor
+
+    @property
     def _airflow_env(self):
         return [
-            CoreEnvVar("EXECUTOR", self._airflow_options.core_executor),
+            CoreEnvVar("EXECUTOR", self._executor),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_timezone,),
             CoreEnvVar("LOAD_DEFAULT_CONNECTIONS", "False"),
             CoreEnvVar("LOAD_EXAMPLES", "False"),
@@ -156,7 +166,15 @@ class AirflowContainer(Container):
             KubernetesEnvVar(
                 "WORKER_CONTAINER_TAG", self._airflow_options.worker_image_tag,
             ),
-        ] + self._worker_pod_settings
+            KubernetesEnvVar(
+                "POD_TEMPLATE_FILE",
+                "/usr/local/airflow/worker_pod_template/pod_template.yaml",
+            ),
+            KubernetesEnvVar(
+                "DELETE_WORKER_PODS_ON_FAILURE",
+                str(self._airflow_options.delete_pods_on_failure),
+            ),
+        ]
         if not self._monitoring_options.enabled:
             kube_settings.append(
                 KubernetesEnvVar(
@@ -168,18 +186,31 @@ class AirflowContainer(Container):
             )
         return kube_settings
 
-    @property
-    def _worker_pod_settings(self):
-        airflow_env = [var for var in self._airflow_env if "EXECUTOR" not in var.name]
-        worker_env: List[AirflowEnvVar] = airflow_env + self._elastic_search_env
-        return [KubernetesWorkerPodEnvVar(var.name, var.value) for var in worker_env]
-
 
 class AirflowWorker(AirflowContainer):
     _command_entry_point = None
 
+    @property
+    def _args(self):
+        return []
 
-class WebserverUI(AirflowContainer):
+    @property
+    def _executor(self):
+        """
+        The executor for the worker pods must be local
+        :return: LocalExecutor string
+        """
+        return "LocalExecutor"
+
+
+class AirflowMasterContainer(AirflowContainer):
+    def _get_volume_mounts(self):
+        mounts = super()._get_volume_mounts()
+        mounts.append(AirflowWorkerPodTemplateStorageGroup().volume_mount)
+        return mounts
+
+
+class WebserverUI(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,
@@ -200,7 +231,7 @@ class WebserverUI(AirflowContainer):
         )
 
 
-class Scheduler(AirflowContainer):
+class Scheduler(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,
@@ -220,7 +251,7 @@ class Scheduler(AirflowContainer):
         )
 
 
-class FlowerUI(AirflowContainer):
+class FlowerUI(AirflowMasterContainer):
     def __init__(
         self,
         sql_options: SqlOptions,

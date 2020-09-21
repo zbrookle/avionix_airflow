@@ -70,6 +70,7 @@ RUN set -ex \
         /usr/share/doc \
         /usr/share/doc-base
 
+RUN mkdir /root/.ssh
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 RUN chmod +x /entrypoint.sh

@@ -21,6 +21,7 @@ from avionix_airflow.kubernetes.airflow.airflow_storage import (
     AirflowDagVolumeGroup,
     AirflowLogVolumeGroup,
     AirflowSSHSecretsVolumeGroup,
+    AirflowWorkerPodTemplateStorageGroup,
     ExternalStorageVolumeGroup,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -48,6 +49,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         self._airflow_options = airflow_options
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
+        self._airflow_ssh_volume_group = AirflowSSHSecretsVolumeGroup()
         super().__init__(
             AirflowMeta(
                 name=name,
@@ -71,7 +73,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
             ).volume,
         ]
         if self._airflow_options.git_ssh_key:
-            volumes.append(AirflowSSHSecretsVolumeGroup().volume)
+            volumes.append(self._airflow_ssh_volume_group.volume)
         return volumes
 
     @abstractmethod
@@ -93,6 +95,7 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
             if airflow_options.in_kube_mode
             else None
         )
+        self._worker_pod_template_storage_group = AirflowWorkerPodTemplateStorageGroup()
         super().__init__(
             sql_options,
             redis_options,
@@ -132,9 +135,11 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
             )
         return pods
 
-
-class AirflowWorkerPodTemplate(AirflowPodTemplate):
-    pass
+    @property
+    def _volumes(self):
+        volumes = super()._volumes
+        volumes.append(self._worker_pod_template_storage_group.volume)
+        return volumes
 
 
 class AirflowDeployment(Deployment):
