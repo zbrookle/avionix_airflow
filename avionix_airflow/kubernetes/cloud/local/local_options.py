@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from avionix import ChartDependency, ObjectMeta
 from avionix.kube.base_objects import KubernetesBaseObject
@@ -15,13 +15,13 @@ class LocalOptions(CloudOptions):
 
     def __init__(self):
         super().__init__(
-            storage_class=StorageClass(
-                ObjectMeta(name="standard"), None, None, None, "efs.csi.aws.com", None
-            ),
+            storage_class=StorageClass(ObjectMeta(name="standard"), "efs.csi.aws.com"),
             volume_mode="Filesystem",
         )
 
-    def get_csi_persistent_volume_source(self, name: str) -> CSIPersistentVolumeSource:
+    def get_csi_persistent_volume_source(
+        self, name: str
+    ) -> Optional[CSIPersistentVolumeSource]:
         return None
 
     def get_host_path_volume_source(self, host_path: str):

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from avionix import ChartDependency
 from avionix.kube.base_objects import KubernetesBaseObject
@@ -20,7 +20,9 @@ class CloudOptions(ABC):
         self.volume_mode = volume_mode
 
     @abstractmethod
-    def get_csi_persistent_volume_source(self, name: str) -> CSIPersistentVolumeSource:
+    def get_csi_persistent_volume_source(
+        self, name: str
+    ) -> Optional[CSIPersistentVolumeSource]:
         pass
 
     @abstractmethod
