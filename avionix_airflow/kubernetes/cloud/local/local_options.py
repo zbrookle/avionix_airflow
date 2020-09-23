@@ -3,10 +3,9 @@ from typing import Dict, List, Optional
 from avionix import ChartDependency, ObjectMeta
 from avionix.kube.base_objects import KubernetesBaseObject
 from avionix.kube.core import CSIPersistentVolumeSource, HostPathVolumeSource
-from avionix.kube.extensions import IngressBackend
+from avionix.kube.extensions import HTTPIngressPath, IngressBackend
 from avionix.kube.storage import StorageClass
 
-from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 
 
@@ -55,7 +54,7 @@ class LocalOptions(CloudOptions):
         return {}
 
     @property
-    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+    def extra_ingress_paths(self) -> List[HTTPIngressPath]:
         return []
 
     @property

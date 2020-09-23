@@ -1,12 +1,9 @@
 from typing import List
 
-from avionix.kube.core import ConfigMap
+from avionix.kube.core import ConfigMap, Container
 from yaml import dump
 
-from avionix_airflow.kubernetes.airflow.airflow_containers import (
-    AirflowContainer,
-    AirflowWorker,
-)
+from avionix_airflow.kubernetes.airflow.airflow_containers import AirflowWorker
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_pods import AirflowPodTemplate
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
@@ -18,7 +15,7 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowWorkerPodTemplate(AirflowPodTemplate):
-    def _get_containers(self) -> List[AirflowContainer]:
+    def _get_containers(self) -> List[Container]:
         return [
             AirflowWorker(
                 "base",

@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from avionix import ChartDependency, ObjectMeta
 from avionix.kube.base_objects import KubernetesBaseObject
 from avionix.kube.core import CSIPersistentVolumeSource
-from avionix.kube.extensions import IngressBackend
+from avionix.kube.extensions import HTTPIngressPath, IngressBackend
 from avionix.kube.storage import StorageClass
 
 from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
@@ -201,8 +201,8 @@ class AwsOptions(CloudOptions):
         return annotations
 
     @property
-    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
-        ingress_paths = [
+    def extra_ingress_paths(self) -> List[HTTPIngressPath]:
+        ingress_paths: List[HTTPIngressPath] = [
             AirflowIngressPath(
                 self._grafana_redirect, self._use_annotation, path="/grafana"
             ),
@@ -211,13 +211,13 @@ class AwsOptions(CloudOptions):
             ),
         ]
         if self.__use_ssl:
-            return [
-                AirflowIngressPath("ssl-redirect", self._use_annotation, path="/*"),
-            ] + ingress_paths
+            ingress_paths.insert(
+                0, AirflowIngressPath("ssl-redirect", self._use_annotation, path="/*"),
+            )
         return ingress_paths
 
     @property
-    def default_backend(self) -> IngressBackend:
+    def default_backend(self) -> Optional[IngressBackend]:
         return None
 
     @property

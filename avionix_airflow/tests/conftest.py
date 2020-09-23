@@ -25,6 +25,8 @@ from avionix_airflow.tests.utils import (
 class AvionixAirflowChartInstallationContext(ChartInstallationContext):
     def get_status_resources(self):
         resources = super().get_status_resources()
+        print(resources)
+        exit()
         new_resources = resources.filter(regex=".*deployment.*")
         return new_resources
 
