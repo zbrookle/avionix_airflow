@@ -5,7 +5,12 @@ from avionix_airflow import AirflowOptions
 
 @pytest.mark.parametrize(
     "local_mode,worker_image,worker_image_tag,master_image,master_image_tag",
-    [(True, None, None, None, None), (False, None, None, None, None)],
+    [
+        (True, "", "", "", ""),
+        (False, "", "", "", ""),
+        (True, "test-image", "oldest", "", ""),
+        (False, "test-image", "oldest", "", ""),
+    ],
 )
 def test_airflow_options_images(
     local_mode: bool,
@@ -14,17 +19,16 @@ def test_airflow_options_images(
     master_image: str,
     master_image_tag: str,
 ):
-    kwargs = {
-        "local_mode": local_mode,
-        "worker_image": worker_image,
-        "worker_image_tag": worker_image_tag,
-        "master_image": master_image,
-        "master_image_tag": master_image_tag,
-    }
-    for key in list(kwargs.keys()):
-        if kwargs[key] is None:
-            del kwargs[key]
-    options = AirflowOptions("busybox", ["test"], "* * * * *", **kwargs)
+    options = AirflowOptions(
+        "busybox",
+        ["test"],
+        "* * * * *",
+        local_mode=local_mode,
+        worker_image=worker_image,
+        worker_image_tag=worker_image_tag,
+        master_image=master_image,
+        master_image_tag=master_image_tag,
+    )
 
     # Assert expected master image behavior
     if master_image:
@@ -35,5 +39,5 @@ def test_airflow_options_images(
         master_image_tag if master_image_tag else "latest"
     )
     assert options.worker_image_tag == (
-        worker_image_tag if master_image_tag else "latest"
+        worker_image_tag if worker_image_tag else "latest"
     )

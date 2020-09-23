@@ -104,14 +104,14 @@ class AirflowOptions:
     fernet_key: InitVar[str] = ""
     dags_paused_at_creation: bool = True
     worker_image: str = ""
-    worker_image_tag: str = "latest"
+    worker_image_tag: str = ""
     open_node_ports: bool = False
     local_mode: bool = False
     smtp_notification_options: Optional[SmtpNotificationOptions] = None
     git_ssh_key: Optional[str] = None
     image_pull_policy: str = "IfNotPresent"
     master_image: str = ""
-    master_image_tag: str = "latest"
+    master_image_tag: str = ""
     delete_pods_on_failure: bool = False
     default_image: ClassVar[str] = "zachb1996/avionix_airflow"
 
@@ -122,6 +122,8 @@ class AirflowOptions:
         self.fernet_key = fernet_key if fernet_key else _create_fernet_key()
         self.worker_image = self._get_image_behavior(self.worker_image)
         self.master_image = self._get_image_behavior(self.master_image)
+        self.worker_image_tag = self._get_tag(self.worker_image_tag)
+        self.master_image_tag = self._get_tag(self.master_image_tag)
 
         self.__additional_vars = additional_vars if additional_vars is not None else {}
         if self.smtp_notification_options:
@@ -133,6 +135,12 @@ class AirflowOptions:
         if not image and self.local_mode:
             return "airflow-image"
         return image
+
+    @staticmethod
+    def _get_tag(tag: str):
+        if tag:
+            return tag
+        return "latest"
 
     @staticmethod
     def __get_access_modes(access_modes: Optional[List[str]]):
