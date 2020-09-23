@@ -52,6 +52,7 @@ setup(
         "Typing :: Typed",
         "Operating System :: OS Independent",
     ],
+    package_data={"avionix_airflow": ["py.typed"]},
     long_description_content_type="text/x-rst",
     include_package_data=True,
 )
