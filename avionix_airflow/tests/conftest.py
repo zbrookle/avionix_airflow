@@ -2,6 +2,7 @@ from logging import info
 from subprocess import check_output
 
 from avionix.testing.installation_context import ChartInstallationContext
+from pandas import DataFrame
 import pytest
 
 from avionix_airflow import get_chart_builder
@@ -24,8 +25,7 @@ from avionix_airflow.tests.utils import (
 
 class AvionixAirflowChartInstallationContext(ChartInstallationContext):
     def get_status_resources(self):
-        resources = super().get_status_resources()
-        print(resources)
+        resources = DataFrame(super().get_status_resources())
         new_resources = resources.filter(regex=".*deployment.*")
         return new_resources
 
