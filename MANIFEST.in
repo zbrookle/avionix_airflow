@@ -6,5 +6,6 @@ include avionix_airflow/docker/airflow/script/entrypoint.sh
 include avionix_airflow/kubernetes/monitoring/dashboards/grafana_dashboard.json
 include avionix_airflow/kubernetes/monitoring/event_js/event.js
 include requirements.txt
+include avionix_airflow/py.typed
 
 
