@@ -55,4 +55,5 @@ setup(
     package_data={"avionix_airflow": ["py.typed"]},
     long_description_content_type="text/x-rst",
     include_package_data=True,
+    zip_safe=False,
 )
