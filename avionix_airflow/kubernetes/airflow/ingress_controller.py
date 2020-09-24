@@ -1,4 +1,7 @@
+from typing import List
+
 from avionix.kube.extensions import (
+    HTTPIngressPath,
     HTTPIngressRuleValue,
     Ingress,
     IngressRule,
@@ -15,7 +18,7 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 class AirflowIngress(Ingress):
     def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
         values = ValueOrchestrator()
-        ingress_paths = cloud_options.extra_ingress_paths + [
+        ingress_paths: List[HTTPIngressPath] = cloud_options.extra_ingress_paths + [
             AirflowIngressPath(
                 values.webserver_service_name,
                 values.webserver_port_name,

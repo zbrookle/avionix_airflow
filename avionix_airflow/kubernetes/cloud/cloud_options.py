@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from avionix import ChartDependency
 from avionix.kube.base_objects import KubernetesBaseObject
 from avionix.kube.core import CSIPersistentVolumeSource
-from avionix.kube.extensions import IngressBackend
+from avionix.kube.extensions import HTTPIngressPath, IngressBackend
 from avionix.kube.storage import StorageClass
-
-from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 
 
 class CloudOptions(ABC):
@@ -20,7 +18,9 @@ class CloudOptions(ABC):
         self.volume_mode = volume_mode
 
     @abstractmethod
-    def get_csi_persistent_volume_source(self, name: str) -> CSIPersistentVolumeSource:
+    def get_csi_persistent_volume_source(
+        self, name: str
+    ) -> Optional[CSIPersistentVolumeSource]:
         pass
 
     @abstractmethod
@@ -42,12 +42,12 @@ class CloudOptions(ABC):
 
     @property
     @abstractmethod
-    def extra_ingress_paths(self) -> List[AirflowIngressPath]:
+    def extra_ingress_paths(self) -> List[HTTPIngressPath]:
         pass
 
     @property
     @abstractmethod
-    def default_backend(self) -> IngressBackend:
+    def default_backend(self) -> Optional[IngressBackend]:
         pass
 
     @property

@@ -7,11 +7,10 @@ from avionix.kube.apps import (
     DeploymentStrategy,
     RollingUpdateDeployment,
 )
-from avionix.kube.core import PodSpec, PodTemplateSpec
+from avionix.kube.core import Container, PodSpec, PodTemplateSpec
 from avionix.kube.meta import LabelSelector
 
 from avionix_airflow.kubernetes.airflow.airflow_containers import (
-    AirflowContainer,
     FlowerUI,
     Scheduler,
     WebserverUI,
@@ -77,7 +76,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         return volumes
 
     @abstractmethod
-    def _get_containers(self) -> List[AirflowContainer]:
+    def _get_containers(self) -> List[Container]:
         pass
 
 

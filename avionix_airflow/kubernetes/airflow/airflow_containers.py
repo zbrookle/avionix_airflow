@@ -77,9 +77,8 @@ class AirflowContainer(Container):
         super().__init__(
             name=name,
             args=self._args,
-            image="airflow-image"
-            if airflow_options.local_mode
-            else f"zachb1996/avionix_airflow:{self._airflow_options.master_image_tag}",
+            image=f"{self._airflow_options.master_image}:"
+            f"{self._airflow_options.master_image_tag}",
             image_pull_policy=airflow_options.image_pull_policy,
             env=self._get_environment(),
             env_from=[

@@ -120,6 +120,8 @@ class AirflowPersistentVolumeGroup:
         self.__persistent_volume = AirflowPersistentVolume(
             name, storage, host_path, access_modes, cloud_options
         )
+        if self.__volume.persistentVolumeClaim is None:
+            raise Exception("Need persistent volume claim!")
         self.__persistent_volume_claim = AirflowPersistentVolumeClaim(
             self.__volume.persistentVolumeClaim.claimName,
             access_modes,
