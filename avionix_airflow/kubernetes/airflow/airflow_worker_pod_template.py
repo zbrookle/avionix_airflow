@@ -15,6 +15,27 @@ from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowWorkerPodTemplate(AirflowPodTemplate):
+    def __init__(
+        self,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+        monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
+        name: str,
+        service_account: str = "default",
+    ):
+        super().__init__(
+            sql_options,
+            redis_options,
+            airflow_options,
+            monitoring_options,
+            cloud_options,
+            name,
+            service_account,
+            "Never",
+        )
+
     def _get_containers(self) -> List[Container]:
         return [
             AirflowWorker(
