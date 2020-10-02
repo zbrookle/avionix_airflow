@@ -41,6 +41,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         cloud_options: CloudOptions,
         name: str,
         service_account: str = "default",
+        restart_policy: str = "Always",
     ):
         values = ValueOrchestrator()
         self._sql_options = sql_options
@@ -59,6 +60,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
                 self._get_containers(),
                 volumes=self._volumes,
                 service_account_name=service_account,
+                restart_policy=restart_policy,
             ),
         )
 
