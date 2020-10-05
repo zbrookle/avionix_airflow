@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Dict, List
 
 from avionix.kube.apps import (
     Deployment,
@@ -40,10 +40,10 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
         name: str,
+        labels: Dict[str, str],
         service_account: str = "default",
         restart_policy: str = "Always",
     ):
-        values = ValueOrchestrator()
         self._sql_options = sql_options
         self._redis_options = redis_options
         self._airflow_options = airflow_options
@@ -53,7 +53,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         super().__init__(
             AirflowMeta(
                 name=name,
-                labels=values.master_node_labels,
+                labels=labels,
                 annotations=cloud_options.elasticsearch_connection_annotations,
             ),
             spec=PodSpec(
@@ -88,10 +88,9 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
     ):
+        values = ValueOrchestrator()
         service_account = (
-            ValueOrchestrator().airflow_pod_service_account
-            if airflow_options.in_kube_mode
-            else None
+            values.airflow_pod_service_account if airflow_options.in_kube_mode else None
         )
         self._worker_pod_template_storage_group = AirflowWorkerPodTemplateStorageGroup()
         super().__init__(
@@ -101,6 +100,7 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
             monitoring_options,
             cloud_options,
             "airflow-master-pod",
+            values.master_node_labels,
             service_account,
         )
 

@@ -1,4 +1,6 @@
 class ValueOrchestrator:
+    _job_key = "pod-job"
+
     def __init__(self, dashboard_service_account: str = "dashboard"):
         self.dashboard_service_account = dashboard_service_account
         self.secret_name = "airflow-secrets"
@@ -13,23 +15,27 @@ class ValueOrchestrator:
 
     @property
     def master_node_labels(self):
-        return {"pod-job": "master-node"}
+        return {self._job_key: "master-node"}
+
+    @property
+    def worker_node_labels(self):
+        return {self._job_key: "worker-node"}
 
     @property
     def elasticsearch_proxy_labels(self):
-        return {"pod-job": "es-proxy"}
+        return {self._job_key: "es-proxy"}
 
     @property
     def database_labels(self):
-        return {"pod-job": "database"}
+        return {self._job_key: "database"}
 
     @property
     def redis_labels(self):
-        return {"pod-job": "redis"}
+        return {self._job_key: "redis"}
 
     @property
     def dag_sync_cron_labels(self):
-        return {"pod-job": "dag-sync"}
+        return {self._job_key: "dag-sync"}
 
     @property
     def database_service_name(self):

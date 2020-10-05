@@ -25,6 +25,7 @@ class AirflowWorkerPodTemplate(AirflowPodTemplate):
         name: str,
         service_account: str = "default",
     ):
+        values = ValueOrchestrator()
         super().__init__(
             sql_options,
             redis_options,
@@ -32,6 +33,7 @@ class AirflowWorkerPodTemplate(AirflowPodTemplate):
             monitoring_options,
             cloud_options,
             name,
+            values.worker_node_labels,
             service_account,
             "Never",
         )
