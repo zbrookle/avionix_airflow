@@ -139,7 +139,7 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
     @property
     def _volumes(self):
         volumes = super()._volumes
-        volumes.append(self._worker_pod_template_storage_group.volume,)
+        volumes.append(self._worker_pod_template_storage_group.volume)
         return volumes
 
 
