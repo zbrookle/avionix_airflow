@@ -69,6 +69,9 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         volumes = [
             AirflowLogVolumeGroup(self._airflow_options, self._cloud_options).volume,
             AirflowDagVolumeGroup(self._airflow_options, self._cloud_options).volume,
+            ExternalStorageVolumeGroup(
+                self._airflow_options, self._cloud_options
+            ).volume,
         ]
         if self._airflow_options.git_ssh_key:
             volumes.append(self._airflow_ssh_volume_group.volume)
@@ -136,14 +139,7 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
     @property
     def _volumes(self):
         volumes = super()._volumes
-        volumes.extend(
-            [
-                self._worker_pod_template_storage_group.volume,
-                ExternalStorageVolumeGroup(
-                    self._airflow_options, self._cloud_options
-                ).volume,
-            ]
-        )
+        volumes.append(self._worker_pod_template_storage_group.volume,)
         return volumes
 
 
