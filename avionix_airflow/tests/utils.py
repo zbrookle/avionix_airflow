@@ -46,4 +46,9 @@ def skip_if_not_celery(airflow_options: AirflowOptions):
         pytest.skip("This functionality is only available with the celery executor")
 
 
+def skip_if_not_kubernetes(airflow_options: AirflowOptions):
+    if not airflow_options.in_kube_mode:
+        pytest.skip("This functionality is only available with the kubernetes executor")
+
+
 dag_copy_loc = Path(__file__).parent / "sync_dags.sh"

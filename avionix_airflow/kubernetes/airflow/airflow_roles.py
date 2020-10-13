@@ -25,7 +25,7 @@ class AirflowRoleBinding(RoleBinding):
 class AirflowPodRole(AirflowRole):
     def __init__(self):
         super().__init__(
-            "pod-reader",
+            "pod-controller",
             [
                 PolicyRule(
                     resources=["pods"],
@@ -40,7 +40,7 @@ class AirflowPodRoleGroup:
     def __init__(self, service_account: ServiceAccount):
         self.role = AirflowPodRole()
         self.role_binding = AirflowRoleBinding(
-            "pod-reader-binding",
+            "pod-controller-binding",
             RoleRef(self.role.metadata.name, "rbac.authorization.k8s.io", kind="Role"),
             [Subject(service_account.metadata.name, kind="ServiceAccount")],
         )

@@ -151,7 +151,7 @@ class AirflowContainer(Container):
     @property
     def _kubernetes_env(self):
         kube_settings = [
-            KubernetesEnvVar("NAMESPACE", self._airflow_options.namespace),
+            KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
             KubernetesEnvVar(
                 "DAGS_VOLUME_CLAIM",
                 AirflowDagVolumeGroup(

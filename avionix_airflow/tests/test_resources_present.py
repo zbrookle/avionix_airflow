@@ -68,3 +68,9 @@ def test_volumes_present(label):
         volume_specific_info = volume_info[volume]
         assert volume_specific_info["CAPACITY"] == "50Mi"
         assert volume_specific_info["ACCESS MODES"] == "RWX"
+
+
+def test_namespaces_present(airflow_options):
+    assert airflow_options.namespace in kubectl_name_dict("namespace")
+    if airflow_options.in_kube_mode:
+        assert airflow_options.pods_namespace in kubectl_name_dict("namespace")

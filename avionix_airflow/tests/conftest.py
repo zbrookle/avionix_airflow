@@ -40,10 +40,15 @@ def host():
     return get_minikube_ip()
 
 
+@pytest.fixture
+def pod_namespace():
+    return "airflow-worker-pods"
+
+
 @pytest.fixture(
     scope="session", params=["CeleryExecutor", "KubernetesExecutor"],
 )
-def airflow_options(request):
+def airflow_options(request, pod_namespace):
     return AirflowOptions(
         dag_sync_image="alpine/git",
         dag_sync_command=["/bin/sh", "-c", parse_shell_script(str(dag_copy_loc))],
@@ -52,6 +57,7 @@ def airflow_options(request):
         core_executor=request.param,
         open_node_ports=True,
         local_mode=True,
+        pods_namespace=pod_namespace,
     )
 
 

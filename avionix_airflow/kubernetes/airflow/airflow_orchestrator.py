@@ -1,3 +1,6 @@
+from avionix.kube.core import Namespace
+from avionix.kube.meta import ObjectMeta
+
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_pods import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
@@ -80,5 +83,11 @@ class AirflowOrchestrator(Orchestrator):
             role_group = AirflowPodRoleGroup(airflow_pod_service_account)
             components.extend(
                 [airflow_pod_service_account, role_group.role, role_group.role_binding]
+            )
+        if (
+            airflow_options.pods_namespace != airflow_options.namespace
+        ) and airflow_options.in_kube_mode:
+            components.append(
+                Namespace(ObjectMeta(name=airflow_options.pods_namespace))
             )
         super().__init__(components)

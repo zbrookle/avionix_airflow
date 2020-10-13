@@ -85,6 +85,7 @@ class AirflowOptions:
     :param master_image_tag: The docker tag to use for the master image
     :param delete_pods_on_failure: Whether or not to terminate pods if
         KubernetesExecutor task fails
+    :param pods_namespace: The namespace in which pods will be launched
     """
 
     dag_sync_image: str
@@ -114,6 +115,7 @@ class AirflowOptions:
     master_image_tag: str = ""
     delete_pods_on_failure: bool = False
     default_image: ClassVar[str] = "zachb1996/avionix_airflow"
+    pods_namespace: Optional[str] = None
 
     def __post_init__(
         self, access_modes, additional_vars, fernet_key: str,
@@ -124,6 +126,9 @@ class AirflowOptions:
         self.master_image = self._get_image_behavior(self.master_image)
         self.worker_image_tag = self._get_tag(self.worker_image_tag)
         self.master_image_tag = self._get_tag(self.master_image_tag)
+        self.pods_namespace = (
+            self.namespace if self.pods_namespace is None else self.pods_namespace
+        )
 
         self.__additional_vars = additional_vars if additional_vars is not None else {}
         if self.smtp_notification_options:
