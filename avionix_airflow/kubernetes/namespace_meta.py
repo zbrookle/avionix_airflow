@@ -13,6 +13,8 @@ class AirflowMeta(ObjectMeta):
     ):
         if labels is None:
             labels = {}
+        else:
+            labels = labels.copy()
         labels["app"] = "airflow"
         super().__init__(
             name=name, labels=labels, annotations=annotations, namespace=namespace

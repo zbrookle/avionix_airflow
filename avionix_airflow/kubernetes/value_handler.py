@@ -1,35 +1,39 @@
+from dataclasses import dataclass, field
+
+_JOB_KEY = "pod-job"
+
+
+# TODO Break apart into different application objects that contain, service,
+#  deployment, etc.
+@dataclass(frozen=True)
 class ValueOrchestrator:
-    _job_key = "pod-job"
-
-    def __init__(self, dashboard_service_account: str = "dashboard"):
-        self.dashboard_service_account = dashboard_service_account
-        self.secret_name = "airflow-secrets"
-        self.statsd_service_name = "statsd"
-        self.statsd_node_port = 30004
-        self.statsd_port_name = "statsd"
-        self.elasticsearch_proxy_port = 9200
-        self.es_proxy_service_name = "elasticsearch-master"
-        self.grafana_service_name = "airflow-grafana"
-        self.grafana_service_port = "service"
-        self.airflow_worker_pod_template_config_file = "pod-template-config"
-        self.master_node_labels = {self._job_key: "master-node"}
-        self.worker_node_labels = {self._job_key: "worker-node"}
-        self.database_labels = {self._job_key: "database"}
-        self.redis_labels = {self._job_key: "redis"}
-        self.dag_sync_cron_labels = {self._job_key: "dag-sync"}
-        self.database_service_name = "airflow-database-connection"
-        self.redis_service_name = "redis-svc"
-        self.flower_service_name = "flower-svc"
-        self.webserver_service_name = "webserver-svc"
-        self.master_deployment_name = "airflow-master-deployment"
-        self.database_deployment_name = "postgres-database-deployment"
-        self.redis_deployment_name = "redis-deployment"
-        self.webserver_port_name = "webserver-port"
-        self.flower_port_name = "flower-port"
-        self.webserver_node_port = 30000
-        self.flower_node_port = 30003
-        self.airflow_pod_service_account = "airflow-pod-account"
-
-    @property
-    def elasticsearch_proxy_labels(self):
-        return {self._job_key: "es-proxy"}
+    dashboard_service_account: str = "dashboard"
+    secret_name: str = "airflow-secrets"
+    statsd_service_name: str = "statsd"
+    statsd_node_port: int = 30004
+    statsd_port_name: str = "statsd"
+    elasticsearch_proxy_port: int = 9200
+    es_proxy_service_name: str = "elasticsearch-master"
+    grafana_service_name: str = "airflow-grafana"
+    grafana_service_port: str = "service"
+    airflow_worker_pod_template_config_file: str = "pod-template-config"
+    master_node_labels: dict = field(default_factory=lambda: {_JOB_KEY: "master-node"})
+    worker_node_labels: dict = field(default_factory=lambda: {_JOB_KEY: "worker-node"})
+    database_labels: dict = field(default_factory=lambda: {_JOB_KEY: "database"})
+    redis_labels: dict = field(default_factory=lambda: {_JOB_KEY: "redis"})
+    dag_sync_cron_labels: dict = field(default_factory=lambda: {_JOB_KEY: "dag-sync"})
+    elasticsearch_proxy_labels: dict = field(
+        default_factory=lambda: {_JOB_KEY: "es-proxy"}
+    )
+    database_service_name: str = "airflow-database-connection"
+    redis_service_name: str = "redis-svc"
+    flower_service_name: str = "flower-svc"
+    webserver_service_name: str = "webserver-svc"
+    master_deployment_name: str = "airflow-master-deployment"
+    database_deployment_name: str = "postgres-database-deployment"
+    redis_deployment_name: str = "redis-deployment"
+    webserver_port_name: str = "webserver-port"
+    flower_port_name: str = "flower-port"
+    webserver_node_port: int = 30000
+    flower_node_port: int = 30003
+    airflow_pod_service_account: str = "airflow-pod-account"
