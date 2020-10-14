@@ -147,10 +147,7 @@ class AirflowContainer(Container):
         dag_volume_group = self._volume_group_factory.dag_volume_group
         kube_settings = [
             KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
-            KubernetesEnvVar(
-                "DAGS_VOLUME_CLAIM",
-                dag_volume_group.persistent_volume_claim.metadata.name,
-            ),
+            KubernetesEnvVar("DAGS_VOLUME_CLAIM", dag_volume_group.pvc.metadata.name,),
             KubernetesEnvVar(
                 "WORKER_CONTAINER_REPOSITORY", self._airflow_options.worker_image,
             ),
@@ -171,8 +168,7 @@ class AirflowContainer(Container):
             log_volume_group = self._volume_group_factory.log_volume_group
             kube_settings.append(
                 KubernetesEnvVar(
-                    "LOGS_VOLUME_CLAIM",
-                    log_volume_group.persistent_volume_claim.metadata.name,
+                    "LOGS_VOLUME_CLAIM", log_volume_group.pvc.metadata.name,
                 )
             )
         return kube_settings

@@ -54,10 +54,10 @@ class AirflowOrchestrator(Orchestrator):
             WebserverService(values, airflow_options.open_node_ports, cloud_options),
             dag_group.persistent_volume,
             log_group.persistent_volume,
-            dag_group.persistent_volume_claim,
-            log_group.persistent_volume_claim,
+            dag_group.pvc,
+            log_group.pvc,
             external_volume_group.persistent_volume,
-            external_volume_group.persistent_volume_claim,
+            external_volume_group.pvc,
             DagRetrievalJob(airflow_options, cloud_options),
             AirflowIngress(airflow_options, cloud_options),
             AirflowSecret(sql_options, airflow_options, redis_options),
@@ -86,7 +86,15 @@ class AirflowOrchestrator(Orchestrator):
         if (
             airflow_options.pods_namespace != airflow_options.namespace
         ) and airflow_options.in_kube_mode:
-            components.append(
-                Namespace(ObjectMeta(name=airflow_options.pods_namespace))
+            worker_storage_groups = StorageGroupFactory(
+                airflow_options, cloud_options, airflow_options.pods_namespace
+            )
+            components.extend(
+                [
+                    Namespace(ObjectMeta(name=airflow_options.pods_namespace)),
+                    worker_storage_groups.dag_volume_group.pvc,
+                    worker_storage_groups.log_volume_group.pvc,
+                    worker_storage_groups.external_storage_volume_group.pvc,
+                ]
             )
         super().__init__(components)
