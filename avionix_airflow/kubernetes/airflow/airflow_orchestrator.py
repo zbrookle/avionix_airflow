@@ -79,8 +79,10 @@ class AirflowOrchestrator(Orchestrator):
                 FlowerService(values, airflow_options.open_node_ports, cloud_options)
             )
         if airflow_options.in_kube_mode:
-            airflow_pod_service_account = AirflowPodServiceAccount()
-            role_group = AirflowPodRoleGroup(airflow_pod_service_account)
+            airflow_pod_service_account = AirflowPodServiceAccount(airflow_options)
+            role_group = AirflowPodRoleGroup(
+                airflow_pod_service_account, airflow_options
+            )
             components.extend(
                 [airflow_pod_service_account, role_group.role, role_group.role_binding]
             )
