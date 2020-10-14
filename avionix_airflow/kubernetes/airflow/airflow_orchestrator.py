@@ -52,11 +52,11 @@ class AirflowOrchestrator(Orchestrator):
                 cloud_options,
             ),
             WebserverService(values, airflow_options.open_node_ports, cloud_options),
-            dag_group.persistent_volume,
-            log_group.persistent_volume,
+            dag_group.pv,
+            log_group.pv,
             dag_group.pvc,
             log_group.pvc,
-            external_volume_group.persistent_volume,
+            external_volume_group.pv,
             external_volume_group.pvc,
             DagRetrievalJob(airflow_options, cloud_options),
             AirflowIngress(airflow_options, cloud_options),
@@ -93,8 +93,11 @@ class AirflowOrchestrator(Orchestrator):
                 [
                     Namespace(ObjectMeta(name=airflow_options.pods_namespace)),
                     worker_storage_groups.dag_volume_group.pvc,
+                    worker_storage_groups.dag_volume_group.pv,
                     worker_storage_groups.log_volume_group.pvc,
+                    worker_storage_groups.log_volume_group.pv,
                     worker_storage_groups.external_storage_volume_group.pvc,
+                    worker_storage_groups.external_storage_volume_group.pv,
                 ]
             )
         super().__init__(components)

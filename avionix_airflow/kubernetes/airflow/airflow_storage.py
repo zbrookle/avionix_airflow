@@ -31,6 +31,7 @@ class AirflowPersistentVolume(PersistentVolume):
         host_path: str,
         access_modes: List[str],
         cloud_options: CloudOptions,
+        namespace: str,
     ):
         self._cloud_options = cloud_options
         volume_spec = PersistentVolumeSpec(
@@ -44,9 +45,9 @@ class AirflowPersistentVolume(PersistentVolume):
 
         super().__init__(
             AirflowMeta(
-                name,
+                f"{namespace}-{name}",
                 annotations={"pv.beta.kubernetes.io/gid": "1001"},
-                labels={"storage-type": name},
+                labels={"storage-type": name, "namespace": namespace},
             ),
             volume_spec,
         )
@@ -77,7 +78,7 @@ class AirflowPersistentVolumeClaim(PersistentVolumeClaim):
             PersistentVolumeClaimSpec(
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
-                selector=LabelSelector({"storage-type": name}),
+                selector=LabelSelector({"storage-type": name, "namespace": namespace}),
                 storage_class_name=self._cloud_options.storage_class.metadata.name,
             ),
         )
@@ -120,7 +121,7 @@ class AirflowPersistentVolumeGroup:
         host_path = "/tmp/data/airflow/" + folder
         self.__volume = AirflowVolume(name, name)
         self.__persistent_volume = AirflowPersistentVolume(
-            name, storage, host_path, access_modes, cloud_options
+            name, storage, host_path, access_modes, cloud_options, namespace
         )
         if self.__volume.persistentVolumeClaim is None:
             raise Exception("Need persistent volume claim!")
@@ -137,7 +138,7 @@ class AirflowPersistentVolumeGroup:
         )
 
     @property
-    def persistent_volume(self):
+    def pv(self):
         return self.__persistent_volume
 
     @property
