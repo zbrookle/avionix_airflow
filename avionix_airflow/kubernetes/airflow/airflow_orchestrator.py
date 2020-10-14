@@ -41,10 +41,14 @@ class AirflowOrchestrator(Orchestrator):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
     ):
-        dag_group = AirflowDagVolumeGroup(airflow_options, cloud_options)
-        log_group = AirflowLogVolumeGroup(airflow_options, cloud_options)
+        dag_group = AirflowDagVolumeGroup(
+            airflow_options, cloud_options, airflow_options.namespace
+        )
+        log_group = AirflowLogVolumeGroup(
+            airflow_options, cloud_options, airflow_options.namespace
+        )
         external_volume_group = ExternalStorageVolumeGroup(
-            airflow_options, cloud_options
+            airflow_options, cloud_options, airflow_options.namespace
         )
         components = [
             AirflowDeployment(

@@ -74,6 +74,12 @@ class AirflowContainer(Container):
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
         self._name = name
+        self._dag_volume_group = AirflowDagVolumeGroup(
+            self._airflow_options, self._cloud_options, self._airflow_options.namespace
+        )
+        self._log_volume_group = AirflowLogVolumeGroup(
+            self._airflow_options, self._cloud_options, self._airflow_options.namespace
+        )
         super().__init__(
             name=name,
             args=self._args,
@@ -94,14 +100,12 @@ class AirflowContainer(Container):
 
     def _get_volume_mounts(self):
         mounts = [
-            AirflowLogVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume_mount,
-            AirflowDagVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume_mount,
+            self._log_volume_group.volume_mount,
+            self._dag_volume_group.volume_mount,
             ExternalStorageVolumeGroup(
-                self._airflow_options, self._cloud_options
+                self._airflow_options,
+                self._cloud_options,
+                self._airflow_options.namespace,
             ).volume_mount,
         ]
         if self._airflow_options.git_ssh_key:
@@ -154,9 +158,7 @@ class AirflowContainer(Container):
             KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
             KubernetesEnvVar(
                 "DAGS_VOLUME_CLAIM",
-                AirflowDagVolumeGroup(
-                    self._airflow_options, self._cloud_options
-                ).persistent_volume_claim.metadata.name,
+                self._dag_volume_group.persistent_volume_claim.metadata.name,
             ),
             KubernetesEnvVar(
                 "WORKER_CONTAINER_REPOSITORY", self._airflow_options.worker_image,
@@ -178,9 +180,7 @@ class AirflowContainer(Container):
             kube_settings.append(
                 KubernetesEnvVar(
                     "LOGS_VOLUME_CLAIM",
-                    AirflowLogVolumeGroup(
-                        self._airflow_options, self._cloud_options
-                    ).persistent_volume_claim.metadata.name,
+                    self._log_volume_group.persistent_volume_claim.metadata.name,
                 )
             )
         return kube_settings
