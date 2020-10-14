@@ -12,26 +12,14 @@ class ValueOrchestrator:
         self.grafana_service_name = "airflow-grafana"
         self.grafana_service_port = "service"
         self.airflow_worker_pod_template_config_file = "pod-template-config"
-
-    @property
-    def master_node_labels(self):
-        return {self._job_key: "master-node"}
-
-    @property
-    def worker_node_labels(self):
-        return {self._job_key: "worker-node"}
+        self.master_node_labels = {self._job_key: "master-node"}
+        self.worker_node_labels = {self._job_key: "worker-node"}
+        self.database_labels = {self._job_key: "database"}
+        self.redis_labels = {self._job_key: "redis"}
 
     @property
     def elasticsearch_proxy_labels(self):
         return {self._job_key: "es-proxy"}
-
-    @property
-    def database_labels(self):
-        return {self._job_key: "database"}
-
-    @property
-    def redis_labels(self):
-        return {self._job_key: "redis"}
 
     @property
     def dag_sync_cron_labels(self):
