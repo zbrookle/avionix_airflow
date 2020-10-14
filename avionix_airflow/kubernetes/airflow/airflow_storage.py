@@ -266,3 +266,40 @@ class AirflowWorkerPodTemplateStorageGroup(AirflowVolumeGroup):
                 ],
             ),
         )
+
+
+class StorageGroupFactory:
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        namespace: str,
+    ):
+        if namespace not in {airflow_options.namespace, airflow_options.pods_namespace}:
+            raise Exception("Invalid namespace used")
+        self._airflow_options = airflow_options
+        self._cloud_options = cloud_options
+        self._namespace = namespace
+
+    def _get_volume_group_with_options(self, group_class: type):
+        return group_class(self._airflow_options, self._cloud_options, self._namespace)
+
+    @property
+    def external_storage_volume_group(self):
+        return self._get_volume_group_with_options(ExternalStorageVolumeGroup)
+
+    @property
+    def pod_template_group(self):
+        return AirflowWorkerPodTemplateStorageGroup()
+
+    @property
+    def ssh_volume_group(self):
+        return AirflowSSHSecretsVolumeGroup()
+
+    @property
+    def dag_volume_group(self):
+        return self._get_volume_group_with_options(AirflowDagVolumeGroup)
+
+    @property
+    def log_volume_group(self):
+        return self._get_volume_group_with_options(AirflowLogVolumeGroup)

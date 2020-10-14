@@ -13,11 +13,7 @@ from avionix_airflow.kubernetes.airflow.airflow_service import (
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
     AirflowPodServiceAccount,
 )
-from avionix_airflow.kubernetes.airflow.airflow_storage import (
-    AirflowDagVolumeGroup,
-    AirflowLogVolumeGroup,
-    ExternalStorageVolumeGroup,
-)
+from avionix_airflow.kubernetes.airflow.airflow_storage import StorageGroupFactory
 from avionix_airflow.kubernetes.airflow.airflow_worker_pod_template import (
     PodTemplateWorkerConfig,
 )
@@ -41,15 +37,12 @@ class AirflowOrchestrator(Orchestrator):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
     ):
-        dag_group = AirflowDagVolumeGroup(
+        storage_group_factory = StorageGroupFactory(
             airflow_options, cloud_options, airflow_options.namespace
         )
-        log_group = AirflowLogVolumeGroup(
-            airflow_options, cloud_options, airflow_options.namespace
-        )
-        external_volume_group = ExternalStorageVolumeGroup(
-            airflow_options, cloud_options, airflow_options.namespace
-        )
+        dag_group = storage_group_factory.dag_volume_group
+        log_group = storage_group_factory.log_volume_group
+        external_volume_group = storage_group_factory.external_storage_volume_group
         components = [
             AirflowDeployment(
                 sql_options,

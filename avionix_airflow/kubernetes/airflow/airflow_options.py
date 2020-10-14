@@ -115,7 +115,7 @@ class AirflowOptions:
     master_image_tag: str = ""
     delete_pods_on_failure: bool = False
     default_image: ClassVar[str] = "zachb1996/avionix_airflow"
-    pods_namespace: Optional[str] = None
+    pods_namespace: str = ""
 
     def __post_init__(
         self, access_modes, additional_vars, fernet_key: str,
@@ -127,7 +127,7 @@ class AirflowOptions:
         self.worker_image_tag = self._get_tag(self.worker_image_tag)
         self.master_image_tag = self._get_tag(self.master_image_tag)
         self.pods_namespace = (
-            self.namespace if self.pods_namespace is None else self.pods_namespace
+            self.namespace if not self.pods_namespace else self.pods_namespace
         )
 
         self.__additional_vars = additional_vars if additional_vars is not None else {}

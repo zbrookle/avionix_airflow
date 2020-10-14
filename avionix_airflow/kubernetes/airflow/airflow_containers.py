@@ -11,11 +11,8 @@ from avionix.kube.core import (
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
-    AirflowDagVolumeGroup,
-    AirflowLogVolumeGroup,
-    AirflowSSHSecretsVolumeGroup,
     AirflowWorkerPodTemplateStorageGroup,
-    ExternalStorageVolumeGroup,
+    StorageGroupFactory,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
@@ -74,10 +71,7 @@ class AirflowContainer(Container):
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
         self._name = name
-        self._dag_volume_group = AirflowDagVolumeGroup(
-            self._airflow_options, self._cloud_options, self._airflow_options.namespace
-        )
-        self._log_volume_group = AirflowLogVolumeGroup(
+        self._volume_group_factory = StorageGroupFactory(
             self._airflow_options, self._cloud_options, self._airflow_options.namespace
         )
         super().__init__(
@@ -100,16 +94,12 @@ class AirflowContainer(Container):
 
     def _get_volume_mounts(self):
         mounts = [
-            self._log_volume_group.volume_mount,
-            self._dag_volume_group.volume_mount,
-            ExternalStorageVolumeGroup(
-                self._airflow_options,
-                self._cloud_options,
-                self._airflow_options.namespace,
-            ).volume_mount,
+            self._volume_group_factory.log_volume_group.volume_mount,
+            self._volume_group_factory.dag_volume_group.volume_mount,
+            self._volume_group_factory.external_storage_volume_group.volume_mount,
         ]
         if self._airflow_options.git_ssh_key:
-            mounts.append(AirflowSSHSecretsVolumeGroup().volume_mount)
+            mounts.append(self._volume_group_factory.ssh_volume_group.volume_mount)
         return mounts
 
     def _get_environment(self):
@@ -154,11 +144,12 @@ class AirflowContainer(Container):
 
     @property
     def _kubernetes_env(self):
+        dag_volume_group = self._volume_group_factory.dag_volume_group
         kube_settings = [
             KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
             KubernetesEnvVar(
                 "DAGS_VOLUME_CLAIM",
-                self._dag_volume_group.persistent_volume_claim.metadata.name,
+                dag_volume_group.persistent_volume_claim.metadata.name,
             ),
             KubernetesEnvVar(
                 "WORKER_CONTAINER_REPOSITORY", self._airflow_options.worker_image,
@@ -177,10 +168,11 @@ class AirflowContainer(Container):
             ),
         ]
         if not self._monitoring_options.enabled:
+            log_volume_group = self._volume_group_factory.log_volume_group
             kube_settings.append(
                 KubernetesEnvVar(
                     "LOGS_VOLUME_CLAIM",
-                    self._log_volume_group.persistent_volume_claim.metadata.name,
+                    log_volume_group.persistent_volume_claim.metadata.name,
                 )
             )
         return kube_settings
