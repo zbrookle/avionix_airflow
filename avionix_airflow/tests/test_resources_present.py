@@ -14,9 +14,9 @@ from avionix_airflow.tests.utils import (
 @parametrize_plus(
     "service", [fixture_ref(database_service), fixture_ref(webserver_service)]
 )
-def test_services_present(label, airflow_options, service: AirflowService):
+def test_services_present(airflow_options, service: AirflowService):
     service_name = service.metadata.name
-    if service_name in {label.flower_service_name, label.redis_service_name}:
+    if service_name in {"flower-svc", "redis-svc"}:
         skip_if_not_celery(airflow_options)
 
     service_info = kubectl_name_dict("service")
