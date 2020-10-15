@@ -20,7 +20,6 @@ from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
 from avionix_airflow.kubernetes.services import ServiceFactory
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowOrchestrator(Orchestrator):
@@ -28,7 +27,6 @@ class AirflowOrchestrator(Orchestrator):
         self,
         sql_options: SqlOptions,
         redis_options: RedisOptions,
-        values: ValueOrchestrator,
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
@@ -66,6 +64,7 @@ class AirflowOrchestrator(Orchestrator):
                 airflow_options,
                 monitoring_options,
                 cloud_options,
+                service_factory,
             ),
         ]
         if monitoring_options.enabled:

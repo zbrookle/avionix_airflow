@@ -16,7 +16,6 @@ from avionix_airflow.kubernetes.monitoring import (
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
 from avionix_airflow.kubernetes.services import ServiceFactory
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AvionixChartInfo(ChartInfo):
@@ -54,7 +53,6 @@ def get_chart_builder(
     orchestrator = AirflowOrchestrator(
         sql_options,
         redis_options,
-        ValueOrchestrator(),
         airflow_options,
         monitoring_options,
         cloud_options,
