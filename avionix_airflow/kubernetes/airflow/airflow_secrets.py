@@ -13,6 +13,7 @@ class AirflowSecret(Secret):
         sql_options: SqlOptions,
         airflow_options: AirflowOptions,
         redis_options: RedisOptions,
+        namespace: str,
     ):
         data = {
             "AIRFLOW_CONN_POSTGRES_BACKEND": sql_options.sql_uri,
@@ -28,4 +29,6 @@ class AirflowSecret(Secret):
         if airflow_options.git_ssh_key:
             data["gitSshKey"] = airflow_options.git_ssh_key
         values = ValueOrchestrator()
-        super().__init__(AirflowMeta(values.secret_name), string_data=data)
+        super().__init__(
+            AirflowMeta(values.secret_name, namespace=namespace), string_data=data
+        )

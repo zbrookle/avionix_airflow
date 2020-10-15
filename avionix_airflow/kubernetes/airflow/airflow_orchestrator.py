@@ -60,7 +60,9 @@ class AirflowOrchestrator(Orchestrator):
             external_volume_group.pvc,
             DagRetrievalJob(airflow_options, cloud_options),
             AirflowIngress(airflow_options, cloud_options),
-            AirflowSecret(sql_options, airflow_options, redis_options),
+            AirflowSecret(
+                sql_options, airflow_options, redis_options, airflow_options.namespace
+            ),
             PodTemplateWorkerConfig(
                 sql_options,
                 redis_options,
@@ -98,6 +100,12 @@ class AirflowOrchestrator(Orchestrator):
                     worker_storage_groups.log_volume_group.pv,
                     worker_storage_groups.external_storage_volume_group.pvc,
                     worker_storage_groups.external_storage_volume_group.pv,
+                    AirflowSecret(
+                        sql_options,
+                        airflow_options,
+                        redis_options,
+                        airflow_options.pods_namespace,
+                    ),
                 ]
             )
         super().__init__(components)
