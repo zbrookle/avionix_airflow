@@ -27,7 +27,7 @@ def test_environment_variable_values(
     airflow_options, sql_options, redis_options, airflow_environment
 ):
     assert (
-        sql_options.sql_alchemy_conn_string
+        sql_options.get_sql_alchemy_conn_string
         == airflow_environment["AIRFLOW__CORE__SQL_ALCHEMY_CONN"]
     )
     assert (
@@ -36,7 +36,7 @@ def test_environment_variable_values(
     )
 
     assert (
-        sql_options.sql_alchemy_conn_string
+        sql_options.get_sql_alchemy_conn_string
         == airflow_environment["AIRFLOW__CELERY__RESULT_BACKEND"]
     )
 

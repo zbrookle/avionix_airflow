@@ -12,7 +12,6 @@ from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringO
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
-from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
@@ -25,10 +24,8 @@ class AirflowWorkerPodTemplate(AirflowPodTemplate):
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
         name: str,
-        service_factory: ServiceFactory,
         service_account: str = "default",
     ):
-        self._service_factory = service_factory
         values = ValueOrchestrator()
         super().__init__(
             sql_options,
@@ -54,7 +51,6 @@ class AirflowWorkerPodTemplate(AirflowPodTemplate):
                 self._airflow_options,
                 self._monitoring_options,
                 self._cloud_options,
-                self._service_factory,
             )
         ]
 
@@ -67,7 +63,6 @@ class PodTemplateWorkerConfig(ConfigMap):
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
-        service_factory: ServiceFactory,
     ):
         config_file = ValueOrchestrator().airflow_worker_pod_template_config_file
         super().__init__(
@@ -81,7 +76,6 @@ class PodTemplateWorkerConfig(ConfigMap):
                         monitoring_options,
                         cloud_options,
                         "worker-pod-template",
-                        service_factory,
                     ).to_dict(),
                 )
             },

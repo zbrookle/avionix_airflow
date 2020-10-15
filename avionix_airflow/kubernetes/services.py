@@ -13,6 +13,7 @@ class AirflowService(Service):
     def __init__(
         self,
         name: str,
+        namespace: str,
         port: int,
         target_port: int,
         node_port: int,
@@ -25,7 +26,7 @@ class AirflowService(Service):
         annotations: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
-            AirflowMeta(name, annotations=annotations),
+            AirflowMeta(name, annotations=annotations, namespace=namespace),
             ServiceSpec(
                 [
                     ServicePort(
@@ -52,6 +53,7 @@ class MasterNodeService(AirflowService):
     def __init__(
         self,
         name: str,
+        namespace: str,
         port: int,
         node_port: int,
         values: ValueOrchestrator,
@@ -63,6 +65,7 @@ class MasterNodeService(AirflowService):
     ):
         super().__init__(
             name,
+            namespace,
             port,
             port,
             node_port,
@@ -93,6 +96,7 @@ class ServiceFactory:
     def database_service(self) -> AirflowService:
         return AirflowService(
             self._sql_options.POSTGRES_HOST,
+            self._namespace,
             self._sql_options.POSTGRES_PORT,
             target_port=self._sql_options.POSTGRES_PORT,
             node_port=30001,
@@ -104,6 +108,7 @@ class ServiceFactory:
     def webserver_service(self) -> MasterNodeService:
         return MasterNodeService(
             "webserver-svc",
+            self._namespace,
             8080,
             30000,
             self._values,
@@ -117,6 +122,7 @@ class ServiceFactory:
     def statsd_service(self) -> MasterNodeService:
         return MasterNodeService(
             "statsd",
+            self._namespace,
             8125,
             30004,
             self._values,
@@ -129,6 +135,7 @@ class ServiceFactory:
     def flower_service(self) -> MasterNodeService:
         return MasterNodeService(
             "flower-svc",
+            self._namespace,
             5555,
             30003,
             self._values,

@@ -19,7 +19,6 @@ from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringO
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.probes import AvionixAirflowProbe
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
-from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
@@ -186,11 +185,9 @@ class AirflowWorker(AirflowContainer):
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
-        service_factory: ServiceFactory,
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
     ):
-        self._service_factory = service_factory
         super().__init__(
             name,
             sql_options,
@@ -220,14 +217,6 @@ class AirflowWorker(AirflowContainer):
             SchedulerEnvVar(
                 "STATSD_HOST",
                 f"airflow-telegraf.{self._airflow_options.namespace}.svc.cluster.local",
-            )
-        ]
-
-    @property
-    def _airflow_env(self) -> List[CoreEnvVar]:
-        return super()._airflow_env + [
-            CoreEnvVar(
-                "SQL_ALCHEMY_CONN", self._service_factory.database_service.kube_dns_name
             )
         ]
 

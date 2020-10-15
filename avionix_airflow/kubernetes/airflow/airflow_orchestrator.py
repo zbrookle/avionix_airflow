@@ -56,7 +56,11 @@ class AirflowOrchestrator(Orchestrator):
             DagRetrievalJob(airflow_options, cloud_options),
             AirflowIngress(airflow_options, cloud_options, service_factory),
             AirflowSecret(
-                sql_options, airflow_options, redis_options, airflow_options.namespace
+                sql_options,
+                airflow_options,
+                redis_options,
+                airflow_options.namespace,
+                service_factory,
             ),
             PodTemplateWorkerConfig(
                 sql_options,
@@ -64,7 +68,6 @@ class AirflowOrchestrator(Orchestrator):
                 airflow_options,
                 monitoring_options,
                 cloud_options,
-                service_factory,
             ),
         ]
         if monitoring_options.enabled:
@@ -99,6 +102,7 @@ class AirflowOrchestrator(Orchestrator):
                         airflow_options,
                         redis_options,
                         airflow_options.pods_namespace,
+                        service_factory,
                     ),
                 ]
             )
