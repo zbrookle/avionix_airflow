@@ -50,6 +50,8 @@ def pod_namespace():
     scope="session", params=["CeleryExecutor", "KubernetesExecutor"],
 )
 def airflow_options(request, pod_namespace):
+    if request.param == "CeleryExecutor":
+        pod_namespace = ""
     return AirflowOptions(
         dag_sync_image="alpine/git",
         dag_sync_command=["/bin/sh", "-c", parse_shell_script(str(dag_copy_loc))],
@@ -91,11 +93,13 @@ def deployments_are_ready():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def build_chart(airflow_options, sql_options, redis_options, monitoring_options):
+def build_chart(
+    airflow_options, sql_options, redis_options, monitoring_options, cloud_options
+):
     add_host(airflow_options, force=True)
     build_airflow_image()
     builder = get_chart_builder(
-        airflow_options, sql_options, redis_options, monitoring_options
+        airflow_options, sql_options, redis_options, monitoring_options, cloud_options
     )
     if kubectl_name_dict("persistentvolume"):
         # Stateful Sets do not automatically clean up their pvc templates so this
