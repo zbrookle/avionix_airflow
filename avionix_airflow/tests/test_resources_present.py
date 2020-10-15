@@ -10,7 +10,7 @@ from avionix_airflow.tests.utils import (
 
 @pytest.fixture(
     params=[
-        ValueOrchestrator().database_service_name,
+        "airflow-database-connection",
         ValueOrchestrator().webserver_service_name,
         ValueOrchestrator().flower_service_name,
         ValueOrchestrator().redis_service_name,

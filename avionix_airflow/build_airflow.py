@@ -15,6 +15,7 @@ from avionix_airflow.kubernetes.monitoring import (
 )
 from avionix_airflow.kubernetes.postgres import PostgresOrchestrator, SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions, RedisOrchestrator
+from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
@@ -53,6 +54,11 @@ def get_chart_builder(
         monitoring_options,
         cloud_options,
     )
+    service_factory = ServiceFactory(
+        namespace=airflow_options.namespace,
+        pod_namespace=airflow_options.pods_namespace,
+        sql_options=sql_options,
+    )
     dependencies = cloud_options.get_cloud_dependencies()
     if monitoring_options.enabled:
         dependencies += [
@@ -67,7 +73,7 @@ def get_chart_builder(
     if airflow_options.in_celery_mode:
         orchestrator += RedisOrchestrator(redis_options)
     if sql_options.create_database_in_cluster:
-        orchestrator += PostgresOrchestrator(sql_options)
+        orchestrator += PostgresOrchestrator(sql_options, service_factory)
     builder = ChartBuilder(
         AvionixChartInfo("airflow", dependencies),
         orchestrator.get_kube_parts(),

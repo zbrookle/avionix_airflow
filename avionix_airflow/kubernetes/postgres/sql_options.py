@@ -1,7 +1,5 @@
 from avionix.kube.core import EnvVar
 
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
-
 
 class SqlOptions:
     """
@@ -23,7 +21,7 @@ class SqlOptions:
         self,
         user: str = "airflow",
         password: str = "airflow",
-        host: str = ValueOrchestrator().database_service_name,
+        host: str = "airflow-database-connection",
         port: int = 5432,
         db: str = "airflow",
         create_database_in_cluster: bool = True,

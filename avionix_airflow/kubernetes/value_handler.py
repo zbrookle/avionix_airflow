@@ -25,7 +25,6 @@ class ValueOrchestrator:
     elasticsearch_proxy_labels: dict = field(
         default_factory=lambda: {_JOB_KEY: "es-proxy"}
     )
-    database_service_name: str = "airflow-database-connection"
     redis_service_name: str = "redis-svc"
     flower_service_name: str = "flower-svc"
     webserver_service_name: str = "webserver-svc"
