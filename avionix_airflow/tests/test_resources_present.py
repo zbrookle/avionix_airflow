@@ -1,6 +1,9 @@
 import pytest
+from pytest_cases import fixture_ref, parametrize_plus
 
+from avionix_airflow.kubernetes.services import AirflowService
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.tests.conftest import database_service, webserver_service
 from avionix_airflow.tests.utils import (
     filter_out_pvc,
     kubectl_name_dict,
@@ -8,29 +11,11 @@ from avionix_airflow.tests.utils import (
 )
 
 
-@pytest.fixture(
-    params=[
-        "airflow-database-connection",
-        "webserver-svc",
-        ValueOrchestrator().flower_service_name,
-        ValueOrchestrator().redis_service_name,
-    ]
+@parametrize_plus(
+    "service", [fixture_ref(database_service), fixture_ref(webserver_service)]
 )
-def service_name(request):
-    return request.param
-
-
-@pytest.fixture
-def port_mapping(label):
-    return {
-        label.redis_service_name: "6379",
-        label.flower_service_name: "5555",
-        label.webserver_service_name: "8080",
-        label.database_service_name: "5432",
-    }
-
-
-def test_services_present(label, airflow_options, service_name, port_mapping):
+def test_services_present(label, airflow_options, service: AirflowService):
+    service_name = service.metadata.name
     if service_name in {label.flower_service_name, label.redis_service_name}:
         skip_if_not_celery(airflow_options)
 
@@ -40,7 +25,7 @@ def test_services_present(label, airflow_options, service_name, port_mapping):
     def get_port(service: str):
         return service_info[service]["PORT(S)"][:4]
 
-    assert get_port(service_name) == port_mapping[service_name]
+    assert get_port(service_name) == str(service.spec.ports[0].port)
 
 
 @pytest.fixture(

@@ -4,6 +4,7 @@ from subprocess import check_output
 from avionix.testing.installation_context import ChartInstallationContext
 from pandas import DataFrame
 import pytest
+from pytest_cases import fixture_plus
 
 from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
@@ -13,6 +14,7 @@ from avionix_airflow.kubernetes.cloud.local.local_options import LocalOptions
 from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
+from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.utils import get_minikube_ip
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 from avionix_airflow.teardown_cluster import teardown
@@ -82,6 +84,21 @@ def sql_options():
 @pytest.fixture(scope="session")
 def cloud_options():
     return LocalOptions()
+
+
+@pytest.fixture
+def service_factory(sql_options, cloud_options, airflow_options):
+    return ServiceFactory(sql_options, cloud_options, airflow_options)
+
+
+@fixture_plus
+def webserver_service(service_factory):
+    return service_factory.webserver_service
+
+
+@fixture_plus
+def database_service(service_factory):
+    return service_factory.database_service
 
 
 def deployments_are_ready():
