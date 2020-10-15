@@ -9,6 +9,7 @@ from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
 from avionix_airflow.host_settings import add_host
 from avionix_airflow.kubernetes.airflow import AirflowOptions
+from avionix_airflow.kubernetes.cloud.local.local_options import LocalOptions
 from avionix_airflow.kubernetes.monitoring import MonitoringOptions
 from avionix_airflow.kubernetes.postgres import SqlOptions
 from avionix_airflow.kubernetes.redis import RedisOptions
@@ -40,7 +41,7 @@ def host():
     return get_minikube_ip()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def pod_namespace():
     return "airflow-worker-pods"
 
@@ -74,6 +75,11 @@ def redis_options():
 @pytest.fixture(scope="session")
 def sql_options():
     return SqlOptions()
+
+
+@pytest.fixture(scope="session")
+def cloud_options():
+    return LocalOptions()
 
 
 def deployments_are_ready():
