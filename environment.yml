@@ -12,6 +12,7 @@ dependencies:
   - requests
   - pytest
   - pytest-rerunfailures
+  - pytest-cases
   - pip:
     # Main requirements
     - avionix==0.4.4
