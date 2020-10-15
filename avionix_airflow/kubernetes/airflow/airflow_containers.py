@@ -45,9 +45,9 @@ class ElasticSearchEnvVar(AirflowEnvVar):
         super().__init__("ELASTICSEARCH__" + name, value)
 
 
-class KubernetesWorkerPodEnvVar(AirflowEnvVar):
+class SchedulerEnvVar(AirflowEnvVar):
     def __init__(self, name: str, value):
-        super().__init__("KUBERNETES_ENVIRONMENT_VARIABLES__" + name, value)
+        super().__init__("SCHEDULER__" + name, value)
 
 
 class AirflowContainer(Container):
@@ -64,7 +64,7 @@ class AirflowContainer(Container):
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
     ):
-        values = ValueOrchestrator()
+        self._values = ValueOrchestrator()
         self._sql_options = sql_options
         self._redis_options = redis_options
         self._airflow_options = airflow_options
@@ -83,7 +83,7 @@ class AirflowContainer(Container):
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
-                    secret_ref=SecretEnvSource(values.secret_name, optional=False)
+                    secret_ref=SecretEnvSource(self._values.secret_name, optional=False)
                 ),
             ],
             ports=ports,
@@ -115,11 +115,11 @@ class AirflowContainer(Container):
         return [self._name]
 
     @property
-    def _executor(self):
+    def _executor(self) -> str:
         return self._airflow_options.core_executor
 
     @property
-    def _airflow_env(self):
+    def _airflow_env(self) -> List[CoreEnvVar]:
         return [
             CoreEnvVar("EXECUTOR", self._executor),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_timezone,),
@@ -133,7 +133,7 @@ class AirflowContainer(Container):
         ]
 
     @property
-    def _elastic_search_env(self):
+    def _elastic_search_env(self) -> List[ElasticSearchEnvVar]:
         return [
             ElasticSearchEnvVar(
                 "HOST", self._monitoring_options.elastic_search_proxy_uri
@@ -143,7 +143,7 @@ class AirflowContainer(Container):
         ]
 
     @property
-    def _kubernetes_env(self):
+    def _kubernetes_env(self) -> List[KubernetesEnvVar]:
         dag_volume_group = self._volume_group_factory.dag_volume_group
         kube_settings = [
             KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
@@ -188,6 +188,18 @@ class AirflowWorker(AirflowContainer):
         :return: LocalExecutor string
         """
         return "LocalExecutor"
+
+    @property
+    def _scheduler_env(self) -> List[SchedulerEnvVar]:
+        return [
+            SchedulerEnvVar(
+                "STATSD_HOST",
+                f"airflow-telegraf.{self._airflow_options.namespace}.svc.cluster.local",
+            )
+        ]
+
+    def _get_environment(self):
+        return super()._get_environment() + self._scheduler_env
 
 
 class AirflowMasterContainer(AirflowContainer):
