@@ -27,11 +27,9 @@ class ValueOrchestrator:
     )
     redis_service_name: str = "redis-svc"
     flower_service_name: str = "flower-svc"
-    webserver_service_name: str = "webserver-svc"
     master_deployment_name: str = "airflow-master-deployment"
     database_deployment_name: str = "postgres-database-deployment"
     redis_deployment_name: str = "redis-deployment"
-    webserver_port_name: str = "webserver-port"
     flower_port_name: str = "flower-port"
     webserver_node_port: int = 30000
     flower_node_port: int = 30003
