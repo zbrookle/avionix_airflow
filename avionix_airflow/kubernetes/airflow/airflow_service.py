@@ -50,18 +50,3 @@ class FlowerService(MasterNodeService):
             values.flower_port_name,
             service_type=cloud_options.service_type,
         )
-
-
-class StatsDService(MasterNodeService):
-    __statsd_port = 8125
-
-    def __init__(self, values: ValueOrchestrator, node_ports_open: bool):
-        super().__init__(
-            values.statsd_service_name,
-            self.__statsd_port,
-            values.statsd_node_port,
-            values,
-            node_ports_open,
-            values.statsd_port_name,
-            protocol="UDP",
-        )

@@ -9,9 +9,6 @@ _JOB_KEY = "pod-job"
 class ValueOrchestrator:
     dashboard_service_account: str = "dashboard"
     secret_name: str = "airflow-secrets"
-    statsd_service_name: str = "statsd"
-    statsd_node_port: int = 30004
-    statsd_port_name: str = "statsd"
     elasticsearch_proxy_port: int = 9200
     es_proxy_service_name: str = "elasticsearch-master"
     grafana_service_name: str = "airflow-grafana"

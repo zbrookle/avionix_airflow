@@ -95,21 +95,6 @@ class FlowerService(MasterNodeService):
         )
 
 
-class StatsDService(MasterNodeService):
-    __statsd_port = 8125
-
-    def __init__(self, values: ValueOrchestrator, node_ports_open: bool):
-        super().__init__(
-            values.statsd_service_name,
-            self.__statsd_port,
-            values.statsd_node_port,
-            values,
-            node_ports_open,
-            values.statsd_port_name,
-            protocol="UDP",
-        )
-
-
 class ServiceFactory:
     def __init__(
         self,
@@ -146,4 +131,16 @@ class ServiceFactory:
             port_name="webserver-port",
             service_type=self._cloud_options.service_type,
             annotations=self._cloud_options.webserver_service_annotations,
+        )
+
+    @property
+    def statsd_service(self) -> MasterNodeService:
+        return MasterNodeService(
+            "statsd",
+            8125,
+            30004,
+            self._values,
+            self._airflow_options.open_node_ports,
+            port_name="statsd",
+            protocol="UDP",
         )
