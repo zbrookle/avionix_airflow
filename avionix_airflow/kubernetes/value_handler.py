@@ -23,11 +23,7 @@ class ValueOrchestrator:
         default_factory=lambda: {_JOB_KEY: "es-proxy"}
     )
     redis_service_name: str = "redis-svc"
-    flower_service_name: str = "flower-svc"
     master_deployment_name: str = "airflow-master-deployment"
     database_deployment_name: str = "postgres-database-deployment"
     redis_deployment_name: str = "redis-deployment"
-    flower_port_name: str = "flower-port"
-    webserver_node_port: int = 30000
-    flower_node_port: int = 30003
     airflow_pod_service_account: str = "airflow-pod-account"

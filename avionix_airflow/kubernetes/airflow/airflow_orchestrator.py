@@ -5,7 +5,6 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_pods import AirflowDeployment
 from avionix_airflow.kubernetes.airflow.airflow_roles import AirflowPodRoleGroup
 from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
-from avionix_airflow.kubernetes.airflow.airflow_service import FlowerService
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
     AirflowPodServiceAccount,
 )
@@ -72,9 +71,7 @@ class AirflowOrchestrator(Orchestrator):
         if monitoring_options.enabled:
             components.append(service_factory.statsd_service)
         if airflow_options.in_celery_mode:
-            components.append(
-                FlowerService(values, airflow_options.open_node_ports, cloud_options)
-            )
+            components.append(service_factory.flower_service)
         if airflow_options.in_kube_mode:
             airflow_pod_service_account = AirflowPodServiceAccount(airflow_options)
             role_group = AirflowPodRoleGroup(

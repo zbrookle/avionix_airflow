@@ -101,6 +101,11 @@ def database_service(service_factory):
     return service_factory.database_service
 
 
+@fixture_plus
+def flower_service(service_factory):
+    return service_factory.flower_service
+
+
 def deployments_are_ready():
     deployments = kubectl_name_dict("deployment")
     for deployment in deployments:

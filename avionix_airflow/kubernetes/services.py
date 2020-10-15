@@ -75,26 +75,6 @@ class MasterNodeService(AirflowService):
         )
 
 
-class FlowerService(MasterNodeService):
-    __flower_port = 5555
-
-    def __init__(
-        self,
-        values: ValueOrchestrator,
-        node_ports_open: bool,
-        cloud_options: CloudOptions,
-    ):
-        super().__init__(
-            values.flower_service_name,
-            self.__flower_port,
-            values.flower_node_port,
-            values,
-            node_ports_open,
-            values.flower_port_name,
-            service_type=cloud_options.service_type,
-        )
-
-
 class ServiceFactory:
     def __init__(
         self,
@@ -143,4 +123,16 @@ class ServiceFactory:
             self._airflow_options.open_node_ports,
             port_name="statsd",
             protocol="UDP",
+        )
+
+    @property
+    def flower_service(self) -> MasterNodeService:
+        return MasterNodeService(
+            "flower-svc",
+            5555,
+            30003,
+            self._values,
+            self._airflow_options.open_node_ports,
+            port_name="flower-port",
+            service_type=self._cloud_options.service_type,
         )

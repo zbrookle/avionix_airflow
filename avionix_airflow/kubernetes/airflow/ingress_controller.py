@@ -39,7 +39,9 @@ class AirflowIngress(Ingress):
         if airflow_options.in_celery_mode:
             ingress_paths.append(
                 AirflowIngressPath(
-                    values.flower_service_name, values.flower_port_name, path="/flower"
+                    service_factory.flower_service.metadata.name,
+                    service_factory.flower_service.spec.ports[0].name,
+                    path="/flower",
                 )
             )
         super().__init__(
