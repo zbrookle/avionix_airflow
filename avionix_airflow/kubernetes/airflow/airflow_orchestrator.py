@@ -8,7 +8,6 @@ from avionix_airflow.kubernetes.airflow.airflow_secrets import AirflowSecret
 from avionix_airflow.kubernetes.airflow.airflow_service import (
     FlowerService,
     StatsDService,
-    WebserverService,
 )
 from avionix_airflow.kubernetes.airflow.airflow_service_accounts import (
     AirflowPodServiceAccount,
@@ -24,6 +23,7 @@ from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringO
 from avionix_airflow.kubernetes.orchestration import Orchestrator
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 from avionix_airflow.kubernetes.redis.redis_options import RedisOptions
+from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
@@ -36,6 +36,7 @@ class AirflowOrchestrator(Orchestrator):
         airflow_options: AirflowOptions,
         monitoring_options: MonitoringOptions,
         cloud_options: CloudOptions,
+        service_factory: ServiceFactory,
     ):
         storage_group_factory = StorageGroupFactory(
             airflow_options, cloud_options, airflow_options.namespace
@@ -51,7 +52,7 @@ class AirflowOrchestrator(Orchestrator):
                 monitoring_options,
                 cloud_options,
             ),
-            WebserverService(values, airflow_options.open_node_ports, cloud_options),
+            service_factory.webserver_service,
             dag_group.pv,
             log_group.pv,
             dag_group.pvc,
@@ -59,7 +60,7 @@ class AirflowOrchestrator(Orchestrator):
             external_volume_group.pv,
             external_volume_group.pvc,
             DagRetrievalJob(airflow_options, cloud_options),
-            AirflowIngress(airflow_options, cloud_options),
+            AirflowIngress(airflow_options, cloud_options, service_factory),
             AirflowSecret(
                 sql_options, airflow_options, redis_options, airflow_options.namespace
             ),

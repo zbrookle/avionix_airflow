@@ -32,27 +32,6 @@ class MasterNodeService(AirflowService):
         )
 
 
-class WebserverService(MasterNodeService):
-    __webserver_port = 8080
-
-    def __init__(
-        self,
-        values: ValueOrchestrator,
-        node_ports_open: bool,
-        cloud_options: CloudOptions,
-    ):
-        super().__init__(
-            values.webserver_service_name,
-            self.__webserver_port,
-            values.webserver_node_port,
-            values,
-            node_ports_open,
-            values.webserver_port_name,
-            service_type=cloud_options.service_type,
-            annotations=cloud_options.webserver_service_annotations,
-        )
-
-
 class FlowerService(MasterNodeService):
     __flower_port = 5555
 

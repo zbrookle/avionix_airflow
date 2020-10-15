@@ -12,16 +12,22 @@ from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.base_ingress_path import AirflowIngressPath
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
+from avionix_airflow.kubernetes.services import ServiceFactory
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
 class AirflowIngress(Ingress):
-    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        service_factory: ServiceFactory,
+    ):
         values = ValueOrchestrator()
         ingress_paths: List[HTTPIngressPath] = cloud_options.extra_ingress_paths + [
             AirflowIngressPath(
-                values.webserver_service_name,
-                values.webserver_port_name,
+                service_factory.webserver_service.metadata.name,
+                service_factory.webserver_service.spec.ports[0].name,
                 path="/airflow" + cloud_options.ingress_path_service_suffix,
             ),
             AirflowIngressPath(
