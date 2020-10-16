@@ -4,7 +4,7 @@ from subprocess import check_output
 from avionix.testing.installation_context import ChartInstallationContext
 from pandas import DataFrame
 import pytest
-from pytest_cases import fixture_plus
+from pytest_cases import fixture_plus, fixture_ref, parametrize_plus
 
 from avionix_airflow import get_chart_builder
 from avionix_airflow.docker import build_airflow_image
@@ -43,23 +43,29 @@ def host():
     return get_minikube_ip()
 
 
-@pytest.fixture(scope="session")
-def pod_namespace():
-    return "airflow-worker-pods"
+@fixture_plus(scope="session")
+@parametrize_plus("namespace", ["", "airflow-worker-pods"])
+def pod_namespace(namespace):
+    return namespace
 
 
-@pytest.fixture(
-    scope="session", params=["CeleryExecutor", "KubernetesExecutor"],
+@fixture_plus(scope="session")
+@parametrize_plus("executor_name", ["CeleryExecutor", "KubernetesExecutor"])
+def executor(executor_name):
+    return executor_name
+
+
+@parametrize_plus(
+    "executor, pod_namespace", [(fixture_ref(executor), fixture_ref(pod_namespace))]
 )
-def airflow_options(request, pod_namespace):
-    if request.param == "CeleryExecutor":
-        pod_namespace = ""
+@pytest.fixture(scope="session")
+def airflow_options(executor, pod_namespace):
     return AirflowOptions(
         dag_sync_image="alpine/git",
         dag_sync_command=["/bin/sh", "-c", parse_shell_script(str(dag_copy_loc))],
         dag_sync_schedule="* * * * *",
         default_timezone="est",
-        core_executor=request.param,
+        core_executor=executor,
         open_node_ports=True,
         local_mode=True,
         pods_namespace=pod_namespace,
