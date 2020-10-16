@@ -25,6 +25,7 @@ jobs:
         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
     - uses: conda-incubator/setup-miniconda@v1.7.0
       with:
+        auto-update-conda: true
         activate-environment: avionix_airflow
         python-version: 3.8
         channel-priority: strict
