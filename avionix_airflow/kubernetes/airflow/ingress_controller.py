@@ -27,7 +27,7 @@ class AirflowIngress(Ingress):
         ingress_paths: List[HTTPIngressPath] = cloud_options.extra_ingress_paths + [
             AirflowIngressPath(
                 service_factory.webserver_service.metadata.name,
-                service_factory.webserver_service.spec.ports[0].name,
+                service_factory.webserver_service.spec.ports[0].port,
                 path="/airflow" + cloud_options.ingress_path_service_suffix,
             ),
             AirflowIngressPath(
@@ -40,7 +40,7 @@ class AirflowIngress(Ingress):
             ingress_paths.append(
                 AirflowIngressPath(
                     service_factory.flower_service.metadata.name,
-                    service_factory.flower_service.spec.ports[0].name,
+                    service_factory.flower_service.spec.ports[0].port,
                     path="/flower",
                 )
             )
