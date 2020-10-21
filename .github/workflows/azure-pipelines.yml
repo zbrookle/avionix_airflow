@@ -23,8 +23,9 @@ jobs:
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
-    - uses: goanpeca/setup-miniconda@v1
+    - uses: conda-incubator/setup-miniconda@v1.7.0
       with:
+        auto-update-conda: true
         activate-environment: avionix_airflow
         python-version: 3.8
         channel-priority: strict
@@ -75,7 +76,7 @@ jobs:
       if: always()
 
     - name: Setup Minikube
-      uses: manusa/actions-setup-minikube@v2.0.0
+      uses: manusa/actions-setup-minikube@v2.0.1
       with:
         minikube version: 'v1.11.0'
         kubernetes version: 'v1.18.3'

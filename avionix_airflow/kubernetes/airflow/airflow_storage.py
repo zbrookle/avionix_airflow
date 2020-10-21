@@ -31,6 +31,7 @@ class AirflowPersistentVolume(PersistentVolume):
         host_path: str,
         access_modes: List[str],
         cloud_options: CloudOptions,
+        namespace: str,
     ):
         self._cloud_options = cloud_options
         volume_spec = PersistentVolumeSpec(
@@ -44,9 +45,9 @@ class AirflowPersistentVolume(PersistentVolume):
 
         super().__init__(
             AirflowMeta(
-                name,
+                f"{namespace}-{name}",
                 annotations={"pv.beta.kubernetes.io/gid": "1001"},
-                labels={"storage-type": name},
+                labels={"storage-type": name, "namespace": namespace},
             ),
             volume_spec,
         )
@@ -69,14 +70,15 @@ class AirflowPersistentVolumeClaim(PersistentVolumeClaim):
         access_modes: List[str],
         storage: str,
         cloud_options: CloudOptions,
+        namespace: str,
     ):
         self._cloud_options = cloud_options
         super().__init__(
-            AirflowMeta(name),
+            AirflowMeta(name, namespace=namespace),
             PersistentVolumeClaimSpec(
                 access_modes,
                 resources=ResourceRequirements(requests={"storage": storage}),
-                selector=LabelSelector({"storage-type": name}),
+                selector=LabelSelector({"storage-type": name, "namespace": namespace}),
                 storage_class_name=self._cloud_options.storage_class.metadata.name,
             ),
         )
@@ -114,11 +116,12 @@ class AirflowPersistentVolumeGroup:
         access_modes: List[str],
         folder: str,
         cloud_options: CloudOptions,
+        namespace: str,
     ):
         host_path = "/tmp/data/airflow/" + folder
         self.__volume = AirflowVolume(name, name)
         self.__persistent_volume = AirflowPersistentVolume(
-            name, storage, host_path, access_modes, cloud_options
+            name, storage, host_path, access_modes, cloud_options, namespace
         )
         if self.__volume.persistentVolumeClaim is None:
             raise Exception("Need persistent volume claim!")
@@ -127,6 +130,7 @@ class AirflowPersistentVolumeGroup:
             access_modes,
             storage,
             cloud_options,
+            namespace,
         )
         self.__volume_mount = AirflowVolumeMount(name, folder=folder)
         self.__permission_container = PermissionSettingContainer(
@@ -134,7 +138,7 @@ class AirflowPersistentVolumeGroup:
         )
 
     @property
-    def persistent_volume(self):
+    def pv(self):
         return self.__persistent_volume
 
     @property
@@ -142,7 +146,7 @@ class AirflowPersistentVolumeGroup:
         return self.__volume
 
     @property
-    def persistent_volume_claim(self):
+    def pvc(self):
         return self.__persistent_volume_claim
 
     @property
@@ -155,35 +159,53 @@ class AirflowPersistentVolumeGroup:
 
 
 class AirflowLogVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        namespace: str,
+    ):
         super().__init__(
             "logs",
             airflow_options.log_storage,
             access_modes=airflow_options.access_modes,
             folder="logs",
             cloud_options=cloud_options,
+            namespace=namespace,
         )
 
 
 class AirflowDagVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        namespace: str,
+    ):
         super().__init__(
             "dags",
             airflow_options.dag_storage,
             access_modes=airflow_options.access_modes,
             folder="dags",
             cloud_options=cloud_options,
+            namespace=namespace,
         )
 
 
 class ExternalStorageVolumeGroup(AirflowPersistentVolumeGroup):
-    def __init__(self, airflow_options: AirflowOptions, cloud_options: CloudOptions):
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        namespace: str,
+    ):
         super().__init__(
             "tmp",
             airflow_options.dag_storage,
             access_modes=airflow_options.access_modes,
             folder="tmp",
             cloud_options=cloud_options,
+            namespace=namespace,
         )
 
 
@@ -245,3 +267,40 @@ class AirflowWorkerPodTemplateStorageGroup(AirflowVolumeGroup):
                 ],
             ),
         )
+
+
+class StorageGroupFactory:
+    def __init__(
+        self,
+        airflow_options: AirflowOptions,
+        cloud_options: CloudOptions,
+        namespace: str,
+    ):
+        if namespace not in {airflow_options.namespace, airflow_options.pods_namespace}:
+            raise Exception("Invalid namespace used")
+        self._airflow_options = airflow_options
+        self._cloud_options = cloud_options
+        self._namespace = namespace
+
+    def _get_volume_group_with_options(self, group_class: type):
+        return group_class(self._airflow_options, self._cloud_options, self._namespace)
+
+    @property
+    def external_storage_volume_group(self) -> ExternalStorageVolumeGroup:
+        return self._get_volume_group_with_options(ExternalStorageVolumeGroup)
+
+    @property
+    def pod_template_group(self) -> AirflowWorkerPodTemplateStorageGroup:
+        return AirflowWorkerPodTemplateStorageGroup()
+
+    @property
+    def ssh_volume_group(self) -> AirflowSSHSecretsVolumeGroup:
+        return AirflowSSHSecretsVolumeGroup()
+
+    @property
+    def dag_volume_group(self) -> AirflowDagVolumeGroup:
+        return self._get_volume_group_with_options(AirflowDagVolumeGroup)
+
+    @property
+    def log_volume_group(self) -> AirflowLogVolumeGroup:
+        return self._get_volume_group_with_options(AirflowLogVolumeGroup)

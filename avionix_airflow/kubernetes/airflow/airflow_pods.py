@@ -16,13 +16,7 @@ from avionix_airflow.kubernetes.airflow.airflow_containers import (
     WebserverUI,
 )
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
-from avionix_airflow.kubernetes.airflow.airflow_storage import (
-    AirflowDagVolumeGroup,
-    AirflowLogVolumeGroup,
-    AirflowSSHSecretsVolumeGroup,
-    AirflowWorkerPodTemplateStorageGroup,
-    ExternalStorageVolumeGroup,
-)
+from avionix_airflow.kubernetes.airflow.airflow_storage import StorageGroupFactory
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
@@ -41,6 +35,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         cloud_options: CloudOptions,
         name: str,
         labels: Dict[str, str],
+        storage_group_factory: StorageGroupFactory,
         service_account: str = "default",
         restart_policy: str = "Always",
     ):
@@ -49,7 +44,7 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
         self._airflow_options = airflow_options
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
-        self._airflow_ssh_volume_group = AirflowSSHSecretsVolumeGroup()
+        self._storage_group_factory = storage_group_factory
         super().__init__(
             AirflowMeta(
                 name=name,
@@ -67,14 +62,12 @@ class AirflowPodTemplate(PodTemplateSpec, ABC):
     @property
     def _volumes(self):
         volumes = [
-            AirflowLogVolumeGroup(self._airflow_options, self._cloud_options).volume,
-            AirflowDagVolumeGroup(self._airflow_options, self._cloud_options).volume,
-            ExternalStorageVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume,
+            self._storage_group_factory.log_volume_group.volume,
+            self._storage_group_factory.dag_volume_group.volume,
+            self._storage_group_factory.external_storage_volume_group.volume,
         ]
         if self._airflow_options.git_ssh_key:
-            volumes.append(self._airflow_ssh_volume_group.volume)
+            volumes.append(self._storage_group_factory.ssh_volume_group.volume)
         return volumes
 
     @abstractmethod
@@ -93,9 +86,10 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
     ):
         values = ValueOrchestrator()
         service_account = (
-            values.airflow_pod_service_account if airflow_options.in_kube_mode else None
+            values.airflow_pod_service_account
+            if airflow_options.in_kube_mode
+            else "default"
         )
-        self._worker_pod_template_storage_group = AirflowWorkerPodTemplateStorageGroup()
         super().__init__(
             sql_options,
             redis_options,
@@ -104,6 +98,9 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
             cloud_options,
             "airflow-master-pod",
             values.master_node_labels,
+            StorageGroupFactory(
+                airflow_options, cloud_options, airflow_options.namespace
+            ),
             service_account,
         )
 
@@ -139,7 +136,7 @@ class AirflowMasterPodTemplate(AirflowPodTemplate):
     @property
     def _volumes(self):
         volumes = super()._volumes
-        volumes.append(self._worker_pod_template_storage_group.volume)
+        volumes.append(self._storage_group_factory.pod_template_group.volume)
         return volumes
 
 

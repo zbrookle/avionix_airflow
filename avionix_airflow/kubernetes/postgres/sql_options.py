@@ -1,6 +1,6 @@
-from avionix.kube.core import EnvVar
+from typing import Optional
 
-from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix.kube.core import EnvVar
 
 
 class SqlOptions:
@@ -23,7 +23,7 @@ class SqlOptions:
         self,
         user: str = "airflow",
         password: str = "airflow",
-        host: str = ValueOrchestrator().database_service_name,
+        host: str = "airflow-database-connection",
         port: int = 5432,
         db: str = "airflow",
         create_database_in_cluster: bool = True,
@@ -47,20 +47,19 @@ class SqlOptions:
             if var.name in {"POSTGRES_USER", "POSTGRES_PASSWORD"}
         ]
 
-    @property
-    def _postgres_user_host_string(self):
+    def _get_postgres_user_host_string(self, host: Optional[str] = None):
+        if not self.create_database_in_cluster:
+            host = self.POSTGRES_HOST
         return (
-            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
+            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{host}:"
             f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 
-    @property
-    def sql_alchemy_conn_string(self):
+    def get_sql_alchemy_conn_string(self, host: Optional[str] = None):
         return (
-            f"postgresql+psycopg2://{self._postgres_user_host_string}"
+            f"postgresql+psycopg2://{self._get_postgres_user_host_string(host)}"
             f"{self.POSTGRES_EXTRAS}"
         )
 
-    @property
-    def sql_uri(self):
-        return f"postgres://{self._postgres_user_host_string}"
+    def get_sql_uri(self, host: Optional[str] = None):
+        return f"postgres://{self._get_postgres_user_host_string(host)}"

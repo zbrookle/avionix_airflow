@@ -11,11 +11,8 @@ from avionix.kube.core import (
 
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_storage import (
-    AirflowDagVolumeGroup,
-    AirflowLogVolumeGroup,
-    AirflowSSHSecretsVolumeGroup,
     AirflowWorkerPodTemplateStorageGroup,
-    ExternalStorageVolumeGroup,
+    StorageGroupFactory,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
@@ -48,9 +45,9 @@ class ElasticSearchEnvVar(AirflowEnvVar):
         super().__init__("ELASTICSEARCH__" + name, value)
 
 
-class KubernetesWorkerPodEnvVar(AirflowEnvVar):
+class SchedulerEnvVar(AirflowEnvVar):
     def __init__(self, name: str, value):
-        super().__init__("KUBERNETES_ENVIRONMENT_VARIABLES__" + name, value)
+        super().__init__("SCHEDULER__" + name, value)
 
 
 class AirflowContainer(Container):
@@ -67,13 +64,16 @@ class AirflowContainer(Container):
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
     ):
-        values = ValueOrchestrator()
+        self._values = ValueOrchestrator()
         self._sql_options = sql_options
         self._redis_options = redis_options
         self._airflow_options = airflow_options
         self._monitoring_options = monitoring_options
         self._cloud_options = cloud_options
         self._name = name
+        self._volume_group_factory = StorageGroupFactory(
+            self._airflow_options, self._cloud_options, self._airflow_options.namespace
+        )
         super().__init__(
             name=name,
             args=self._args,
@@ -83,7 +83,7 @@ class AirflowContainer(Container):
             env=self._get_environment(),
             env_from=[
                 EnvFromSource(
-                    secret_ref=SecretEnvSource(values.secret_name, optional=False)
+                    secret_ref=SecretEnvSource(self._values.secret_name, optional=False)
                 ),
             ],
             ports=ports,
@@ -94,18 +94,12 @@ class AirflowContainer(Container):
 
     def _get_volume_mounts(self):
         mounts = [
-            AirflowLogVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume_mount,
-            AirflowDagVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume_mount,
-            ExternalStorageVolumeGroup(
-                self._airflow_options, self._cloud_options
-            ).volume_mount,
+            self._volume_group_factory.log_volume_group.volume_mount,
+            self._volume_group_factory.dag_volume_group.volume_mount,
+            self._volume_group_factory.external_storage_volume_group.volume_mount,
         ]
         if self._airflow_options.git_ssh_key:
-            mounts.append(AirflowSSHSecretsVolumeGroup().volume_mount)
+            mounts.append(self._volume_group_factory.ssh_volume_group.volume_mount)
         return mounts
 
     def _get_environment(self):
@@ -121,11 +115,11 @@ class AirflowContainer(Container):
         return [self._name]
 
     @property
-    def _executor(self):
+    def _executor(self) -> str:
         return self._airflow_options.core_executor
 
     @property
-    def _airflow_env(self):
+    def _airflow_env(self) -> List[CoreEnvVar]:
         return [
             CoreEnvVar("EXECUTOR", self._executor),
             CoreEnvVar("DEFAULT_TIMEZONE", self._airflow_options.default_timezone,),
@@ -139,7 +133,7 @@ class AirflowContainer(Container):
         ]
 
     @property
-    def _elastic_search_env(self):
+    def _elastic_search_env(self) -> List[ElasticSearchEnvVar]:
         return [
             ElasticSearchEnvVar(
                 "HOST", self._monitoring_options.elastic_search_proxy_uri
@@ -149,15 +143,11 @@ class AirflowContainer(Container):
         ]
 
     @property
-    def _kubernetes_env(self):
+    def _kubernetes_env(self) -> List[KubernetesEnvVar]:
+        dag_volume_group = self._volume_group_factory.dag_volume_group
         kube_settings = [
-            KubernetesEnvVar("NAMESPACE", self._airflow_options.namespace),
-            KubernetesEnvVar(
-                "DAGS_VOLUME_CLAIM",
-                AirflowDagVolumeGroup(
-                    self._airflow_options, self._cloud_options
-                ).persistent_volume_claim.metadata.name,
-            ),
+            KubernetesEnvVar("NAMESPACE", self._airflow_options.pods_namespace),
+            KubernetesEnvVar("DAGS_VOLUME_CLAIM", dag_volume_group.pvc.metadata.name,),
             KubernetesEnvVar(
                 "WORKER_CONTAINER_REPOSITORY", self._airflow_options.worker_image,
             ),
@@ -175,12 +165,10 @@ class AirflowContainer(Container):
             ),
         ]
         if not self._monitoring_options.enabled:
+            log_volume_group = self._volume_group_factory.log_volume_group
             kube_settings.append(
                 KubernetesEnvVar(
-                    "LOGS_VOLUME_CLAIM",
-                    AirflowLogVolumeGroup(
-                        self._airflow_options, self._cloud_options
-                    ).persistent_volume_claim.metadata.name,
+                    "LOGS_VOLUME_CLAIM", log_volume_group.pvc.metadata.name,
                 )
             )
         return kube_settings
@@ -188,6 +176,28 @@ class AirflowContainer(Container):
 
 class AirflowWorker(AirflowContainer):
     _command_entry_point = None
+
+    def __init__(
+        self,
+        name: str,
+        sql_options: SqlOptions,
+        redis_options: RedisOptions,
+        airflow_options: AirflowOptions,
+        monitoring_options: MonitoringOptions,
+        cloud_options: CloudOptions,
+        ports: Optional[List[ContainerPort]] = None,
+        readiness_probe: Optional[Probe] = None,
+    ):
+        super().__init__(
+            name,
+            sql_options,
+            redis_options,
+            airflow_options,
+            monitoring_options,
+            cloud_options,
+            ports,
+            readiness_probe,
+        )
 
     @property
     def _args(self):
@@ -200,6 +210,18 @@ class AirflowWorker(AirflowContainer):
         :return: LocalExecutor string
         """
         return "LocalExecutor"
+
+    @property
+    def _scheduler_env(self) -> List[SchedulerEnvVar]:
+        return [
+            SchedulerEnvVar(
+                "STATSD_HOST",
+                f"airflow-telegraf.{self._airflow_options.namespace}.svc.cluster.local",
+            )
+        ]
+
+    def _get_environment(self):
+        return super()._get_environment() + self._scheduler_env
 
 
 class AirflowMasterContainer(AirflowContainer):

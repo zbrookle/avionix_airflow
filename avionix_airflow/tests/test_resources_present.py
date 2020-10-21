@@ -1,6 +1,9 @@
 import pytest
+from pytest_cases import fixture_ref, parametrize_plus
 
+from avionix_airflow.kubernetes.services import AirflowService
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
+from avionix_airflow.tests.conftest import database_service, webserver_service
 from avionix_airflow.tests.utils import (
     filter_out_pvc,
     kubectl_name_dict,
@@ -8,30 +11,12 @@ from avionix_airflow.tests.utils import (
 )
 
 
-@pytest.fixture(
-    params=[
-        ValueOrchestrator().database_service_name,
-        ValueOrchestrator().webserver_service_name,
-        ValueOrchestrator().flower_service_name,
-        ValueOrchestrator().redis_service_name,
-    ]
+@parametrize_plus(
+    "service", [fixture_ref(database_service), fixture_ref(webserver_service)]
 )
-def service_name(request):
-    return request.param
-
-
-@pytest.fixture
-def port_mapping(label):
-    return {
-        label.redis_service_name: "6379",
-        label.flower_service_name: "5555",
-        label.webserver_service_name: "8080",
-        label.database_service_name: "5432",
-    }
-
-
-def test_services_present(label, airflow_options, service_name, port_mapping):
-    if service_name in {label.flower_service_name, label.redis_service_name}:
+def test_services_present(airflow_options, service: AirflowService):
+    service_name = service.metadata.name
+    if service_name in {"flower-svc", "redis-svc"}:
         skip_if_not_celery(airflow_options)
 
     service_info = kubectl_name_dict("service")
@@ -40,7 +25,7 @@ def test_services_present(label, airflow_options, service_name, port_mapping):
     def get_port(service: str):
         return service_info[service]["PORT(S)"][:4]
 
-    assert get_port(service_name) == port_mapping[service_name]
+    assert get_port(service_name) == str(service.spec.ports[0].port)
 
 
 @pytest.fixture(
@@ -68,3 +53,9 @@ def test_volumes_present(label):
         volume_specific_info = volume_info[volume]
         assert volume_specific_info["CAPACITY"] == "50Mi"
         assert volume_specific_info["ACCESS MODES"] == "RWX"
+
+
+def test_namespaces_present(airflow_options):
+    assert airflow_options.namespace in kubectl_name_dict("namespace")
+    if airflow_options.in_kube_mode:
+        assert airflow_options.pods_namespace in kubectl_name_dict("namespace")

@@ -17,3 +17,6 @@ dependencies:
     - avionix==0.4.4
     - python-hosts==1.0.0
     - cryptography==3.0
+    # Only available on pip
+    - pytest-cases==2.3.0
+

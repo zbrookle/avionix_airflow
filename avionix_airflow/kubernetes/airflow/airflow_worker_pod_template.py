@@ -6,6 +6,7 @@ from yaml import dump
 from avionix_airflow.kubernetes.airflow.airflow_containers import AirflowWorker
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.airflow.airflow_pods import AirflowPodTemplate
+from avionix_airflow.kubernetes.airflow.airflow_storage import StorageGroupFactory
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.namespace_meta import AirflowMeta
@@ -34,6 +35,9 @@ class AirflowWorkerPodTemplate(AirflowPodTemplate):
             cloud_options,
             name,
             values.worker_node_labels,
+            StorageGroupFactory(
+                airflow_options, cloud_options, airflow_options.pods_namespace
+            ),
             service_account,
             "Never",
         )
