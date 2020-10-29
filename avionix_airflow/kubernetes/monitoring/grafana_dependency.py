@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from avionix import ChartDependency
-
 from avionix_airflow.kubernetes.airflow.airflow_options import AirflowOptions
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.dependencies import StableChartDependency
 from avionix_airflow.kubernetes.monitoring.monitoring_options import MonitoringOptions
 from avionix_airflow.kubernetes.postgres.sql_options import SqlOptions
 
@@ -40,7 +39,7 @@ class ElasticSearchResource:
         }
 
 
-class GrafanaDependency(ChartDependency):
+class GrafanaDependency(StableChartDependency):
     def __init__(
         self,
         monitoring_options: MonitoringOptions,
@@ -53,11 +52,7 @@ class GrafanaDependency(ChartDependency):
         self.__airflow_options = airflow_options
         self.__cloud_options = cloud_options
         super().__init__(
-            "grafana",
-            "5.5.2",
-            "https://kubernetes-charts.storage.googleapis.com/",
-            "stable",
-            values=self.__values_yaml,
+            "grafana", "5.5.2", values=self.__values_yaml,
         )
 
     @property

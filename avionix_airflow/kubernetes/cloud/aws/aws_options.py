@@ -15,6 +15,7 @@ from avionix_airflow.kubernetes.cloud.aws.elastic_search_proxy.proxy_service imp
     AwsElasticSearchProxyService,
 )
 from avionix_airflow.kubernetes.cloud.cloud_options import CloudOptions
+from avionix_airflow.kubernetes.dependencies import StableChartDependency
 from avionix_airflow.kubernetes.value_handler import ValueOrchestrator
 
 
@@ -103,11 +104,9 @@ class AwsOptions(CloudOptions):
                     "podAnnotations": {"iam.amazonaws.com/role": self.__alb_role_arn},
                 },
             ),
-            ChartDependency(
+            StableChartDependency(
                 "kube2iam",
                 "2.5.1",
-                "https://kubernetes-charts.storage.googleapis.com/",
-                "stable",
                 values={
                     "extraArgs": {"default-role": self.__default_role},
                     "rbac": {"create": True},
@@ -128,11 +127,9 @@ class AwsOptions(CloudOptions):
                     },
                 },
             ),
-            ChartDependency(
+            StableChartDependency(
                 "cluster-autoscaler",
                 "7.3.4",
-                "https://kubernetes-charts.storage.googleapis.com/",
-                "stable",
                 values={
                     "autoDiscovery": {"clusterName": "hmi-dev-team-cluster"},
                     "extraArgs": {"skip-nodes-with-system-pods": False},
